@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="css/bootstrap.min.css" rel="stylesheet">	
+	<link href="css/style.css" rel="stylesheet">	
+</head>
+<body id="body">
+	<h1>Bulk Open <small>- Version 0.5.5</small></h1>
+	<div class="form-group">					
+		<label for="comment">URLs:</label>
+		<textarea class="form-control" rows="5" id="list" autofocus="autofocus"></textarea>
+	</div>
+	<button class="btn btn-outline-primary" id="openButton" type="button"><span>Open List</span></button>
+	<button class="btn btn-outline-primary" id="copyCurrentOpen" type="button"><span>Get list of open tabs</span></button>
+	<button class="btn btn-outline-warning" id="clearList" type="button"><span>Clear current links</span></button>
+	<div class="form-group">
+		<div class="input-group">
+			<select class="form-control" id="savedLists">
+				<option id="-1" value="" disabled selected>Your saved lists</option>
+			</select>
+			<button class="btn btn-outline-success selectaddon" id="openList" type="button"><span>Open list</span></button>
+			<button class="btn btn-outline-primary selectaddon" id="createNewList" type="button"><span>New list</span></button>			
+			<button class="btn btn-outline-info selectaddon" id="editList" type="button"><span>Edit list</span></button>
+			<button class="btn btn-outline-danger selectaddon" id="deleteList" type="button"><span>Delete list</span></button>
+		</div>	
+	</div>	
+</body>   
+  	<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>    
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>    
+	<script type="text/javascript" src="js/bulkopen.js"></script>
+	<script type="text/javascript" src="js/lists.js"></script>
+</html>
