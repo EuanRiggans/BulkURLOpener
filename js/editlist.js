@@ -28,7 +28,9 @@ $(document).ready(function () {
         arrayOfLines.push($('#listName').val());    
         var lines = $('#list').val().split('\n');
         for(var i = 0;i < lines.length;i++) {
-            arrayOfLines.push(lines[i]);        
+            if(!(lines[i]) == "\n") {
+                arrayOfLines.push(lines[i]);        
+            } 
         }
         if(arrayOfLines.length <= 3) {
             alert("No URLs given for the list!");

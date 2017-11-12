@@ -63,3 +63,14 @@ function removeQueryString(URL) {
   URL = URL.replace(/(\?.*)|(#.*)/g, "");
   return URL;
 }
+
+function outputAllLists() {
+    var counter = 0;
+    for (var i = 0; i < localStorage.length; i++){
+        console.log(loadList(localStorage.key(i)));
+        counter = i;
+    }
+    if(counter == 0) {
+        console.log("No lists found");
+    }
+}

@@ -1,7 +1,4 @@
-//Add ability for user to only open first X number of URL's e.g. first 25, 50, 75, 100
-//When searching for the URL list stop search once found?
-
-function initPopup() {
+$(document).ready(function () {
     chrome.windows.getCurrent( function(window) {
         chrome.tabs.getAllInWindow(window.id, function(tabs){
             if (!tabs.length) return;
@@ -28,7 +25,7 @@ function initPopup() {
     document.getElementById("openList").addEventListener("click", openSelectedList);
     document.getElementById("editList").addEventListener("click", editSelectedList);
     document.getElementById("deleteList").addEventListener("click", deleteList);
-}
+});
 
 function openTextAreaList() {
     openList(document.getElementById("list").value);
@@ -37,14 +34,14 @@ function openTextAreaList() {
 function getCurrentTabs() {    
     chrome.windows.getCurrent( function(window) {
         chrome.tabs.getAllInWindow(window.id, function(tabs){
-            if (!tabs.length) return;
-
+            if (!tabs.length) {
+                return;
+            }
             var listTextArea = document.getElementById("list");
             listTextArea.value = "";
             for (var i=0; i<tabs.length; ++i) {
                 listTextArea.value += tabs[i].url + "\n";
             }
-
             listTextArea.select();
         });
     });
@@ -55,31 +52,41 @@ function clearLinksList() {
     listTextArea.value = "";
 }
 
-window.addEventListener("load", initPopup);
-
 String.prototype.trim = function() { 
 	return this.replace(/^\s+|\s+$/g, ''); 
 }
 
 function isProbablyUrl(string) {
 	var substr = string.substring(0,4).toLowerCase();
-	if (substr == 'ftp:' || substr == 'www.') return true;
+	if (substr == 'ftp:' || substr == 'www.') {
+        return true;
+    }
 
 	var substr = string.substring(0,5).toLowerCase();
-	if (substr == 'http:') return true;
+	if (substr == 'http:') {
+        return true;
+    }
 
 	var substr = string.substring(0,6).toLowerCase();
-	if (substr == 'https:') return true;
+	if (substr == 'https:') {
+        return true;
+    }
 
 	var substr = string.substring(0,7).toLowerCase();
-	if (substr == 'chrome:') return true;
+	if (substr == 'chrome:') {
+        return true;
+    }
 
 	return false;
 }
 
 function openList(list) {
-    //Should prompt the user to comfirm they wish to open X number of tabs if > than 5
-	var strings = list.split(/\r\n|\r|\n/);
+    var strings = list.split(/\r\n|\r|\n/);
+    if(strings.length > 10) {
+        if(!(confirm("Are you sure you wish to open " + strings.length + " URLs?"))) {
+            return;
+        }
+    }    
 	for (var i=0; i<strings.length; i++) {
 		strings[i] = strings[i].trim();
 		if (strings[i] == '') continue;
@@ -102,7 +109,7 @@ function openSaveNewListDialog() {
         
     }
     localStorage.setItem("temp", arrayOfLines);
-    chrome.tabs.create({'url': chrome.extension.getURL('savelist.html')});
+    chrome.tabs.create({'url': chrome.extension.getURL('newlist.html')});
 }
 
 function openSelectedList() {

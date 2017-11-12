@@ -21,7 +21,9 @@ $(document).ready(function () {
         arrayOfLines.push($('#listName').val());    
         var lines = $('#list').val().split('\n');
         for(var i = 0;i < lines.length;i++) {
-            arrayOfLines.push(lines[i]);        
+            if(!(lines[i]) == "\n") {
+                arrayOfLines.push(lines[i]);        
+            }            
         }
         if(arrayOfLines.length <= 3) {
             alert("No URLs given for the list!");
@@ -31,16 +33,6 @@ $(document).ready(function () {
             return;
         }
         saveList(listID, arrayOfLines);
-    });
-    $('#tempView').click(function () {
-        var counter = 0;
-        for (var i = 0; i < localStorage.length; i++){
-            console.log(loadList(localStorage.key(i)));
-            counter = i;
-        }
-        if(counter == 0) {
-            console.log("No lists found");
-        }
     });
     $('#listName').select();
 });
