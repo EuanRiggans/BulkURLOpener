@@ -10,16 +10,19 @@
 	<div class="modal-dialog modal-lg" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h4 class="modal-title">Edit a link list</h4>
+                <h4 class="modal-title">Edit a link list</h4>
+                <button type="button" class="close" id="closeModal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>            
 			<div class="modal-body">
                 <div class="input-group">
-                    <span class="input-group-addon" id="basic-addon1">Link list ID:</span>
-                    <input type="text" class="form-control" value=""  id="listID" aria-describedby="basic-addon1" disabled>
+                    <span class="input-group-addon" id="list-id-addon">Link list ID:</span>
+                    <input type="text" class="form-control" value=""  id="listID" aria-describedby="list-id-addon" disabled>
                 </div><br />
                 <div class="input-group">
-                    <span class="input-group-addon" id="basic-addon1">Link list name:</span>
-                    <input type="text" class="form-control" placeholder="List name" id="listName" aria-describedby="basic-addon1">
+                    <span class="input-group-addon" id="list-name-addon">Link list name:</span>
+                    <input type="text" class="form-control" placeholder="List name" id="listName" aria-describedby="list-name-addon">
                 </div><br />
 				<div class="form-group">					
                     <label for="comment">Link list urls:</label>

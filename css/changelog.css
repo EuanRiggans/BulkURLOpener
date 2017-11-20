@@ -1,0 +1,11 @@
+.version {
+    text-decoration:underline;
+}
+
+.notes {
+    padding-left:25px;
+}
+
+.notes::before {
+    content:"-";
+}

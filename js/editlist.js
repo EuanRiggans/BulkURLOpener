@@ -8,10 +8,10 @@ $(document).ready(function () {
     var id = getParameterByName('ID');
     for (var i = 0; i < localStorage.length; i++){
         var tempArray = loadList(localStorage.key(i));        
-        if(tempArray[0] == id && tempArray.length > 1) {    
+        if(tempArray[1] == id && tempArray.length > 1) {    
             var listTextArea = document.getElementById("list");
             $('#list').val('');              
-            for (var i=2; i<tempArray.length; ++i) {
+            for (var i=3; i<tempArray.length; ++i) {
                 listTextArea.value += tempArray[i] + "\n";
             }            
             listTextArea.select(); 
@@ -24,6 +24,7 @@ $(document).ready(function () {
         var listID = $('#listID').val()
         removeList(listID, true);
         var arrayOfLines = new Array();
+        arrayOfLines.push("listStorage");
         arrayOfLines.push(listID);
         arrayOfLines.push($('#listName').val());    
         var lines = $('#list').val().split('\n');

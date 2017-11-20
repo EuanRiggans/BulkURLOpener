@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Settings</title>
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/modalstyles.css" rel="stylesheet">
+</head>
+<body>
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">				
+				<h4 class="modal-title">Settings</h4>
+				<button type="button" class="close" id="closeModal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+            </div>
+            
+			<div class="modal-body">
+                <div class="input-group">
+                    <span class="input-group-addon" id="delay-addon">Tab creation delay:</span>
+                    <input type="number" class="form-control" placeholder="Delay in seconds" id="tabCreationDelay" aria-describedby="delay-addon">
+                </div>
+			</div>
+			<div class="modal-footer">
+                <button class="btn btn-outline-danger" id="closeModal" type="button">Close</button>
+				<button class="btn btn-outline-primary" id="saveSettings" type="button">Save settings</button>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>    
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>   
+	<script type="text/javascript" src="js/settings.js"></script>
+	<script type="text/javascript" src="js/lists.js"></script>
+</body>
+</html>

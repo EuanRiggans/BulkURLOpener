@@ -11,12 +11,14 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<h4 class="modal-title">Save a new link list</h4>
-            </div>
-            
+				<button type="button" class="close" id="closeModal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+            </div>            
 			<div class="modal-body">
                 <div class="input-group">
-                    <span class="input-group-addon" id="basic-addon1">Link list name:</span>
-                    <input type="text" class="form-control" placeholder="List name" id="listName" aria-describedby="basic-addon1">
+                    <span class="input-group-addon" id="link-name-addon">Link list name:</span>
+                    <input type="text" class="form-control" placeholder="List name" id="listName" aria-describedby="link-name-addon">
                 </div><br />
 				<div class="form-group">					
                     <label for="comment">Link list urls:</label>

@@ -14,17 +14,37 @@ $(document).ready(function () {
     });
     for (var i = 0; i < localStorage.length; i++){
         var tempStorageArray = loadList(localStorage.key(i));
-        if(tempStorageArray.length > 1) {
-            $('#savedLists').append('<option id="' + tempStorageArray[0] +'">'+ tempStorageArray[1] +'</option>');
+        if(tempStorageArray[0] == "listStorage") {
+            $('#savedLists').append('<option id="' + tempStorageArray[1] +'">'+ tempStorageArray[2] +'</option>');
         }        
-    }   
-    document.getElementById("openButton").addEventListener("click", openTextAreaList);
-    document.getElementById("copyCurrentOpen").addEventListener("click", getCurrentTabs);
-    document.getElementById("clearList").addEventListener("click", clearLinksList);
-    document.getElementById("createNewList").addEventListener("click", openSaveNewListDialog);
-    document.getElementById("openList").addEventListener("click", openSelectedList);
-    document.getElementById("editList").addEventListener("click", editSelectedList);
-    document.getElementById("deleteList").addEventListener("click", deleteList);
+    }
+    $('#openButton').click(function () {
+        openTextAreaList();
+    });
+    $('#copyCurrentOpen').click(function () {
+        getCurrentTabs();
+    });
+    $('#clearList').click(function () {
+        clearLinksList();
+    });
+    $('#createNewList').click(function () {
+        openSaveNewListDialog();
+    });
+    $('#openList').click(function () {
+        openSelectedList();
+    });
+    $('#editList').click(function () {
+        editSelectedList();
+    });
+    $('#deleteList').click(function () {
+        deleteList();
+    });
+    $('#openSettings').click(function () {
+        openSettingsDialog();
+    });
+    $('#openHelp').click(function () {
+        openHelpDialog();
+    });
 });
 
 function openTextAreaList() {
@@ -86,16 +106,27 @@ function openList(list) {
         if(!(confirm("Are you sure you wish to open " + strings.length + " URLs?"))) {
             return;
         }
-    }    
-	for (var i=0; i<strings.length; i++) {
-		strings[i] = strings[i].trim();
-		if (strings[i] == '') continue;
-		var url = strings[i];
-		if (!isProbablyUrl(url)) {
-			url = 'http://www.google.com/search?q=' + encodeURI(url);
-		}
-		chrome.tabs.create({'url':url,'selected':false});
-	}
+    }
+    var tabCreationDelay = getTabCreationDelay();    
+    tabCreationDelay = tabCreationDelay * 1000;
+    linksIterator(0, strings, tabCreationDelay);
+}
+
+function linksIterator(i, strings, tabCreationDelay) {
+    console.log(i);
+    strings[i] = strings[i].trim();
+    if (strings[i] == '') {
+        return;
+    }
+    var url = strings[i];
+    if (!isProbablyUrl(url)) {
+        url = 'http://www.google.com/search?q=' + encodeURI(url);
+    }
+    chrome.tabs.create({'url':url,'selected':false});
+    i++;
+    if(i < strings.length){
+        setTimeout(linksIterator, tabCreationDelay, i, strings, tabCreationDelay);
+    }
 }
 
 function openSaveNewListDialog() {
@@ -119,15 +150,23 @@ function openSelectedList() {
     }
     for (var i = 0; i < localStorage.length; i++){
         var tempArray = loadList(localStorage.key(i));        
-        if(tempArray[0] == getSelectedListID() && tempArray.length > 1) {    
+        if(tempArray[1] == getSelectedListID() && tempArray.length > 1) {    
             var listTextArea = document.getElementById("list");
             $('#list').val('');              
-            for (var i=2; i<tempArray.length; ++i) {
+            for (var i=3; i<tempArray.length; ++i) {
                 listTextArea.value += tempArray[i] + "\n";
             }            
             listTextArea.select(); 
         }        
     }
+}
+
+function openSettingsDialog() {
+    chrome.tabs.create({'url': chrome.extension.getURL('settings.html')});
+}
+
+function openHelpDialog() {
+    chrome.tabs.create({'url': chrome.extension.getURL('help.html')});
 }
 
 function deleteList() {
@@ -154,4 +193,13 @@ function getSelectedList() {
 
 function getSelectedListID() {
     return $('select[id="savedLists"] option:selected').attr('id');
+}
+
+function getTabCreationDelay() {
+    for (var i = 0; i < localStorage.length; i++){
+        var tempArray = loadList(localStorage.key(i));        
+        if(tempArray[0] == "settings") {    
+            return tempArray[1];
+        }
+    } 
 }

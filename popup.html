@@ -1,12 +1,25 @@
-<!DOCTYPE html> <!-- First item in list is always NaN -->
+<!DOCTYPE html>
 <html>
 <head>
 	<link href="css/bootstrap.min.css" rel="stylesheet">	
+	<link href="css/font-awesome.min.css" rel="stylesheet">	
 	<link href="css/style.css" rel="stylesheet">	
 </head>
 <body id="body">
-	<h1>Bulk Open <small>- Version 1.0.1</small></h1>
-	<div class="form-group">					
+	<div class="header">
+		<h1 class="header title">Bulk Open <small>- Version 1.1.0</small></h1>
+		<div class="header help">
+				<a href="#" class="no-highlight" data-toggle="tooltip" data-placement="top" title="Open help">
+					<i class="fa fa-question-circle" id="openHelp" aria-hidden="true"></i>
+				</a>		
+			</div>	
+		<div class="header settings">
+			<a href="#" class="no-highlight" data-toggle="tooltip" data-placement="top" title="Open settings">
+				<i class="fa fa-cog" id="openSettings" aria-hidden="true"></i>		
+			</a>		
+		</div>	
+	</div>
+	<div class="form-group">
 		<label for="comment">URLs:</label>
 		<textarea class="form-control" rows="5" id="list" autofocus="autofocus"></textarea>
 	</div>
@@ -24,9 +37,9 @@
 			<button class="btn btn-outline-danger selectaddon" id="deleteList" type="button"><span>Delete list</span></button>
 		</div>	
 	</div>	
-</body>   
-  	<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>    
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>    
+</body>     	
+	<script type="text/javascript" src="js/bootstrap.min.js"></script>    
+	<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>   
 	<script type="text/javascript" src="js/bulkopen.js"></script>
 	<script type="text/javascript" src="js/lists.js"></script>
 </html>

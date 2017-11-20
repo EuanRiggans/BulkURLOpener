@@ -5,6 +5,13 @@ function saveList(Id, resultsArray) {
     window.close();
 }
 
+function saveSettings(settingsArray) {
+    removeList("settings", false);
+    localStorage.setItem("settings", settingsArray);
+    alert("Settings successfully saved!");
+    window.close();
+}
+
 function loadList(Id) {
     var resultsArray = new Array();
     var results = localStorage.getItem(Id);
@@ -13,13 +20,16 @@ function loadList(Id) {
 }
 
 function getCurrentMaxID() {
+    if(localStorage.getItem("maxID") == "NaN") {
+        return 0;
+    }
     return localStorage.getItem("maxID");
 }
 
 function removeList(id, noAlert) {
     for (var i = 0; i < localStorage.length; i++){
         var tempArray = loadList(localStorage.key(i));        
-        if(tempArray[0] == id && tempArray.length > 1) {             
+        if(tempArray[1] == id && tempArray.length > 1) {             
             localStorage.removeItem(localStorage.key(i));
             $('select option[id="' + id + '"]').remove();
             if(!(noAlert)) {
@@ -29,14 +39,25 @@ function removeList(id, noAlert) {
     }
 }
 
+function removeTempList() {
+    for (var i = 0; i < localStorage.length; i++){
+        var tempArray = loadList(localStorage.key(i));        
+        if(tempArray[0] == "temp") {             
+            localStorage.removeItem(localStorage.key(i));       
+        }        
+    }
+}
+
 function getNextAvailableID() {
     var availableID;
     availableID = 0;
-    for (var i = 0; i < localStorage.length; i++){
+    for (var i = 0; i < localStorage.length; i++){        
         var resultsArray = new Array();
-        var results = localStorage.getItem(localStorage.key(i));
-        resultsArray = results.split(',');
-        availableID = +resultsArray[0] + 1;
+        var results = localStorage.getItem(localStorage.key(i));        
+        resultsArray = results.split(',');        
+        if(resultsArray[0] == "listStorage") {                        
+            availableID = +resultsArray[1] + 1;
+        }
     }
     return availableID;
 }

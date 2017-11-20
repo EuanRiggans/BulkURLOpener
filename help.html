@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Help</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/font-awesome.min.css" rel="stylesheet">	
+	<link href="css/style.css" rel="stylesheet">
+    <link href="css/modalstyles.css" rel="stylesheet">
+    <link href="css/help.css" rel="stylesheet">
+</head>
+<body>
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+                <h4 class="modal-title">Help - FAQ</h4>
+                <button type="button" class="close" id="closeModal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+			</div>
+			<div class="modal-body">
+                <h5 class="question">Tab creation delay is not working:</h5>
+                <p class="answer">For tab creation delay to work correctly, the Bulk URL Opener window must be left open until all tabs have been created, this is due to how javascript runs in chrome extensions</p>
+                <h5 class="question">Where can I find the changelog:</h5>
+                <p class="answer">The changelog can be found on the extension page on the chrome store, or by clicking <a href="#" id="openChangelog">here</a></p>
+            </div>                    
+			<div class="modal-footer">
+                <div class="help-icon">
+                    <i class="fa fa-question-circle" id="openHelp" aria-hidden="true"></i>
+            </div>                
+				<small>If your question is not answered here you can get additional help from this extensions support page on the chrome extension store</small>
+			</div>
+		</div>
+	</div>
+	<script src="js/jquery-3.2.1.min.js" type="text/javascript"></script> 
+	<script src="js/bootstrap.min.js" type="text/javascript"></script> 
+    <script src="js/lists.js" type="text/javascript"></script>
+    <script src="js/help.js" type="text/javascript"></script>
+</body>
+</html>

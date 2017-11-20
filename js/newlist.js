@@ -7,7 +7,7 @@ $(document).ready(function () {
             for (var i=1; i<tempArray.length; ++i) {
                 listTextArea.value += tempArray[i] + "\n";
             }            
-            removeList("temp", true);
+            removeTempList();
             listTextArea.select(); 
         }        
     } 
@@ -17,6 +17,7 @@ $(document).ready(function () {
     $('#saveList').click(function () {
         var listID = getNextAvailableID();
         var arrayOfLines = new Array();
+        arrayOfLines.push("listStorage");
         arrayOfLines.push(listID);
         arrayOfLines.push($('#listName').val());    
         var lines = $('#list').val().split('\n');

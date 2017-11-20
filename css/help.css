@@ -1,0 +1,12 @@
+.question {
+    text-decoration:underline;
+}
+
+.answer {
+    padding-left:25px;
+}
+
+.help-icon {
+    float:left;
+    padding-right:7.5px;
+}
