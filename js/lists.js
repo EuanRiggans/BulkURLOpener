@@ -48,6 +48,15 @@ function removeTempList() {
     }
 }
 
+function removeLinksToOpenList() {
+    for (var i = 0; i < localStorage.length; i++){
+        var tempArray = loadList(localStorage.key(i));        
+        if(tempArray[0] == "linksToOpen") {             
+            localStorage.removeItem(localStorage.key(i));       
+        }        
+    }
+}
+
 function getNextAvailableID() {
     var availableID;
     availableID = 0;

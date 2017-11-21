@@ -1,14 +1,14 @@
 $(document).ready(function () {
+    convertOldURLLists();
     chrome.windows.getCurrent( function(window) {
         chrome.tabs.getAllInWindow(window.id, function(tabs){
             if (!tabs.length) return;
 
             var listTextArea = document.getElementById("list");
 
-            for (var i=0; i<tabs.length; ++i) {
+            for (var i = 0; i < tabs.length; ++i) {
                 listTextArea.value += tabs[i].url + "\n";
             }
-
             listTextArea.select();
         });
     });
@@ -101,19 +101,25 @@ function isProbablyUrl(string) {
 }
 
 function openList(list) {
-    var strings = list.split(/\r\n|\r|\n/);
+    var strings = list.split(/\r\n|\r|\n/);    
     if(strings.length > 10) {
         if(!(confirm("Are you sure you wish to open " + strings.length + " URLs?"))) {
             return;
         }
     }
-    var tabCreationDelay = getTabCreationDelay();    
-    tabCreationDelay = tabCreationDelay * 1000;
-    linksIterator(0, strings, tabCreationDelay);
+    var tabCreationDelay = getTabCreationDelay();   
+    if(!(tabCreationDelay > 0) || !(strings.length > 1)) {
+        tabCreationDelay = tabCreationDelay * 1000;
+        linksIterator(0, strings, tabCreationDelay);
+    } else {
+        strings.push("linksToOpen");
+        strings.unshift("linksToOpen");
+        localStorage.setItem("linksToOpen", strings);
+        chrome.tabs.create({'url': chrome.extension.getURL('openingtabs.html')});   
+    }    
 }
 
 function linksIterator(i, strings, tabCreationDelay) {
-    console.log(i);
     strings[i] = strings[i].trim();
     if (strings[i] == '') {
         return;
@@ -201,5 +207,23 @@ function getTabCreationDelay() {
         if(tempArray[0] == "settings") {    
             return tempArray[1];
         }
-    } 
+    }
+}
+
+function convertOldURLLists() {
+    for (var i = 0; i < localStorage.length; i++){
+        var tempArray = loadList(localStorage.key(i));   
+        var newListStorageArray = new Array();
+        if(tempArray[0] == localStorage.key(i) && !(localStorage.key(i) == "settings") && !(localStorage.key(i) == "maxID")) {             
+            console.log("Need to convert: " + tempArray);
+            localStorage.removeItem(localStorage.key(i));
+            newListStorageArray.push("listStorage");
+            newListStorageArray.push(getNextAvailableID());
+            for(var x = 1; x < tempArray.length; x++) {
+                newListStorageArray.push(tempArray[x]);
+            }
+            var listID = getNextAvailableID();
+            localStorage.setItem(listID, newListStorageArray);          
+        }        
+    }
 }

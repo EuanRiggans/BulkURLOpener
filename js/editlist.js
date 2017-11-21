@@ -20,6 +20,9 @@ $(document).ready(function () {
     $('#closeModal').click(function () {
         window.close();
     });
+    $('#closeModalFooter').click(function () {
+        window.close();
+    });
     $('#saveList').click(function () {
         var listID = $('#listID').val()
         removeList(listID, true);

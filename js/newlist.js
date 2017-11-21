@@ -14,6 +14,9 @@ $(document).ready(function () {
     $('#closeModal').click(function () {
         window.close();
     });
+    $('#closeModalFooter').click(function () {
+        window.close();
+    });
     $('#saveList').click(function () {
         var listID = getNextAvailableID();
         var arrayOfLines = new Array();

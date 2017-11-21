@@ -9,6 +9,9 @@ $(document).ready(function () {
     $('#closeModal').click(function () {
         window.close();
     });
+    $('#closeModalFooter').click(function () {
+        window.close();
+    });
     $('#saveSettings').click(function () {
         var tabCreationDelay = $('#tabCreationDelay').val();
         if(!(isNumber(tabCreationDelay))) {
@@ -20,7 +23,6 @@ $(document).ready(function () {
         settingsArray.push(tabCreationDelay);
         saveSettings(settingsArray);
     });
-    outputAllLists();
 });
 
 function isNumber(varToTest) { 
