@@ -101,12 +101,13 @@ function isProbablyUrl(string) {
 }
 
 function openList(list) {
-    var strings = list.split(/\r\n|\r|\n/);    
-    if(strings.length > 10) {
-        if(!(confirm("Are you sure you wish to open " + strings.length + " URLs?"))) {
-            return;
-        }
-    }
+    var strings = list.split(/\r\n|\r|\n/);
+    //Removed until better solution is found
+    //if(strings.length > 10) {
+    //    if(!(confirm("Are you sure you wish to open " + strings.length + " URLs?"))) {
+    //        return;
+    //    }
+    //}
     var tabCreationDelay = getTabCreationDelay();   
     if(!(tabCreationDelay > 0) || !(strings.length > 1)) {
         tabCreationDelay = tabCreationDelay * 1000;
