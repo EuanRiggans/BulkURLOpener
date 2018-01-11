@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    getCurrentVersion();
     convertOldURLLists();
     chrome.windows.getCurrent( function(window) {
         chrome.tabs.getAllInWindow(window.id, function(tabs){
@@ -45,6 +46,7 @@ $(document).ready(function () {
     $('#openHelp').click(function () {
         openHelpDialog();
     });
+    $('#version').text("- Version " + getCurrentVersion());
 });
 
 function openTextAreaList() {
@@ -110,17 +112,22 @@ function openList(list) {
     //}
     var tabCreationDelay = getTabCreationDelay();   
     if(!(tabCreationDelay > 0) || !(strings.length > 1)) {
-        tabCreationDelay = tabCreationDelay * 1000;
+        for (var i = 0; i<strings.length; i++) {
+            if(strings[i].trim() == '') {
+                strings.splice(i, 1);
+                i--;
+            }
+        }
+        tabCreationDelay = tabCreationDelay * 1000;        
         linksIterator(0, strings, tabCreationDelay);
     } else {
-        strings.push("linksToOpen");
-        strings.unshift("linksToOpen");
+        strings.unshift("linksToOpen"); 
         localStorage.setItem("linksToOpen", strings);
         chrome.tabs.create({'url': chrome.extension.getURL('openingtabs.html')});   
     }    
 }
 
-function linksIterator(i, strings, tabCreationDelay) {
+function linksIterator(i, strings, tabCreationDelay) {    
     strings[i] = strings[i].trim();
     if (strings[i] == '') {
         return;
@@ -209,6 +216,11 @@ function getTabCreationDelay() {
             return tempArray[1];
         }
     }
+}
+
+function getCurrentVersion() {
+    var manifestData = chrome.runtime.getManifest();
+    return(manifestData.version);
 }
 
 function convertOldURLLists() {

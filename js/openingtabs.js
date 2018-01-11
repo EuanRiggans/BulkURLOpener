@@ -2,6 +2,12 @@ $(document).ready(function () {
     var tabCreationDelay = getTabCreationDelay();   
     tabCreationDelay = tabCreationDelay * 1000;
     var strings = loadList("linksToOpen");
+    for (var i = 0; i<strings.length; i++) {
+        if(strings[i].trim() == '') {
+            strings.splice(i, 1);
+            i--;
+        }
+    }
     linksIterator(0, strings, tabCreationDelay);
     removeLinksToOpenList();
 });
@@ -15,15 +21,15 @@ function linksIterator(i, strings, tabCreationDelay) {
         }
         chrome.tabs.create({'url':url,'selected':false});
         i++;
-        if(i < strings.length) {
-            if(strings[i + 2] == null) {
+        if(i - 1 < strings.length) {
+            if(strings[i] == null || strings[i].trim() == '') {
                 window.close();
             }
             setTimeout(linksIterator, tabCreationDelay, i, strings, tabCreationDelay);
         }
     } else {
         i++;
-        if(i >= strings.length - 1) {
+        if(i >= strings.length) {
             window.close();
         }
         if(i < strings.length) {
