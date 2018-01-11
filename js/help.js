@@ -5,7 +5,13 @@ $(document).ready(function () {
     $('#openChangelog').click(function () {
         chrome.tabs.create({'url': chrome.extension.getURL('changelog.html')});
     });
+    $('#openSupportURLBugs').click(function () {
+        chrome.tabs.create({'url': "https:chrome.google.com/webstore/detail/"+chrome.runtime.id+"/support"});
+    });
     $('#openSupportURL').click(function () {
+        chrome.tabs.create({'url': "https:chrome.google.com/webstore/detail/"+chrome.runtime.id+"/support"});
+    });
+    $('#openSupportURLFooter').click(function () {
         chrome.tabs.create({'url': "https:chrome.google.com/webstore/detail/"+chrome.runtime.id+"/support"});
     });
 });
