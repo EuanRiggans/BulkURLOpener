@@ -110,7 +110,7 @@ function isProbablyUrl(string) {
 
 function openList(list) {
     var strings = list.split(/\r\n|\r|\n/);
-    //Removed until better solution is found
+    //Removed, pending better solution. Caused issue for users using browsers other than chrome.
     //if(strings.length > 10) {
     //    if(!(confirm("Are you sure you wish to open " + strings.length + " URLs?"))) {
     //        return;
