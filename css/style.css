@@ -62,7 +62,15 @@ button {
 	padding-right:10px;
 }
 
-.header.settings, .header.help {
+.import {
+	padding-right: 10px;
+}
+
+.export {
+	padding-right: 10px;
+}
+
+.header.settings, .header.help, .header.import, .header.export {
 	float:right;
 	font-size:35px;
 }

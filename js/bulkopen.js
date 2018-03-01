@@ -46,6 +46,12 @@ $(document).ready(function () {
     $('#openHelp').click(function () {
         openHelpDialog();
     });
+    $('#openImport').click(function () {
+        openImportDialog();
+    });
+    $('#openExport').click(function () {
+        openExportDialog();
+    });
     $('#version').text("- Version " + getCurrentVersion());
 });
 
@@ -181,6 +187,14 @@ function openSettingsDialog() {
 
 function openHelpDialog() {
     chrome.tabs.create({'url': chrome.extension.getURL('help.html')});
+}
+
+function openImportDialog() {
+    chrome.tabs.create({'url': chrome.extension.getURL('import.html')});
+}
+
+function openExportDialog() {
+    chrome.tabs.create({'url': chrome.extension.getURL('export.html')});
 }
 
 function deleteList() {
