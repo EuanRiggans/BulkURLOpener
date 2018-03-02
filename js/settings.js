@@ -1,9 +1,13 @@
 $(document).ready(function () {   
     $('#tabCreationDelay').val(0);
     for (var i = 0; i < localStorage.length; i++){
-        var tempArray = loadList(localStorage.key(i));        
-        if(tempArray[0] == "settings") {    
+        var tempArray = loadList(localStorage.key(i));
+        console.log(tempArray);
+        if(tempArray[0] === "settings") {
             $('#tabCreationDelay').val(tempArray[1]);
+            if(tempArray[2] === 1) {
+                $('#nightMode').prop('checked', true);
+            }
         }
     } 
     $('#closeModal').click(function () {
@@ -14,6 +18,10 @@ $(document).ready(function () {
     });
     $('#saveSettings').click(function () {
         var tabCreationDelay = $('#tabCreationDelay').val();
+        var nightMode = 0;
+        if($('#nightMode').is(":checked")) {
+            nightMode = 1;
+        }
         if(!(isNumber(tabCreationDelay))) {
             alert("Your tab creation delay is not a number!");
             return;
@@ -21,6 +29,7 @@ $(document).ready(function () {
         var settingsArray = new Array();
         settingsArray.push("settings");
         settingsArray.push(tabCreationDelay);
+        settingsArray.push(nightMode);
         saveSettings(settingsArray);
     });
 });
