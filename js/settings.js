@@ -3,9 +3,9 @@ $(document).ready(function () {
     for (var i = 0; i < localStorage.length; i++){
         var tempArray = loadList(localStorage.key(i));
         console.log(tempArray);
-        if(tempArray[0] === "settings") {
+        if(tempArray[0] == "settings") {
             $('#tabCreationDelay').val(tempArray[1]);
-            if(tempArray[2] === 1) {
+            if(tempArray[2] == 1) {
                 $('#nightMode').prop('checked', true);
             }
         }

@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+* {
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    background-color: #161616;
+    margin: 10px;
+    height: 200px;
+    padding: 10px;
+}
+
+button {
+    margin-top:20px;
+}
+
+#list {
+    width: 700px;
+    height: 300px;
+    margin-bottom: -25px;
+}
+#openButton {
+    float: left;
+    margin-bottom: 8px;
+    margin-right: 10px;
+    padding: 5px 15px 7px 15px;
+}
+#copyCurrentOpen {
+    float: left;
+    margin-bottom: 8px;
+    padding: 5px 15px 7px 15px;
+}
+#clearList {
+    float: right;
+    margin-bottom: 8px;
+    padding: 5px 15px 7px 15px;
+}
+
+#saveNewList {
+    float:right;
+    margin-bottom: 8px;
+    margin-right:10px;
+    padding: 5px 15px 7px 15px;
+}
+
+#savedLists {
+    margin-top:10px;
+    margin-bottom:10px;
+}
+
+.selectaddon {
+    margin-top:10px;
+    margin-bottom:10px;
+    margin-left:10px;
+}
+
+.header {
+    display:inline;
+}
+
+.settings {
+    padding-right:10px;
+}
+
+.import {
+    padding-right: 10px;
+}
+
+.export {
+    padding-right: 10px;
+}
+
+.header.settings, .header.help, .header.import, .header.export {
+    float:right;
+    font-size:35px;
+}
+
+.no-highlight {
+    color: #000000;
+    text-decoration: none;
+}
