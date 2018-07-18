@@ -1,3 +1,9 @@
+/**
+ * @todo Convert old settings
+ * @todo Convert old link lists
+ * @todo Settings tooltips
+ */
+
 $(document).ready(function () {
     getCurrentVersion();
     chrome.windows.getCurrent( function(window) {
@@ -14,9 +20,14 @@ $(document).ready(function () {
     });
     for (let i = 0; i < localStorage.length; i++){
         const tempStorageArray = loadList(localStorage.key(i));
-        if(tempStorageArray[0] === "listStorage") {
-            $('#savedLists').append('<option id="' + tempStorageArray[1] +'">'+ tempStorageArray[2] +'</option>');
-        }        
+        try {
+            const parsedList = JSON.parse(tempStorageArray);
+            if(parsedList.object_description === "list_storage") {
+                $('#savedLists').append('<option id="' + parsedList.list_id +'">'+ parsedList.list_name +'</option>');
+            }
+        } catch (e) {
+
+        }
     }
     $('#openButton').click(function () {
         openTextAreaList();
@@ -70,9 +81,9 @@ function getCurrentTabs() {
             if (!tabs.length) {
                 return;
             }
-            var listTextArea = document.getElementById("list");
+            const listTextArea = document.getElementById("list");
             listTextArea.value = "";
-            for (var i=0; i<tabs.length; ++i) {
+            for (let i=0; i<tabs.length; ++i) {
                 listTextArea.value += tabs[i].url + "\n";
             }
             listTextArea.select();
@@ -81,32 +92,32 @@ function getCurrentTabs() {
 }
 
 function clearLinksList() {
-    var listTextArea = document.getElementById("list");
+    const listTextArea = document.getElementById("list");
     listTextArea.value = "";
 }
 
 String.prototype.trim = function() { 
 	return this.replace(/^\s+|\s+$/g, ''); 
-}
+};
 
 function isProbablyUrl(string) {
-	var substr = string.substring(0,4).toLowerCase();
-	if (substr == 'ftp:' || substr == 'www.') {
+    let substr = string.substring(0, 4).toLowerCase();
+    if (substr === 'ftp:' || substr === 'www.') {
         return true;
     }
 
-	var substr = string.substring(0,5).toLowerCase();
-	if (substr == 'http:') {
+    substr = string.substring(0, 5).toLowerCase();
+    if (substr === 'http:') {
         return true;
     }
 
-	var substr = string.substring(0,6).toLowerCase();
-	if (substr == 'https:') {
+    substr = string.substring(0, 6).toLowerCase();
+    if (substr === 'https:') {
         return true;
     }
 
-	var substr = string.substring(0,7).toLowerCase();
-	if (substr == 'chrome:') {
+    substr = string.substring(0, 7).toLowerCase();
+    if (substr === 'chrome:') {
         return true;
     }
 
@@ -123,7 +134,7 @@ function openList(list) {
     //}
     let tabCreationDelay = getSetting("tab_creation_delay");
     if(!(tabCreationDelay > 0) || !(strings.length > 1)) {
-        for (var i = 0; i<strings.length; i++) {
+        for (let i = 0; i<strings.length; i++) {
             if(strings[i].trim() == '') {
                 strings.splice(i, 1);
                 i--;
@@ -169,20 +180,25 @@ function openSaveNewListDialog() {
 }
 
 function openSelectedList() {
-    if(getSelectedListID() == "-1") {
+    if(getSelectedListID() === "-1") {
         alert("You need to select a list");
         return;
     }
-    for (var i = 0; i < localStorage.length; i++){
-        var tempArray = loadList(localStorage.key(i));        
-        if(tempArray[1] == getSelectedListID() && tempArray.length > 1) {    
-            var listTextArea = document.getElementById("list");
-            $('#list').val('');              
-            for (var i=3; i<tempArray.length; ++i) {
-                listTextArea.value += tempArray[i] + "\n";
-            }            
-            listTextArea.select(); 
-        }        
+    for (let i = 0; i < localStorage.length; i++){
+        const tempArray = loadList(localStorage.key(i));
+        try {
+            const parsedList = JSON.parse(tempArray);
+            if (parsedList.list_id === parseInt(getSelectedListID())) {
+                const listTextArea = document.getElementById("list");
+                $('#list').val('');
+                for(const link of parsedList.list_links) {
+                    listTextArea.value += link + "\n";
+                }
+                listTextArea.select();
+            }
+        } catch (e) {
+
+        }
     }
 }
 
@@ -203,7 +219,7 @@ function openExportDialog() {
 }
 
 function deleteList() {
-    if(getSelectedListID() == "-1") {
+    if(getSelectedListID() === "-1") {
         alert("You need to select a list");
         return;
     }
@@ -213,7 +229,7 @@ function deleteList() {
 }
 
 function editSelectedList() {
-    if(getSelectedListID() == "-1") {
+    if(getSelectedListID() === "-1") {
         alert("You need to select a list");
         return;
     }
@@ -234,7 +250,6 @@ function getSetting(setting) {
         const tempArray = loadList(localStorage.key(i));
         if(localStorage.key(i) === "settings") {
             const userSettings = JSON.parse(tempArray);
-            console.dir(userSettings);
             switch(settingSelected) {
                 case "tab_creation_delay":
                     return userSettings.tab_creation_delay;
@@ -250,7 +265,7 @@ function getSetting(setting) {
 }
 
 function getCurrentVersion() {
-    var manifestData = chrome.runtime.getManifest();
+    const manifestData = chrome.runtime.getManifest();
     return(manifestData.version);
 }
 

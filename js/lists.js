@@ -1,5 +1,5 @@
-function saveList(Id, resultsArray) {
-    localStorage.setItem(Id, resultsArray);
+function saveList(Id, newListObject) {
+    localStorage.setItem(Id, JSON.stringify(newListObject));
     localStorage.setItem("maxID", Id);
     alert("List saved successfully!");
     window.close();
@@ -49,8 +49,8 @@ function removeTempList() {
 }
 
 function removeLinksToOpenList() {
-    for (var i = 0; i < localStorage.length; i++){
-        var tempArray = loadList(localStorage.key(i));        
+    for (let i = 0; i < localStorage.length; i++){
+        const tempArray = loadList(localStorage.key(i));
         if(tempArray[0] == "linksToOpen") {             
             localStorage.removeItem(localStorage.key(i));       
         }        
@@ -58,14 +58,17 @@ function removeLinksToOpenList() {
 }
 
 function getNextAvailableID() {
-    var availableID;
+    let availableID;
     availableID = 0;
-    for (var i = 0; i < localStorage.length; i++){        
-        var resultsArray = new Array();
-        var results = localStorage.getItem(localStorage.key(i));        
-        resultsArray = results.split(',');        
-        if(resultsArray[0] == "listStorage") {                        
-            availableID = +resultsArray[1] + 1;
+    for (let i = 0; i < localStorage.length; i++){
+        const results = localStorage.getItem(localStorage.key(i));
+        try {
+            const result = JSON.parse(results);
+            if(result.object_description === "list_storage") {
+                availableID = result.list_id + 1;
+            }
+        } catch (e) {
+            //Not a JSON list
         }
     }
     return availableID;

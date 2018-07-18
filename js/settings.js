@@ -51,12 +51,11 @@ function initSettingsSave() {
         return;
     }
     const userSettings = {
-        object_description: null,
+        object_description: "user_settings",
         tab_creation_delay: 0,
         night_mode: 0,
         auto_open_lists: 0
     };
-    userSettings.object_description = "user_settings";
     userSettings.tab_creation_delay = tabCreationDelay;
     userSettings.night_mode = nightMode;
     userSettings.auto_open_lists = autoOpenLists;
