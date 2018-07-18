@@ -5,9 +5,9 @@ function saveList(Id, resultsArray) {
     window.close();
 }
 
-function saveSettings(settingsArray) {
+function saveSettings(userSettings) {
     removeList("settings", false);
-    localStorage.setItem("settings", settingsArray);
+    localStorage.setItem("settings", JSON.stringify(userSettings));
     alert("Settings successfully saved!");
     window.close();
 }

@@ -1,21 +1,20 @@
 $(document).ready(function () {
     getCurrentVersion();
-    convertOldURLLists();
     chrome.windows.getCurrent( function(window) {
         chrome.tabs.getAllInWindow(window.id, function(tabs){
             if (!tabs.length) return;
 
-            var listTextArea = document.getElementById("list");
+            const listTextArea = document.getElementById("list");
 
-            for (var i = 0; i < tabs.length; ++i) {
+            for (let i = 0; i < tabs.length; ++i) {
                 listTextArea.value += tabs[i].url + "\n";
             }
             listTextArea.select();
         });
     });
-    for (var i = 0; i < localStorage.length; i++){
-        var tempStorageArray = loadList(localStorage.key(i));
-        if(tempStorageArray[0] == "listStorage") {
+    for (let i = 0; i < localStorage.length; i++){
+        const tempStorageArray = loadList(localStorage.key(i));
+        if(tempStorageArray[0] === "listStorage") {
             $('#savedLists').append('<option id="' + tempStorageArray[1] +'">'+ tempStorageArray[2] +'</option>');
         }        
     }
@@ -51,6 +50,12 @@ $(document).ready(function () {
     });
     $('#openExport').click(function () {
         openExportDialog();
+    });
+    $(document).on('change', '#savedLists', function() {
+       if(getSetting('auto_open_lists') === 1) {
+           openSelectedList();
+           openTextAreaList();
+       }
     });
     $('#version').text("- Version " + getCurrentVersion());
 });
@@ -116,7 +121,7 @@ function openList(list) {
     //        return;
     //    }
     //}
-    var tabCreationDelay = getTabCreationDelay();   
+    let tabCreationDelay = getSetting("tab_creation_delay");
     if(!(tabCreationDelay > 0) || !(strings.length > 1)) {
         for (var i = 0; i<strings.length; i++) {
             if(strings[i].trim() == '') {
@@ -223,11 +228,23 @@ function getSelectedListID() {
     return $('select[id="savedLists"] option:selected').attr('id');
 }
 
-function getTabCreationDelay() {
-    for (var i = 0; i < localStorage.length; i++){
-        var tempArray = loadList(localStorage.key(i));        
-        if(tempArray[0] == "settings") {    
-            return tempArray[1];
+function getSetting(setting) {
+    const settingSelected = setting.toLowerCase();
+    for (let i = 0; i < localStorage.length; i++){
+        const tempArray = loadList(localStorage.key(i));
+        if(localStorage.key(i) === "settings") {
+            const userSettings = JSON.parse(tempArray);
+            console.dir(userSettings);
+            switch(settingSelected) {
+                case "tab_creation_delay":
+                    return userSettings.tab_creation_delay;
+                    break;
+                case "auto_open_lists":
+                    return userSettings.auto_open_lists;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }
@@ -237,19 +254,27 @@ function getCurrentVersion() {
     return(manifestData.version);
 }
 
+function upgradeToJSONFormatting() {
+
+}
+
+/**
+ * Automatically converted lists from pre 1.1.0 into the new list format. Now for all versions 1.1.4 > lists are stored using json, so this list has been deprecated
+ * @deprecated
+ */
 function convertOldURLLists() {
-    for (var i = 0; i < localStorage.length; i++){
-        var tempArray = loadList(localStorage.key(i));   
-        var newListStorageArray = new Array();
-        if(tempArray[0] == localStorage.key(i) && !(localStorage.key(i) == "settings") && !(localStorage.key(i) == "maxID")) {             
+    for (let i = 0; i < localStorage.length; i++){
+        const tempArray = loadList(localStorage.key(i));
+        const newListStorageArray = [];
+        if(tempArray[0] === localStorage.key(i) && !(localStorage.key(i) === "settings") && !(localStorage.key(i) === "maxID")) {
             console.log("Need to convert: " + tempArray);
             localStorage.removeItem(localStorage.key(i));
             newListStorageArray.push("listStorage");
             newListStorageArray.push(getNextAvailableID());
-            for(var x = 1; x < tempArray.length; x++) {
+            for(let x = 1; x < tempArray.length; x++) {
                 newListStorageArray.push(tempArray[x]);
             }
-            var listID = getNextAvailableID();
+            const listID = getNextAvailableID();
             localStorage.setItem(listID, newListStorageArray);          
         }        
     }
