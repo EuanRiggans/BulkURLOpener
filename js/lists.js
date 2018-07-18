@@ -27,22 +27,30 @@ function getCurrentMaxID() {
 }
 
 function removeList(id, noAlert) {
-    for (var i = 0; i < localStorage.length; i++){
-        var tempArray = loadList(localStorage.key(i));        
-        if(tempArray[1] == id && tempArray.length > 1) {             
-            localStorage.removeItem(localStorage.key(i));
-            $('select option[id="' + id + '"]').remove();
-            if(!(noAlert)) {
-                alert("List successfully deleted");
-            }            
-        }        
+    for (let i = 0; i < localStorage.length; i++){
+        const tempArray = loadList(localStorage.key(i));
+        try {
+            const parsedList = JSON.parse(tempArray);
+            if (parsedList.list_id === parseInt(id)) {
+                localStorage.removeItem(localStorage.key(i));
+                $('select option[id="' + id + '"]').remove();
+                if (!(noAlert)) {
+                    alert("List successfully deleted");
+                }
+            }
+        } catch (e) {
+
+        }
     }
 }
 
+/**
+ * @deprecated
+ */
 function removeTempList() {
-    for (var i = 0; i < localStorage.length; i++){
-        var tempArray = loadList(localStorage.key(i));        
-        if(tempArray[0] == "temp") {             
+    for (let i = 0; i < localStorage.length; i++){
+        const tempArray = loadList(localStorage.key(i));
+        if(tempArray[0] === "temp") {
             localStorage.removeItem(localStorage.key(i));       
         }        
     }

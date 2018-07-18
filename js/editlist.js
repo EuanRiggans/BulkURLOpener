@@ -1,21 +1,26 @@
-$(document).ready(function () {        
-    if(!(document.location.search.length) || getParameterByName('ID') == null || getParameterByName('name') == null) {
+$(document).ready(function () {
+    if (!(document.location.search.length) || getParameterByName('ID') == null || getParameterByName('name') == null) {
         alert("No list data present. Closing window.");
         window.close();
     }
     $('#listID').val(getParameterByName('ID'));
     $('#listName').val(getParameterByName('name'));
-    var id = getParameterByName('ID');
-    for (var i = 0; i < localStorage.length; i++){
-        var tempArray = loadList(localStorage.key(i));        
-        if(tempArray[1] == id && tempArray.length > 1) {    
-            var listTextArea = document.getElementById("list");
-            $('#list').val('');              
-            for (var i=3; i<tempArray.length; ++i) {
-                listTextArea.value += tempArray[i] + "\n";
-            }            
-            listTextArea.select(); 
-        }        
+    const id = getParameterByName('ID');
+    for (let i = 0; i < localStorage.length; i++) {
+        const tempArray = loadList(localStorage.key(i));
+        try {
+            const parsedList = JSON.parse(tempArray);
+            if (parsedList.list_id === parseInt(id)) {
+                const listTextArea = document.getElementById("list");
+                $('#list').val('');
+                for (const link of parsedList.list_links) {
+                    listTextArea.value += link + "\n";
+                }
+                listTextArea.select();
+            }
+        } catch (e) {
+
+        }
     }
     $('#closeModal').click(function () {
         window.close();
@@ -24,26 +29,35 @@ $(document).ready(function () {
         window.close();
     });
     $('#saveList').click(function () {
-        var listID = $('#listID').val()
+        const listID = $('#listID').val();
         removeList(listID, true);
-        var arrayOfLines = new Array();
-        arrayOfLines.push("listStorage");
-        arrayOfLines.push(listID);
-        arrayOfLines.push($('#listName').val());    
-        var lines = $('#list').val().split('\n');
-        for(var i = 0;i < lines.length;i++) {
-            if(!(lines[i]) == "\n") {
-                arrayOfLines.push(lines[i]);        
-            } 
+        const newList = {
+            object_description: "list_storage",
+            list_id: null,
+            list_name: null,
+            list_links: []
+        };
+        try {
+            newList.list_id = parseInt(listID);
+        } catch (e) {
+
         }
-        if(arrayOfLines.length <= 3) {
+        newList.list_name = $('#listName').val();
+        const lines = $('#list').val().split('\n');
+        for(let i = 0; i < lines.length; i++) {
+            if(!(lines[i]) == "\n") {
+                console.log(lines[i]);
+                newList.list_links.push(lines[i]);
+            }
+        }
+        if(lines.length <= 3) {
             alert("No URLs given for the list!");
             return;
-        } else if($('#listName').val().trim() == "") {
+        } else if($('#listName').val().trim() === "") {
             alert("You need to give a name for your list!");
             return;
-        }     
-        saveList(listID, arrayOfLines);
+        }
+        saveList(listID, newList);
     });
     $('#listName').select();
 });
