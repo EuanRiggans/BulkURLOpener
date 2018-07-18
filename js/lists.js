@@ -13,10 +13,13 @@ function saveSettings(userSettings) {
 }
 
 function loadList(Id) {
-    var resultsArray = new Array();
-    var results = localStorage.getItem(Id);
-    resultsArray = results.split(',');
-    return resultsArray;
+    let resultsArray = [];
+    const results = localStorage.getItem(Id);
+    try {
+        return JSON.parse(results);
+    } catch (e) {
+        return e;
+    }
 }
 
 function getCurrentMaxID() {
@@ -88,7 +91,7 @@ function getParameterByName(name, url) {
         url = window.location.href;
     }
     name = name.replace(/[\[\]]/g, "\\$&");
-    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)", "i"),
+    let regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)", "i"),
         results = regex.exec(url);
     if (!results) {
         return null;
@@ -106,12 +109,12 @@ function removeQueryString(URL) {
 }
 
 function outputAllLists() {
-    var counter = 0;
-    for (var i = 0; i < localStorage.length; i++) {
-        console.log(loadList(localStorage.key(i)));
+    let counter = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+        console.dir(loadList(localStorage.key(i)));
         counter = i;
     }
-    if (counter == 0) {
+    if (counter === 0) {
         console.log("No lists found");
     }
 }

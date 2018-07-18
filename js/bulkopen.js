@@ -5,6 +5,7 @@
  */
 
 $(document).ready(function () {
+    outputAllLists();
     getCurrentVersion();
     chrome.windows.getCurrent( function(window) {
         chrome.tabs.getAllInWindow(window.id, function(tabs){
@@ -124,8 +125,13 @@ function isProbablyUrl(string) {
 	return false;
 }
 
+
+/**
+ * linksToOpen should use JSON?
+ * @param list
+ */
 function openList(list) {
-    var strings = list.split(/\r\n|\r|\n/);
+    const strings = list.split(/\r\n|\r|\n/);
     //Removed, pending better solution. Caused issue for users using browsers other than chrome.
     //if(strings.length > 10) {
     //    if(!(confirm("Are you sure you wish to open " + strings.length + " URLs?"))) {
@@ -135,17 +141,17 @@ function openList(list) {
     let tabCreationDelay = getSetting("tab_creation_delay");
     if(!(tabCreationDelay > 0) || !(strings.length > 1)) {
         for (let i = 0; i<strings.length; i++) {
-            if(strings[i].trim() == '') {
+            if (strings[i].trim() === '') {
                 strings.splice(i, 1);
                 i--;
             }
         }
-        tabCreationDelay = tabCreationDelay * 1000;        
+        tabCreationDelay = tabCreationDelay * 1000;
         linksIterator(0, strings, tabCreationDelay);
     } else {
-        strings.unshift("linksToOpen"); 
+        strings.unshift("linksToOpen");
         localStorage.setItem("linksToOpen", strings);
-        chrome.tabs.create({'url': chrome.extension.getURL('openingtabs.html')});   
+        chrome.tabs.create({'url': chrome.extension.getURL('openingtabs.html')});
     }    
 }
 
