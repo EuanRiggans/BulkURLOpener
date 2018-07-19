@@ -125,11 +125,6 @@ function isProbablyUrl(string) {
 	return false;
 }
 
-
-/**
- * linksToOpen should use JSON?
- * @param list
- */
 function openList(list) {
     const strings = list.split(/\r\n|\r|\n/);
     //Removed, pending better solution. Caused issue for users using browsers other than chrome.
@@ -149,18 +144,24 @@ function openList(list) {
         tabCreationDelay = tabCreationDelay * 1000;
         linksIterator(0, strings, tabCreationDelay);
     } else {
-        strings.unshift("linksToOpen");
-        localStorage.setItem("linksToOpen", strings);
+        const linksToOpen = {
+            object_description: "link_to_open",
+            list_links: []
+        };
+        for (const link of strings) {
+            linksToOpen.list_links.push(link);
+        }
+        localStorage.setItem("linksToOpen", JSON.stringify(linksToOpen));
         chrome.tabs.create({'url': chrome.extension.getURL('openingtabs.html')});
     }    
 }
 
 function linksIterator(i, strings, tabCreationDelay) {    
     strings[i] = strings[i].trim();
-    if (strings[i] == '') {
+    if (strings[i] === '') {
         return;
     }
-    var url = strings[i];
+    let url = strings[i];
     if (!isProbablyUrl(url)) {
         url = 'http://www.google.com/search?q=' + encodeURI(url);
     }
@@ -172,16 +173,18 @@ function linksIterator(i, strings, tabCreationDelay) {
 }
 
 function openSaveNewListDialog() {
-    var arrayOfLines = new Array();
-    var lines = $('#list').val().split('\n');
-    arrayOfLines.push("temp");
-    for(var i = 0;i < lines.length;i++) {
+    const lines = $('#list').val().split('\n');
+    const tempList = {
+        object_description: "temp_storage",
+        list_links: []
+    };
+    for (let i = 0; i < lines.length; i++) {
         if(!(lines[i]) == "\n") {
-            arrayOfLines.push(lines[i]);
+            tempList.list_links.push(lines[i]);
         }
         
     }
-    localStorage.setItem("temp", arrayOfLines);
+    localStorage.setItem("temp", JSON.stringify(tempList));
     chrome.tabs.create({'url': chrome.extension.getURL('newlist.html')});
 }
 
@@ -253,9 +256,9 @@ function getSelectedListID() {
 function getSetting(setting) {
     const settingSelected = setting.toLowerCase();
     for (let i = 0; i < localStorage.length; i++){
-        const tempArray = loadList(localStorage.key(i));
+        const tempStorage = loadList(localStorage.key(i));
         if(localStorage.key(i) === "settings") {
-            const userSettings = JSON.parse(tempArray);
+            const userSettings = JSON.parse(tempStorage);
             switch(settingSelected) {
                 case "tab_creation_delay":
                     return userSettings.tab_creation_delay;

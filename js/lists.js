@@ -13,10 +13,9 @@ function saveSettings(userSettings) {
 }
 
 function loadList(Id) {
-    let resultsArray = [];
     const results = localStorage.getItem(Id);
     try {
-        return JSON.parse(results);
+        return results;
     } catch (e) {
         return e;
     }
@@ -47,13 +46,10 @@ function removeList(id, noAlert) {
     }
 }
 
-/**
- * @deprecated
- */
 function removeTempList() {
     for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
-        if (tempArray[0] === "temp") {
+        if (localStorage.key(i) === "temp") {
             localStorage.removeItem(localStorage.key(i));
         }
     }
@@ -62,7 +58,7 @@ function removeTempList() {
 function removeLinksToOpenList() {
     for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
-        if (tempArray[0] == "linksToOpen") {
+        if (tempArray[0] === "linksToOpen") {
             localStorage.removeItem(localStorage.key(i));
         }
     }

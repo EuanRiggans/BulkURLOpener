@@ -1,21 +1,20 @@
 $(document).ready(function () {
     let tabCreationDelay = getSetting("tab_creation_delay");
     tabCreationDelay = tabCreationDelay * 1000;
-    const strings = loadList("linksToOpen");
-    for (let i = 0; i<strings.length; i++) {
-        if(strings[i].trim() === '') {
-            strings.splice(i, 1);
-            i--;
-        }
+    const tempArray = loadList("linksToOpen");
+    const parsedList = JSON.parse(tempArray);
+    const linksToOpen = [];
+    for (const link of parsedList.list_links) {
+        linksToOpen.push(link);
     }
-    linksIterator(0, strings, tabCreationDelay);
+    linksIterator(0, linksToOpen, tabCreationDelay);
     removeLinksToOpenList();
 });
 
 function linksIterator(i, strings, tabCreationDelay) {
     strings[i] = strings[i].trim();
     if (!(strings[i] === '') && !(strings[i] === "linksToOpen")) {
-        var url = strings[i];
+        let url = strings[i];
         if (!isProbablyUrl(url)) {
             url = 'http://www.google.com/search?q=' + encodeURI(url);
         }

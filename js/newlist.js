@@ -1,12 +1,17 @@
 $(document).ready(function () {
+    const $listNameSelector = $('#listName');
     for (let i = 0; i < localStorage.length; i++){
-        const tempArray = loadList(localStorage.key(i));
-        if(tempArray[0] === "temp") {
+        if (localStorage.key(i) === "temp") {
             const listTextArea = document.getElementById("list");
-            $('#list').val('');              
-            for (i = 1; i<tempArray.length; ++i) {
-                listTextArea.value += tempArray[i] + "\n";
-            }            
+            $('#list').val('');
+            try {
+                const parsedList = JSON.parse(loadList(localStorage.key(i)));
+                for (const link of parsedList.list_links) {
+                    listTextArea.value += link + "\n";
+                }
+            } catch (e) {
+
+            }
             removeTempList();
             listTextArea.select(); 
         }        
@@ -26,7 +31,7 @@ $(document).ready(function () {
             list_links: []
         };
         newList.list_id = listID;
-        newList.list_name = $('#listName').val();
+        newList.list_name = $listNameSelector.val();
         const lines = $('#list').val().split('\n');
         for(let i = 0; i < lines.length; i++) {
             if(!(lines[i]) == "\n") {
@@ -43,5 +48,5 @@ $(document).ready(function () {
         }
         saveList(listID, newList);
     });
-    $('#listName').select();
+    $listNameSelector.select();
 });
