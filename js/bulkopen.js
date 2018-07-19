@@ -59,6 +59,10 @@ $(document).ready(function () {
     $('#openHelp').click(function () {
         openHelpDialog();
     });
+    $('#openInPopup').click(function () {
+        popupMain();
+        window.close();
+    });
     $(document).on('change', '#savedLists', function (e) {
         if (ctrlDown) {
             return;
@@ -318,7 +322,7 @@ function popupMain() {
         url: "popup.html",
         type: "popup",
         width: 755,
-        height: 600
+        height: 600,
     });
 }
 
