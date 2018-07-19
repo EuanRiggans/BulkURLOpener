@@ -23,6 +23,7 @@ $(document).ready(function () {
         window.close();
     });
     $('#saveList').click(function () {
+        const $linksListSelector = $('#list');
         const listID = getNextAvailableID();
         const newList = {
             object_description: "list_storage",
@@ -32,14 +33,14 @@ $(document).ready(function () {
         };
         newList.list_id = listID;
         newList.list_name = $listNameSelector.val();
-        const lines = $('#list').val().split('\n');
+        const lines = $linksListSelector.val().split('\n');
         for(let i = 0; i < lines.length; i++) {
             if(!(lines[i]) == "\n") {
                 console.log(lines[i]);
                 newList.list_links.push(lines[i]);
             }            
         }
-        if(lines.length <= 3) {
+        if ($linksListSelector.val().trim() === "") {
             alert("No URLs given for the list!");
             return;
         } else if($('#listName').val().trim() === "") {

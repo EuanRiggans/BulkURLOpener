@@ -5,10 +5,9 @@
  */
 
 $(document).ready(function () {
-    outputAllLists();
-    getCurrentVersion();
-    chrome.windows.getCurrent( function(window) {
-        chrome.tabs.getAllInWindow(window.id, function(tabs){
+    upgradeToJSONFormatting();
+    chrome.windows.getCurrent(function (window) {
+        chrome.tabs.getAllInWindow(window.id, function (tabs) {
             if (!tabs.length) return;
 
             const listTextArea = document.getElementById("list");
@@ -19,12 +18,12 @@ $(document).ready(function () {
             listTextArea.select();
         });
     });
-    for (let i = 0; i < localStorage.length; i++){
+    for (let i = 0; i < localStorage.length; i++) {
         const tempStorageArray = loadList(localStorage.key(i));
         try {
             const parsedList = JSON.parse(tempStorageArray);
-            if(parsedList.object_description === "list_storage") {
-                $('#savedLists').append('<option id="' + parsedList.list_id +'">'+ parsedList.list_name +'</option>');
+            if (parsedList.object_description === "list_storage") {
+                $('#savedLists').append('<option id="' + parsedList.list_id + '">' + parsedList.list_name + '</option>');
             }
         } catch (e) {
 
@@ -63,11 +62,14 @@ $(document).ready(function () {
     $('#openExport').click(function () {
         openExportDialog();
     });
-    $(document).on('change', '#savedLists', function() {
-       if(getSetting('auto_open_lists') === 1) {
-           openSelectedList();
-           openTextAreaList();
-       }
+    $(document).on('change', '#savedLists', function (e) {
+        if (e.ctrlKey) {
+            alert("x");
+        }
+        if (getSetting('auto_open_lists') === 1) {
+            openSelectedList();
+            openTextAreaList();
+        }
     });
     $('#version').text("- Version " + getCurrentVersion());
 });
@@ -76,15 +78,15 @@ function openTextAreaList() {
     openList(document.getElementById("list").value);
 }
 
-function getCurrentTabs() {    
-    chrome.windows.getCurrent( function(window) {
-        chrome.tabs.getAllInWindow(window.id, function(tabs){
+function getCurrentTabs() {
+    chrome.windows.getCurrent(function (window) {
+        chrome.tabs.getAllInWindow(window.id, function (tabs) {
             if (!tabs.length) {
                 return;
             }
             const listTextArea = document.getElementById("list");
             listTextArea.value = "";
-            for (let i=0; i<tabs.length; ++i) {
+            for (let i = 0; i < tabs.length; ++i) {
                 listTextArea.value += tabs[i].url + "\n";
             }
             listTextArea.select();
@@ -97,8 +99,8 @@ function clearLinksList() {
     listTextArea.value = "";
 }
 
-String.prototype.trim = function() { 
-	return this.replace(/^\s+|\s+$/g, ''); 
+String.prototype.trim = function () {
+    return this.replace(/^\s+|\s+$/g, '');
 };
 
 function isProbablyUrl(string) {
@@ -122,7 +124,7 @@ function isProbablyUrl(string) {
         return true;
     }
 
-	return false;
+    return false;
 }
 
 function openList(list) {
@@ -134,8 +136,8 @@ function openList(list) {
     //    }
     //}
     let tabCreationDelay = getSetting("tab_creation_delay");
-    if(!(tabCreationDelay > 0) || !(strings.length > 1)) {
-        for (let i = 0; i<strings.length; i++) {
+    if (!(tabCreationDelay > 0) || !(strings.length > 1)) {
+        for (let i = 0; i < strings.length; i++) {
             if (strings[i].trim() === '') {
                 strings.splice(i, 1);
                 i--;
@@ -153,10 +155,10 @@ function openList(list) {
         }
         localStorage.setItem("linksToOpen", JSON.stringify(linksToOpen));
         chrome.tabs.create({'url': chrome.extension.getURL('openingtabs.html')});
-    }    
+    }
 }
 
-function linksIterator(i, strings, tabCreationDelay) {    
+function linksIterator(i, strings, tabCreationDelay) {
     strings[i] = strings[i].trim();
     if (strings[i] === '') {
         return;
@@ -165,9 +167,9 @@ function linksIterator(i, strings, tabCreationDelay) {
     if (!isProbablyUrl(url)) {
         url = 'http://www.google.com/search?q=' + encodeURI(url);
     }
-    chrome.tabs.create({'url':url,'selected':false});
+    chrome.tabs.create({'url': url, 'selected': false});
     i++;
-    if(i < strings.length){
+    if (i < strings.length) {
         setTimeout(linksIterator, tabCreationDelay, i, strings, tabCreationDelay);
     }
 }
@@ -179,28 +181,28 @@ function openSaveNewListDialog() {
         list_links: []
     };
     for (let i = 0; i < lines.length; i++) {
-        if(!(lines[i]) == "\n") {
+        if (!(lines[i]) == "\n") {
             tempList.list_links.push(lines[i]);
         }
-        
+
     }
     localStorage.setItem("temp", JSON.stringify(tempList));
     chrome.tabs.create({'url': chrome.extension.getURL('newlist.html')});
 }
 
 function openSelectedList() {
-    if(getSelectedListID() === "-1") {
+    if (getSelectedListID() === "-1") {
         alert("You need to select a list");
         return;
     }
-    for (let i = 0; i < localStorage.length; i++){
+    for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
         try {
             const parsedList = JSON.parse(tempArray);
             if (parsedList.list_id === parseInt(getSelectedListID())) {
                 const listTextArea = document.getElementById("list");
                 $('#list').val('');
-                for(const link of parsedList.list_links) {
+                for (const link of parsedList.list_links) {
                     listTextArea.value += link + "\n";
                 }
                 listTextArea.select();
@@ -228,17 +230,17 @@ function openExportDialog() {
 }
 
 function deleteList() {
-    if(getSelectedListID() === "-1") {
+    if (getSelectedListID() === "-1") {
         alert("You need to select a list");
         return;
     }
-    if(confirm("Are you sure you wish to delete the list: " + getSelectedList())) {
+    if (confirm("Are you sure you wish to delete the list: " + getSelectedList())) {
         removeList(getSelectedListID());
-    }    
+    }
 }
 
 function editSelectedList() {
-    if(getSelectedListID() === "-1") {
+    if (getSelectedListID() === "-1") {
         alert("You need to select a list");
         return;
     }
@@ -246,7 +248,7 @@ function editSelectedList() {
 }
 
 function getSelectedList() {
-    return $("#savedLists option:selected").html();    
+    return $("#savedLists option:selected").html();
 }
 
 function getSelectedListID() {
@@ -255,11 +257,11 @@ function getSelectedListID() {
 
 function getSetting(setting) {
     const settingSelected = setting.toLowerCase();
-    for (let i = 0; i < localStorage.length; i++){
+    for (let i = 0; i < localStorage.length; i++) {
         const tempStorage = loadList(localStorage.key(i));
-        if(localStorage.key(i) === "settings") {
+        if (localStorage.key(i) === "settings") {
             const userSettings = JSON.parse(tempStorage);
-            switch(settingSelected) {
+            switch (settingSelected) {
                 case "tab_creation_delay":
                     return userSettings.tab_creation_delay;
                     break;
@@ -275,7 +277,7 @@ function getSetting(setting) {
 
 function getCurrentVersion() {
     const manifestData = chrome.runtime.getManifest();
-    return(manifestData.version);
+    return (manifestData.version);
 }
 
 function upgradeToJSONFormatting() {
@@ -287,19 +289,19 @@ function upgradeToJSONFormatting() {
  * @deprecated
  */
 function convertOldURLLists() {
-    for (let i = 0; i < localStorage.length; i++){
+    for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
         const newListStorageArray = [];
-        if(tempArray[0] === localStorage.key(i) && !(localStorage.key(i) === "settings") && !(localStorage.key(i) === "maxID")) {
+        if (tempArray[0] === localStorage.key(i) && !(localStorage.key(i) === "settings") && !(localStorage.key(i) === "maxID")) {
             console.log("Need to convert: " + tempArray);
             localStorage.removeItem(localStorage.key(i));
             newListStorageArray.push("listStorage");
             newListStorageArray.push(getNextAvailableID());
-            for(let x = 1; x < tempArray.length; x++) {
+            for (let x = 1; x < tempArray.length; x++) {
                 newListStorageArray.push(tempArray[x]);
             }
             const listID = getNextAvailableID();
-            localStorage.setItem(listID, newListStorageArray);          
-        }        
+            localStorage.setItem(listID, newListStorageArray);
+        }
     }
 }

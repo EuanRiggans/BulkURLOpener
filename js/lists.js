@@ -58,7 +58,7 @@ function removeTempList() {
 function removeLinksToOpenList() {
     for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
-        if (tempArray[0] === "linksToOpen") {
+        if (localStorage.key(i) === "linksToOpen") {
             localStorage.removeItem(localStorage.key(i));
         }
     }
