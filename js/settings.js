@@ -7,7 +7,6 @@ $(document).ready(function () {
         const tempArray = loadList(localStorage.key(i));
         if (localStorage.key(i) === "settings") {
             const userSettings = JSON.parse(tempArray);
-            console.dir(userSettings);
             $tabCreationDelaySelector.val(userSettings.tab_creation_delay);
             if (userSettings.night_mode === 1) {
                 $nightModeSelector.prop('checked', true);
