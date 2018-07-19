@@ -328,7 +328,7 @@ function upgradeToJSONFormatting() {
         if (tempArray[0] === "listStorage") {
             const newList = {
                 object_description: "list_storage",
-                list_id: tempArray[1],
+                list_id: parseInt(tempArray[1]),
                 list_name: tempArray[2],
                 list_links: []
             };
@@ -339,7 +339,7 @@ function upgradeToJSONFormatting() {
         } else if (tempArray[0] === "settings") {
             const newSettings = {
                 object_description: "user_settings",
-                tab_creation_delay: tempArray[1],
+                tab_creation_delay: parseInt(tempArray[1]),
                 night_mode: 0,
                 auto_open_lists: 0
             };
