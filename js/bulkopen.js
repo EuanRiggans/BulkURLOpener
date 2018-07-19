@@ -287,6 +287,15 @@ function getCurrentVersion() {
     return (manifestData.version);
 }
 
+function popupMain() {
+    chrome.windows.create({
+        url: "popup.html",
+        type: "popup",
+        width: 755,
+        height: 600
+    });
+}
+
 function upgradeToJSONFormatting() {
     for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
