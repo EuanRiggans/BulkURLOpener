@@ -56,12 +56,6 @@ $(document).ready(function () {
     $('#openHelp').click(function () {
         openHelpDialog();
     });
-    $('#openImport').click(function () {
-        openImportDialog();
-    });
-    $('#openExport').click(function () {
-        openExportDialog();
-    });
     $(document).on('change', '#savedLists', function (e) {
         if (e.ctrlKey) {
             alert("x");
