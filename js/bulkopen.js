@@ -341,7 +341,8 @@ function upgradeToJSONFormatting() {
                 object_description: "user_settings",
                 tab_creation_delay: parseInt(tempArray[1]),
                 night_mode: 0,
-                auto_open_lists: 0
+                auto_open_lists: 0,
+                default_list_open: -1
             };
             localStorage.setItem("settings", JSON.stringify(newSettings));
         }
