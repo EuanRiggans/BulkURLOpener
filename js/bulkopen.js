@@ -1,6 +1,4 @@
 /**
- * @todo Convert old settings
- * @todo Convert old link lists
  * @todo Settings tooltips
  */
 
@@ -275,7 +273,29 @@ function getCurrentVersion() {
 }
 
 function upgradeToJSONFormatting() {
-
+    for (let i = 0; i < localStorage.length; i++) {
+        const tempArray = loadList(localStorage.key(i));
+        if (tempArray[0] === "listStorage") {
+            const newList = {
+                object_description: "list_storage",
+                list_id: tempArray[1],
+                list_name: tempArray[2],
+                list_links: []
+            };
+            for (let i = 3; i < tempArray.length; i++) {
+                newList.list_links.push(tempArray[i]);
+            }
+            localStorage.setItem(tempArray[1], JSON.stringify(newList));
+        } else if (tempArray[0] === "settings") {
+            const newSettings = {
+                object_description: "user_settings",
+                tab_creation_delay: tempArray[1],
+                night_mode: 0,
+                auto_open_lists: 0
+            };
+            localStorage.setItem("settings", JSON.stringify(newSettings));
+        }
+    }
 }
 
 /**
