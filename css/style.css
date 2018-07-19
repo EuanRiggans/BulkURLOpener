@@ -19,6 +19,7 @@ button {
 	height: 300px;
 	margin-bottom: -25px;
 }
+
 #openButton {
 	float: left;
 	margin-bottom: 8px;
@@ -78,4 +79,12 @@ button {
 .no-highlight {
 	color: #000000;
     text-decoration: none;
+}
+
+@media all and (min-width: 800px) {
+    #list {
+        width: 100%;
+        height: 300px;
+        margin-bottom: -25px;
+    }
 }
