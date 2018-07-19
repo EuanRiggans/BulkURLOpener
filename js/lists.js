@@ -1,3 +1,8 @@
+/**
+ * Saves a list to local storage
+ * @param Id                The id of the list
+ * @param newListObject     The object containing the data for the list
+ */
 function saveList(Id, newListObject) {
     localStorage.setItem(Id, JSON.stringify(newListObject));
     localStorage.setItem("maxID", Id);
@@ -5,6 +10,10 @@ function saveList(Id, newListObject) {
     window.close();
 }
 
+/**
+ * Saves users settings to local storage
+ * @param userSettings  The users settings object
+ */
 function saveSettings(userSettings) {
     removeList("settings", false);
     localStorage.setItem("settings", JSON.stringify(userSettings));
@@ -12,6 +21,11 @@ function saveSettings(userSettings) {
     window.close();
 }
 
+/**
+ * Gets a list from local storage
+ * @param Id    The list ID
+ * @returns {*} The list object
+ */
 function loadList(Id) {
     const results = localStorage.getItem(Id);
     try {
@@ -21,6 +35,10 @@ function loadList(Id) {
     }
 }
 
+/**
+ * Returns the current max id
+ * @returns {*} The current max id
+ */
 function getCurrentMaxID() {
     if (localStorage.getItem("maxID") == "NaN") {
         return 0;
@@ -28,6 +46,11 @@ function getCurrentMaxID() {
     return localStorage.getItem("maxID");
 }
 
+/**
+ * Removes a list from local storage
+ * @param id        The ID of the list to remove
+ * @param noAlert   Whether a alert should be shown when list is deleted
+ */
 function removeList(id, noAlert) {
     for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
@@ -46,24 +69,32 @@ function removeList(id, noAlert) {
     }
 }
 
+/**
+ * Removes the temporary list that is created when creating a new list
+ */
 function removeTempList() {
     for (let i = 0; i < localStorage.length; i++) {
-        const tempArray = loadList(localStorage.key(i));
         if (localStorage.key(i) === "temp") {
             localStorage.removeItem(localStorage.key(i));
         }
     }
 }
 
+/**
+ * Removes the temporary list created when using tab creation delay
+ */
 function removeLinksToOpenList() {
     for (let i = 0; i < localStorage.length; i++) {
-        const tempArray = loadList(localStorage.key(i));
         if (localStorage.key(i) === "linksToOpen") {
             localStorage.removeItem(localStorage.key(i));
         }
     }
 }
 
+/**
+ * Gets the next available ID for a list
+ * @returns {number}    The next available id
+ */
 function getNextAvailableID() {
     let availableID;
     availableID = 0;
@@ -75,12 +106,18 @@ function getNextAvailableID() {
                 availableID = result.list_id + 1;
             }
         } catch (e) {
-            //Not a JSON list
+
         }
     }
     return availableID;
 }
 
+/**
+ * Gets the value of a parameter in the query string
+ * @param name  The name of the parameter
+ * @param url   The URL that contains the query string
+ * @returns {string | null} The value of the parameter
+ */
 function getParameterByName(name, url) {
     //Gets variable from query string by name. Use: var VIDINURL = getParameterByName('VID');
     if (!url) {
@@ -98,12 +135,20 @@ function getParameterByName(name, url) {
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
+/**
+ * Removes the query string from the URL
+ * @param URL   The URL to remove the query string from
+ * @returns {string | void | *} The url with query string removed
+ */
 function removeQueryString(URL) {
     //Removes the query string from a URL provided Use: var URL = window.location.href; URL = removeQueryString(URL);
     URL = URL.replace(/(\?.*)|(#.*)/g, "");
     return URL;
 }
 
+/**
+ * Outputs all data currently in the extensions local storage
+ */
 function outputAllLists() {
     let counter = 0;
     for (let i = 0; i < localStorage.length; i++) {
