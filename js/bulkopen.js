@@ -3,6 +3,7 @@
  */
 
 $(document).ready(function () {
+    let ctrlDown = false;
     upgradeToJSONFormatting();
     chrome.windows.getCurrent(function (window) {
         chrome.tabs.getAllInWindow(window.id, function (tabs) {
@@ -55,8 +56,8 @@ $(document).ready(function () {
         openHelpDialog();
     });
     $(document).on('change', '#savedLists', function (e) {
-        if (e.ctrlKey) {
-            alert("x");
+        if (ctrlDown) {
+            return;
         }
         if (getSetting('auto_open_lists') === 1) {
             openSelectedList();
@@ -64,6 +65,20 @@ $(document).ready(function () {
         }
     });
     $('#version').text("- Version " + getCurrentVersion());
+
+    $(body).keydown(function (e) {
+        if (e.ctrlKey) {
+            if (!ctrlDown) {
+                ctrlDown = true;
+            }
+        }
+    });
+
+    $(body).keyup(function (e) {
+        if (!e.ctrlKey) {
+            ctrlDown = false;
+        }
+    });
 });
 
 function openTextAreaList() {
