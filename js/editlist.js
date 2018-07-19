@@ -1,10 +1,11 @@
 $(document).ready(function () {
+    $listNameSelector = $('#listName');
     if (!(document.location.search.length) || getParameterByName('ID') == null || getParameterByName('name') == null) {
         alert("No list data present. Closing window.");
         window.close();
     }
     $('#listID').val(getParameterByName('ID'));
-    $('#listName').val(getParameterByName('name'));
+    $listNameSelector.val(getParameterByName('name'));
     const id = getParameterByName('ID');
     for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
@@ -42,7 +43,7 @@ $(document).ready(function () {
         } catch (e) {
 
         }
-        newList.list_name = $('#listName').val();
+        newList.list_name = $listNameSelector.val();
         const lines = $('#list').val().split('\n');
         for(let i = 0; i < lines.length; i++) {
             if(!(lines[i]) == "\n") {
@@ -53,7 +54,7 @@ $(document).ready(function () {
         if(lines.length <= 3) {
             alert("No URLs given for the list!");
             return;
-        } else if($('#listName').val().trim() === "") {
+        } else if ($listNameSelector.val().trim() === "") {
             alert("You need to give a name for your list!");
             return;
         }
