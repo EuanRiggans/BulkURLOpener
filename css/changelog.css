@@ -7,5 +7,5 @@
 }
 
 .notes::before {
-    content:"-";
+    content: "- ";
 }
