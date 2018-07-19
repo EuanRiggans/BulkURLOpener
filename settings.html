@@ -22,10 +22,8 @@
                 <input type="number" class="form-control" placeholder="Delay in seconds" id="tabCreationDelay"
                        aria-describedby="delay-addon">
             </div>
-            <br/>
-            <!--<div class="checkbox">-->
-            <!--<label><input type="checkbox" id="nightMode"> Enable night mode</label>-->
-            <!--</div>-->
+            <hr>
+            <label for="autoOpenLists">Automatically open lists</label>
             <div class="checkbox">
                 <label><input type="checkbox" id="autoOpenLists">&nbsp; Automatically open lists <a
                         id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top"
@@ -33,6 +31,11 @@
                                                                data-placement="top"
                                                                title="Tooltip on top">(?)</a></label>
             </div>
+            <hr>
+            <label for="defaultList">The list that will be displayed when you open the extension:</label>
+            <select class="form-control" id="defaultList">
+                <option id="-1" value="" selected>Currently opened tabs</option>
+            </select>
         </div>
         <div class="modal-footer">
             <button class="btn btn-outline-danger" id="closeModalFooter" type="button">Close</button>

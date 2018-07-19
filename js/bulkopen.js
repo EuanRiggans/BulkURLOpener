@@ -5,18 +5,22 @@
 $(document).ready(function () {
     let ctrlDown = false;
     upgradeToJSONFormatting();
-    chrome.windows.getCurrent(function (window) {
-        chrome.tabs.getAllInWindow(window.id, function (tabs) {
-            if (!tabs.length) return;
+    if (getSetting("default_list_open") === -1) {
+        chrome.windows.getCurrent(function (window) {
+            chrome.tabs.getAllInWindow(window.id, function (tabs) {
+                if (!tabs.length) return;
 
-            const listTextArea = document.getElementById("list");
+                const listTextArea = document.getElementById("list");
 
-            for (let i = 0; i < tabs.length; ++i) {
-                listTextArea.value += tabs[i].url + "\n";
-            }
-            listTextArea.select();
+                for (let i = 0; i < tabs.length; ++i) {
+                    listTextArea.value += tabs[i].url + "\n";
+                }
+                listTextArea.select();
+            });
         });
-    });
+    } else {
+        openListByID(getSetting("default_list_open"));
+    }
     for (let i = 0; i < localStorage.length; i++) {
         const tempStorageArray = loadList(localStorage.key(i));
         try {
@@ -220,6 +224,25 @@ function openSelectedList() {
     }
 }
 
+function openListByID(id) {
+    for (let i = 0; i < localStorage.length; i++) {
+        const tempArray = loadList(localStorage.key(i));
+        try {
+            const parsedList = JSON.parse(tempArray);
+            if (parsedList.list_id === parseInt(id)) {
+                const listTextArea = document.getElementById("list");
+                $('#list').val('');
+                for (const link of parsedList.list_links) {
+                    listTextArea.value += link + "\n";
+                }
+                listTextArea.select();
+            }
+        } catch (e) {
+
+        }
+    }
+}
+
 function openSettingsDialog() {
     chrome.tabs.create({'url': chrome.extension.getURL('settings.html')});
 }
@@ -274,6 +297,9 @@ function getSetting(setting) {
                     break;
                 case "auto_open_lists":
                     return userSettings.auto_open_lists;
+                    break;
+                case "default_list_open":
+                    return userSettings.default_list_open;
                     break;
                 default:
                     break;
