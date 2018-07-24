@@ -3,7 +3,7 @@ $(document).ready(function () {
     if (getSetting('auto_open_lists') === 1) {
         $('#savedListsOptions').after("<label for=\"overrideAutoOpen\"><input type=\"checkbox\" id=\"overrideAutoOpen\">&nbsp;Override Auto Open</label>");
         $(document).on('change', '#savedLists', function (e) {
-            $overrideSelector = $('#overrideAutoOpen');
+            const $overrideSelector = $('#overrideAutoOpen');
             if (!$overrideSelector.is(':checked')) {
                 if (getSetting('auto_open_lists') === 1) {
                     openSelectedList();
