@@ -119,7 +119,6 @@ function getNextAvailableID() {
  * @returns {string | null} The value of the parameter
  */
 function getParameterByName(name, url) {
-    //Gets variable from query string by name. Use: var VIDINURL = getParameterByName('VID');
     if (!url) {
         url = window.location.href;
     }

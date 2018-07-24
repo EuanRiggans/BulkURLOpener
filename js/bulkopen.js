@@ -39,6 +39,9 @@ $(document).ready(function () {
 
         }
     }
+    if (getParameterByName("popup", window.location) === "true") {
+        $('#openInPopup').remove();
+    }
     $('#openButton').click(function () {
         openTextAreaList();
     });
@@ -303,7 +306,7 @@ function getCurrentVersion() {
 
 function popupMain() {
     chrome.windows.create({
-        url: "popup.html",
+        url: "popup.html?popup=true",
         type: "popup",
         width: 755,
         height: 600,
