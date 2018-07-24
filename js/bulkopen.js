@@ -1,7 +1,3 @@
-/**
- * @todo Settings tooltips
- */
-
 $(document).ready(function () {
     upgradeToJSONFormatting();
     if (getSetting('auto_open_lists') === 1) {
