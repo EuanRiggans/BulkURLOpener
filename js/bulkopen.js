@@ -12,7 +12,7 @@ $(document).ready(function () {
             }
         });
     }
-    if (getSetting("default_list_open") === -1) {
+    if (getSetting("default_list_open") === -1 || getSetting("default_list_open") === undefined) {
         chrome.windows.getCurrent(function (window) {
             chrome.tabs.getAllInWindow(window.id, function (tabs) {
                 if (!tabs.length) return;
