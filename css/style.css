@@ -81,6 +81,10 @@ button {
     text-decoration: none;
 }
 
+.setting-title {
+    font-weight: bold;
+}
+
 @media all and (min-width: 800px) {
     #list {
         width: 100%;

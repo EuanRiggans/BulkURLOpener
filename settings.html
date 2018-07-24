@@ -17,24 +17,34 @@
         </div>
 
         <div class="modal-body">
-            <div class="input-group">
-                <span class="input-group-addon" id="delay-addon">Tab creation delay:</span>
-                <input type="number" class="form-control" placeholder="Delay in seconds" id="tabCreationDelay"
-                       aria-describedby="delay-addon">
+            <div id="tabCreationDelayGroup">
+                <p class="setting-title">Tab Creation Delay:</p>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="delay-addon">Tab creation delay:</span>
+                    </div>
+                    <input type="number" class="form-control" placeholder="Delay in seconds" id="tabCreationDelay"
+                           aria-describedby="delay-addon">
+                </div>
             </div>
             <hr>
-            <label for="autoOpenLists">Automatically open lists</label>
-            <div class="checkbox">
-                <label><input type="checkbox" id="autoOpenLists">&nbsp; Automatically open lists <a
-                        id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top"
-                        title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a>
-                    <b>Experimental feature</b></label>
+            <div id="autoOpenListsGroup">
+                <p class="setting-title">Automatically open lists:</p>
+                <div class="checkbox">
+                    <label><input type="checkbox" id="autoOpenLists">&nbsp; Automatically open lists <a
+                            id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top"
+                            title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a>
+                        <b>Experimental feature</b></label>
+                </div>
             </div>
             <hr>
-            <label for="defaultList">The list that will be displayed when you open the extension:</label>
-            <select class="form-control" id="defaultList">
-                <option id="-1" value="" selected>Currently opened tabs</option>
-            </select>
+            <div id="defaultListGroup">
+                <p class="setting-title">Default list to display:</p>
+                <label for="defaultList">The list that will be displayed when you open the extension:</label>
+                <select class="form-control" id="defaultList">
+                    <option id="-1" value="" selected>Currently opened tabs</option>
+                </select>
+            </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-outline-danger" id="closeModalFooter" type="button">Close</button>
