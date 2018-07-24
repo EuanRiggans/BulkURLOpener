@@ -3,8 +3,19 @@
  */
 
 $(document).ready(function () {
-    let ctrlDown = false;
     upgradeToJSONFormatting();
+    if (getSetting('auto_open_lists') === 1) {
+        $('#savedListsOptions').after("<label for=\"overrideAutoOpen\"><input type=\"checkbox\" id=\"overrideAutoOpen\">&nbsp;Override Auto Open</label>");
+        $(document).on('change', '#savedLists', function (e) {
+            $overrideSelector = $('#overrideAutoOpen');
+            if (!$overrideSelector.is(':checked')) {
+                if (getSetting('auto_open_lists') === 1) {
+                    openSelectedList();
+                    openTextAreaList();
+                }
+            }
+        });
+    }
     if (getSetting("default_list_open") === -1) {
         chrome.windows.getCurrent(function (window) {
             chrome.tabs.getAllInWindow(window.id, function (tabs) {
@@ -63,30 +74,7 @@ $(document).ready(function () {
         popupMain();
         window.close();
     });
-    $(document).on('change', '#savedLists', function (e) {
-        if (ctrlDown) {
-            return;
-        }
-        if (getSetting('auto_open_lists') === 1) {
-            openSelectedList();
-            openTextAreaList();
-        }
-    });
     $('#version').text("- Version " + getCurrentVersion());
-
-    $(body).keydown(function (e) {
-        if (e.ctrlKey) {
-            if (!ctrlDown) {
-                ctrlDown = true;
-            }
-        }
-    });
-
-    $(body).keyup(function (e) {
-        if (!e.ctrlKey) {
-            ctrlDown = false;
-        }
-    });
 });
 
 function openTextAreaList() {
