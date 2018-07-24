@@ -1,43 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Edit a link list</title>
-	<link href="css/bootstrap.min.css" rel="stylesheet">
+    <title>Edit a link list</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
-    <link href="css/modalstyles.css" rel="stylesheet">    
+    <link href="css/modalstyles.css" rel="stylesheet">
 </head>
 <body>
-	<div class="modal-dialog modal-lg" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-                <h4 class="modal-title">Edit a link list</h4>
-                <button type="button" class="close" id="closeModal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>            
-			<div class="modal-body">
-                <div class="input-group">
-                    <span class="input-group-addon" id="list-id-addon">Link list ID:</span>
-                    <input type="text" class="form-control" value=""  id="listID" aria-describedby="list-id-addon" disabled>
-                </div><br />
-                <div class="input-group">
-                    <span class="input-group-addon" id="list-name-addon">Link list name:</span>
-                    <input type="text" class="form-control" placeholder="List name" id="listName" aria-describedby="list-name-addon">
-                </div><br />
-				<div class="form-group">					
-                    <label for="comment">Link list urls:</label>
-                    <textarea class="form-control" rows="5" id="list" autofocus="autofocus"></textarea>
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 class="modal-title">Edit a link list</h4>
+            <button type="button" class="close" id="closeModal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="list-id-addon">Link list ID:</span>
                 </div>
-			</div>
-			<div class="modal-footer">
-                <button class="btn btn-outline-danger" id="closeModalFooter" type="button">Cancel</button>
-				<button class="btn btn-outline-primary" id="saveList" type="button">Save changes</button>
-			</div>
-		</div>
+                <input type="text" class="form-control" value="" id="listID" aria-describedby="list-id-addon" disabled>
+            </div>
+            <br/>
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="list-name-addon">Link list name:</span>
+                </div>
+                <input type="text" class="form-control" placeholder="List name" id="listName"
+                       aria-describedby="list-name-addon">
+            </div>
+            <br/>
+            <div class="form-group">
+                <label for="list">Link list urls:</label>
+                <textarea class="form-control" rows="5" id="list" autofocus="autofocus"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-outline-danger" id="closeModalFooter" type="button">Cancel</button>
+            <button class="btn btn-outline-primary" id="saveList" type="button">Save changes</button>
+        </div>
     </div>
-    <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" src="js/bootstrap.min.js"></script>   
-	<script type="text/javascript" src="js/lists.js"></script>
-    <script type="text/javascript" src="js/editlist.js"></script>
+</div>
+<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/lists.js"></script>
+<script type="text/javascript" src="js/editlist.js"></script>
 </body>
 </html>
