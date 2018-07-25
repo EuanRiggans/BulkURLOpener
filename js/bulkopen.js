@@ -309,7 +309,7 @@ function popupMain() {
         url: "popup.html?popup=true",
         type: "popup",
         width: 755,
-        height: 600,
+        height: 610,
     });
 }
 
