@@ -3,20 +3,21 @@
   "short_name": "BulkOpen",
   "author": "Euan Riggans",
   "manifest_version": 2,
-  "version": "1.1.4",
-  "description": "Allows user to open a list of url in one click.",
+  "version": "1.2.0",
+  "description": "A Google Chrome Extension that provides the user with lots of features to handle lists of urls.",
   "permissions": [
     "tabs",
     "storage"
   ],
   "browser_action": {
-    "default_icon":  "icon/icon-48.png",
+    "default_icon": "icon/64.png",
     "default_title": "Bulk URL Open",
     "default_popup": "popup.html"
   },
   "icons": {
-    "16": "icon/icon-16.png",
-    "48": "icon/icon-48.png",
-    "128": "icon/icon-128.png"
+    "16": "icon/16.png",
+    "32": "icon/32.png",
+    "64": "icon/64.png",
+    "128": "icon/128.png"
   }
 }
