@@ -34,7 +34,7 @@
                     <label><input type="checkbox" id="autoOpenLists">&nbsp; Automatically open lists <a
                             id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top"
                             title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a>
-                        <b>Experimental feature</b></label>
+                        <b>(Experimental feature)</b></label>
                 </div>
             </div>
             <hr>
@@ -44,6 +44,14 @@
                 <select class="form-control" id="defaultList">
                     <option id="-1" value="" selected>Currently opened tabs</option>
                 </select>
+            </div>
+            <hr>
+            <div id="nightModeGroup">
+                <p class="setting-title">Enable night theme:</p>
+                <div class="checkbox">
+                    <label><input type="checkbox" id="nightMode">&nbsp; Enable night theme<b> (Experimental
+                        feature)</b></label>
+                </div>
             </div>
         </div>
         <div class="modal-footer">
@@ -56,5 +64,6 @@
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
 <script type="text/javascript" src="js/settings.js"></script>
 <script type="text/javascript" src="js/lists.js"></script>
+<script type="text/javascript" src="js/custom-styles.js" id="tempStylesheetLoader"></script>
 </body>
 </html>

@@ -1,82 +1,56 @@
-@import url('https://fonts.googleapis.com/css?family=Roboto');
+/*
+    Global styles
+ */
 
-* {
-    font-family: 'Roboto', sans-serif;
+a {
+    font-weight: bold;
 }
 
-body {
+body, #list, #savedLists, #defaultList {
+    color: #fff;
     background-color: #161616;
-    margin: 10px;
-    height: 200px;
-    padding: 10px;
 }
 
 button {
-    margin-top:20px;
+    background-color: #737373;
 }
 
-#list {
-    width: 700px;
-    height: 300px;
-    margin-bottom: -25px;
-}
-#openButton {
-    float: left;
-    margin-bottom: 8px;
-    margin-right: 10px;
-    padding: 5px 15px 7px 15px;
-}
-#copyCurrentOpen {
-    float: left;
-    margin-bottom: 8px;
-    padding: 5px 15px 7px 15px;
-}
-#clearList {
-    float: right;
-    margin-bottom: 8px;
-    padding: 5px 15px 7px 15px;
+.modal-content {
+    color: #fff;
+    background-color: #404040;
 }
 
-#saveNewList {
-    float:right;
-    margin-bottom: 8px;
-    margin-right:10px;
-    padding: 5px 15px 7px 15px;
+.input-group-text {
+    color: #fff;
+    background-color: #161616;
 }
 
-#savedLists {
-    margin-top:10px;
-    margin-bottom:10px;
+input[type=text]:disabled, input[type=number]:disabled {
+    color: #fff;
+    background-color: #4d4d4d;
 }
 
-.selectaddon {
-    margin-top:10px;
-    margin-bottom:10px;
-    margin-left:10px;
+input[type=text], input[type=text]:focus, input[type=number], input[type=number]:focus {
+    color: #fff;
+    background-color: #161616;
 }
 
-.header {
-    display:inline;
+#closeModal {
+    color: #fff;
 }
 
-.settings {
-    padding-right:10px;
+/*
+    popup styles
+ */
+
+.popup-body {
+    background-color: #404040;
 }
 
-.import {
-    padding-right: 10px;
+#openSettings {
+    color: #fff;
 }
 
-.export {
-    padding-right: 10px;
-}
-
-.header.settings, .header.help, .header.import, .header.export {
-    float:right;
-    font-size:35px;
-}
-
-.no-highlight {
-    color: #000000;
-    text-decoration: none;
+#openHelp {
+    color: #fff;
 }
