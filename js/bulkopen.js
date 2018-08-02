@@ -333,7 +333,8 @@ function upgradeToJSONFormatting() {
                 tab_creation_delay: parseInt(tempArray[1]),
                 night_mode: 0,
                 auto_open_lists: 0,
-                default_list_open: -1
+                default_list_open: -1,
+                custom_theme: "defaultBoostrap"
             };
             localStorage.setItem("settings", JSON.stringify(newSettings));
         }

@@ -3,6 +3,7 @@ $(document).ready(function () {
     const $nightModeSelector = $('#nightMode');
     const $autoOpenSelector = $('#autoOpenLists');
     let selectedListID = -1;
+    let selectedTheme = "defaultBootstrap";
     $tabCreationDelaySelector.val(0);
     for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
@@ -34,11 +35,16 @@ $(document).ready(function () {
             if (parsedList.object_description === "list_storage") {
                 $('#defaultList').append('<option id="' + parsedList.list_id + '">' + parsedList.list_name + '</option>');
             }
+            if (parsedList.object_description === "user_settings") {
+                selectedTheme = parsedList.custom_theme;
+                console.log(selectedTheme);
+            }
         } catch (e) {
-
+            console.log(e);
         }
     }
     $("#defaultList option[id=" + selectedListID + "]").prop('selected', true);
+    $("#customTheme option[id=" + selectedTheme + "]").prop('selected', true);
     $('#closeModal').click(function () {
         window.close();
     });
@@ -62,6 +68,7 @@ function initSettingsSave() {
     let nightMode = 0;
     let autoOpenLists = 0;
     const defaultList = getSelectedListID();
+    const theme = getSelectedTheme();
     if ($nightModeSelector.is(":checked")) {
         nightMode = 1;
     }
@@ -77,12 +84,14 @@ function initSettingsSave() {
         tab_creation_delay: 0,
         night_mode: 0,
         auto_open_lists: 0,
-        default_list_open: -1
+        default_list_open: -1,
+        custom_theme: "defaultBoostrap"
     };
     userSettings.tab_creation_delay = tabCreationDelay;
     userSettings.night_mode = nightMode;
     userSettings.auto_open_lists = autoOpenLists;
     userSettings.default_list_open = parseInt(defaultList);
+    userSettings.custom_theme = theme;
     saveSettings(userSettings);
 }
 
@@ -92,4 +101,8 @@ function getSelectedList() {
 
 function getSelectedListID() {
     return $('select[id="defaultList"] option:selected').attr('id');
+}
+
+function getSelectedTheme() {
+    return $('select[id="customTheme"] option:selected').attr('id');
 }
