@@ -8,11 +8,22 @@ a {
 
 body, #list, #savedLists, #defaultList, #customTheme {
     color: #fff;
-    background-color: #161616;
+    background-color: #404040;
+}
+
+body {
+    background-color: #333333;
+}
+
+.modal-dialog {
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    border-radius: 5px;
+    box-shadow: 2.5px 5px #262626;
 }
 
 button {
-    background-color: #737373;
+    background-color: #161616;
 }
 
 .modal-content {
@@ -22,7 +33,7 @@ button {
 
 .input-group-text {
     color: #fff;
-    background-color: #161616;
+    background-color: #404040;
 }
 
 input[type=text]:disabled, input[type=number]:disabled {
@@ -32,7 +43,7 @@ input[type=text]:disabled, input[type=number]:disabled {
 
 input[type=text], input[type=text]:focus, input[type=number], input[type=number]:focus {
     color: #fff;
-    background-color: #161616;
+    background-color: #404040;
 }
 
 #closeModal {
