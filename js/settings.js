@@ -15,6 +15,20 @@ $(document).ready(function () {
                 $tabCreationDelaySelector.val(userSettings.tab_creation_delay);
             }
 
+            if (userSettings.custom_theme === "fluentDesignBootstrap") {
+                if (userSettings.night_mode === 1) {
+                    $('#nightModeGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="nightMode" checked><label class="form-check-label" for="nightMode">&nbsp; Enable night theme<b> (Experimental feature)</b></label></div>');
+                } else {
+                    $('#nightModeGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="nightMode"><label class="form-check-label" for="nightMode">&nbsp; Enable night theme<b> (Experimental feature)</b></label></div>');
+                }
+            } else {
+                if (userSettings.night_mode === 1) {
+                    $('#nightModeGroup').append('<div class="checkbox"><label><input type="checkbox" id="nightMode" checked>&nbsp; Enable night theme<b> (Experimental feature)</b></label></div>');
+                } else {
+                    $('#nightModeGroup').append('<div class="checkbox"><label><input type="checkbox" id="nightMode">&nbsp; Enable night theme<b> (Experimental feature)</b></label></div>');
+                }
+            }
+
             if (userSettings.night_mode === 1) {
                 $nightModeSelector.prop('checked', true);
             }

@@ -58,6 +58,7 @@ function getCustomTheme() {
         const nightModeStylesheet = document.createElement('link');
         nightModeStylesheet.href = "css/style-dark.css";
         nightModeStylesheet.rel = "stylesheet";
+        nightModeStylesheet.id = "styles-dark";
         head.appendChild(nightModeStylesheet);
     }
     document.getElementById('tempStylesheetLoader').remove();
