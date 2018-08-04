@@ -17,24 +17,28 @@ $(document).ready(function () {
 
             if (userSettings.custom_theme === "fluentDesignBootstrap") {
                 if (userSettings.night_mode === 1) {
-                    $('#nightModeGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="nightMode" checked><label class="form-check-label" for="nightMode">&nbsp; Enable night theme<b> (Experimental feature)</b></label></div>');
+                    $('#nightModeGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="nightMode" checked><label class="form-check-label" for="nightMode">&nbsp; Enable night theme</label></div>');
                 } else {
-                    $('#nightModeGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="nightMode"><label class="form-check-label" for="nightMode">&nbsp; Enable night theme<b> (Experimental feature)</b></label></div>');
+                    $('#nightModeGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="nightMode"><label class="form-check-label" for="nightMode">&nbsp; Enable night theme</label></div>');
+                }
+
+                if (userSettings.auto_open_lists === 1) {
+                    $('#autoOpenListsGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="autoOpenLists" checked><label class="form-check-label" for="autoOpenLists">&nbsp; Automatically open lists<a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a><b>(Experimental feature)</b></label></div>')
+                } else {
+                    $('#autoOpenListsGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="autoOpenLists"><label class="form-check-label" for="autoOpenLists">&nbsp; Automatically open lists<a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a><b>(Experimental feature)</b></label></div>')
                 }
             } else {
                 if (userSettings.night_mode === 1) {
-                    $('#nightModeGroup').append('<div class="checkbox"><label><input type="checkbox" id="nightMode" checked>&nbsp; Enable night theme<b> (Experimental feature)</b></label></div>');
+                    $('#nightModeGroup').append('<div class="checkbox"><label><input type="checkbox" id="nightMode" checked>&nbsp; Enable night theme</label></div>');
                 } else {
-                    $('#nightModeGroup').append('<div class="checkbox"><label><input type="checkbox" id="nightMode">&nbsp; Enable night theme<b> (Experimental feature)</b></label></div>');
+                    $('#nightModeGroup').append('<div class="checkbox"><label><input type="checkbox" id="nightMode">&nbsp; Enable night theme</label></div>');
                 }
-            }
 
-            if (userSettings.night_mode === 1) {
-                $nightModeSelector.prop('checked', true);
-            }
-
-            if (userSettings.auto_open_lists === 1) {
-                $autoOpenSelector.prop('checked', true);
+                if (userSettings.auto_open_lists === 1) {
+                    $('#autoOpenListsGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoOpenLists" checked>&nbsp; Automatically open lists <a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a><b> (Experimental feature)</b></label></div>');
+                } else {
+                    $('#autoOpenListsGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoOpenLists">&nbsp; Automatically open lists <a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a><b> (Experimental feature)</b></label></div>');
+                }
             }
 
             if (userSettings.default_list_open !== -1) {
@@ -59,15 +63,32 @@ $(document).ready(function () {
     }
     $("#defaultList option[id=" + selectedListID + "]").prop('selected', true);
     $("#customTheme option[id=" + selectedTheme + "]").prop('selected', true);
-    $('#closeModal').click(function () {
+    document.getElementById("closeModal").addEventListener('click', (e) => {
         window.close();
     });
-    $('#closeModalFooter').click(function () {
+    document.getElementById("closeModalFooter").addEventListener('click', (e) => {
         window.close();
     });
-    $('#saveSettings').click(function () {
+    document.getElementById("saveSettings").addEventListener('click', (e) => {
         initSettingsSave();
     });
+    document.getElementById("nightMode").addEventListener('change', (e) => {
+        const isChecked = document.getElementById("nightMode").checked;
+        if (isChecked) {
+            if (!(document.getElementById("styles-dark"))) {
+                const head = document.getElementsByTagName('head')[0];
+                const nightModeStylesheet = document.createElement('link');
+                nightModeStylesheet.href = "css/style-dark.css";
+                nightModeStylesheet.rel = "stylesheet";
+                nightModeStylesheet.id = "styles-dark";
+                head.appendChild(nightModeStylesheet);
+            }
+        } else {
+            if (document.getElementById("styles-dark")) {
+                document.getElementById("styles-dark").remove();
+            }
+        }
+    })
 });
 
 function isNumber(varToTest) {

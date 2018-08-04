@@ -1,7 +1,11 @@
 $(document).ready(function () {
     upgradeToJSONFormatting();
     if (getSetting('auto_open_lists') === 1) {
-        $('#savedListsOptions').after("<label for=\"overrideAutoOpen\"><input type=\"checkbox\" id=\"overrideAutoOpen\">&nbsp;Override Auto Open</label>");
+        if (getSetting('custom_theme') === "fluentDesignBootstrap") {
+            $('#savedListsOptions').after("<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"overrideAutoOpen\"><label class=\"form-check-label\" for=\"overrideAutoOpen\">&nbsp;Override Auto Open</label></div>");
+        } else {
+            $('#savedListsOptions').after("<label for=\"overrideAutoOpen\"><input type=\"checkbox\" id=\"overrideAutoOpen\">&nbsp;Override Auto Open</label>");
+        }
         $(document).on('change', '#savedLists', function (e) {
             const $overrideSelector = $('#overrideAutoOpen');
             if (!$overrideSelector.is(':checked')) {
@@ -291,6 +295,9 @@ function getSetting(setting) {
                     break;
                 case "default_list_open":
                     return userSettings.default_list_open;
+                    break;
+                case "custom_theme":
+                    return userSettings.custom_theme;
                     break;
                 default:
                     break;
