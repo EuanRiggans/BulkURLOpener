@@ -10,6 +10,13 @@ body {
 	padding: 10px;
 }
 
+.modal-dialog {
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
 button {
 	margin-top:20px;
 }
