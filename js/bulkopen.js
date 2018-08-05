@@ -1,5 +1,6 @@
 $(document).ready(function () {
     upgradeToJSONFormatting();
+    createSettings();
     if (getSetting('auto_open_lists') === 1) {
         if (getSetting('custom_theme') === "fluentDesignBootstrap") {
             $('#savedListsOptions').after("<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"overrideAutoOpen\"><label class=\"form-check-label\" for=\"overrideAutoOpen\">&nbsp;Override Auto Open</label></div>");
@@ -345,6 +346,25 @@ function upgradeToJSONFormatting() {
             };
             localStorage.setItem("settings", JSON.stringify(newSettings));
         }
+    }
+}
+
+/**
+ *  Creates the settings json for the user if the do not have settings
+ */
+function createSettings() {
+    let settingsFound = false;
+    const settingsList = loadList("settings");
+    if (!settingsList) {
+        const newSettings = {
+            object_description: "user_settings",
+            tab_creation_delay: 0,
+            night_mode: 0,
+            auto_open_lists: 0,
+            default_list_open: -1,
+            custom_theme: "defaultBoostrap"
+        };
+        localStorage.setItem("settings", JSON.stringify(newSettings));
     }
 }
 

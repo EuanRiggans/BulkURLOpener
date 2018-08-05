@@ -55,7 +55,6 @@ $(document).ready(function () {
             }
             if (parsedList.object_description === "user_settings") {
                 selectedTheme = parsedList.custom_theme;
-                console.log(selectedTheme);
             }
         } catch (e) {
             console.log(e);

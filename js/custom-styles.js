@@ -45,7 +45,7 @@ function getCustomTheme() {
             case "fluentDesignBootstrap":
                 const head = document.getElementsByTagName('head')[0];
                 const nightModeStylesheet = document.createElement('link');
-                nightModeStylesheet.href = "https://dev.static.euanriggans.com/fdb/css/fluent.css";
+                nightModeStylesheet.href = "css/fluent.css";
                 nightModeStylesheet.rel = "stylesheet";
                 head.appendChild(nightModeStylesheet);
                 break;
