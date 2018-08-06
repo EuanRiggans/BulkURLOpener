@@ -1,4 +1,4 @@
-$(document).ready(function () {
+$(() => {
     upgradeToJSONFormatting();
     createSettings();
     if (getSetting('auto_open_lists') === 1) {
@@ -45,40 +45,50 @@ $(document).ready(function () {
         }
     }
     if (getParameterByName("popup", window.location) === "true") {
-        $('#openInPopup').remove();
+        document.getElementById("openInPopup").remove();
+    } else {
+        document.getElementById("openInPopup").addEventListener('click', () => {
+            popupMain();
+            window.close();
+        });
     }
-    $('#openButton').click(function () {
+    document.getElementById("openButton").addEventListener('click', () => {
         openTextAreaList();
     });
-    $('#copyCurrentOpen').click(function () {
+
+    document.getElementById("copyCurrentOpen").addEventListener('click', () => {
         getCurrentTabs();
     });
-    $('#clearList').click(function () {
+
+    document.getElementById("clearList").addEventListener('click', () => {
         clearLinksList();
     });
-    $('#createNewList').click(function () {
+
+    document.getElementById("createNewList").addEventListener('click', () => {
         openSaveNewListDialog();
     });
-    $('#openList').click(function () {
+
+    document.getElementById("openList").addEventListener('click', () => {
         openSelectedList();
     });
-    $('#editList').click(function () {
+
+    document.getElementById("editList").addEventListener('click', () => {
         editSelectedList();
     });
-    $('#deleteList').click(function () {
+
+    document.getElementById("deleteList").addEventListener('click', () => {
         deleteList();
     });
-    $('#openSettings').click(function () {
+
+    document.getElementById("openSettings").addEventListener('click', () => {
         openSettingsDialog();
     });
-    $('#openHelp').click(function () {
+
+    document.getElementById("openHelp").addEventListener('click', () => {
         openHelpDialog();
     });
-    $('#openInPopup').click(function () {
-        popupMain();
-        window.close();
-    });
-    $('#version').text("- Version " + getCurrentVersion());
+
+    document.getElementById("version").textContent = "- Version " + getCurrentVersion();
 });
 
 function openTextAreaList() {
@@ -136,12 +146,6 @@ function isProbablyUrl(string) {
 
 function openList(list) {
     const strings = list.split(/\r\n|\r|\n/);
-    //Removed, pending better solution. Caused issue for users using browsers other than chrome.
-    //if(strings.length > 10) {
-    //    if(!(confirm("Are you sure you wish to open " + strings.length + " URLs?"))) {
-    //        return;
-    //    }
-    //}
     let tabCreationDelay = getSetting("tab_creation_delay");
     if (!(tabCreationDelay > 0) || !(strings.length > 1)) {
         for (let i = 0; i < strings.length; i++) {
