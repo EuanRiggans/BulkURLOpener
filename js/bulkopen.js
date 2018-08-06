@@ -91,10 +91,16 @@ $(() => {
     document.getElementById("version").textContent = "- Version " + getCurrentVersion();
 });
 
+/**
+ *  Will open all of the urls in the textarea
+ */
 function openTextAreaList() {
     openList(document.getElementById("list").value);
 }
 
+/**
+ * Gets all of the urls for the currently opened tabs
+ */
 function getCurrentTabs() {
     chrome.windows.getCurrent(function (window) {
         chrome.tabs.getAllInWindow(window.id, function (tabs) {
@@ -111,6 +117,9 @@ function getCurrentTabs() {
     });
 }
 
+/**
+ * Clears all of the urls from the textarea
+ */
 function clearLinksList() {
     const listTextArea = document.getElementById("list");
     listTextArea.value = "";
@@ -120,6 +129,11 @@ String.prototype.trim = function () {
     return this.replace(/^\s+|\s+$/g, '');
 };
 
+/**
+ * Checks if a given string is a valid url
+ * @param string    The string to check
+ * @returns {boolean}   Whether string is valid url
+ */
 function isProbablyUrl(string) {
     let substr = string.substring(0, 4).toLowerCase();
     if (substr === 'ftp:' || substr === 'www.') {
@@ -144,6 +158,10 @@ function isProbablyUrl(string) {
     return false;
 }
 
+/**
+ * Handles the opening of lists
+ * @param list  The list of urls to open
+ */
 function openList(list) {
     const strings = list.split(/\r\n|\r|\n/);
     let tabCreationDelay = getSetting("tab_creation_delay");
@@ -169,6 +187,12 @@ function openList(list) {
     }
 }
 
+/**
+ * Recursive function to iterate through a list of urls to open
+ * @param i                 Counter
+ * @param strings           The urls to open
+ * @param tabCreationDelay  The delay between opening a new url
+ */
 function linksIterator(i, strings, tabCreationDelay) {
     strings[i] = strings[i].trim();
     if (strings[i] === '') {
@@ -185,6 +209,9 @@ function linksIterator(i, strings, tabCreationDelay) {
     }
 }
 
+/**
+ * Opens the page to create a new list of urls
+ */
 function openSaveNewListDialog() {
     const lines = $('#list').val().split('\n');
     const tempList = {
@@ -201,6 +228,9 @@ function openSaveNewListDialog() {
     chrome.tabs.create({'url': chrome.extension.getURL('newlist.html')});
 }
 
+/**
+ * Loads the urls for the selected list into the text area
+ */
 function openSelectedList() {
     if (getSelectedListID() === "-1") {
         alert("You need to select a list");
@@ -224,6 +254,10 @@ function openSelectedList() {
     }
 }
 
+/**
+ * Will load a given lists urls into the text area in the popup
+ * @param id    The id of the list to get urls from
+ */
 function openListByID(id) {
     for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
@@ -243,22 +277,37 @@ function openListByID(id) {
     }
 }
 
+/**
+ * Opens the settings page
+ */
 function openSettingsDialog() {
     chrome.tabs.create({'url': chrome.extension.getURL('settings.html')});
 }
 
+/**
+ * Opens the help page
+ */
 function openHelpDialog() {
     chrome.tabs.create({'url': chrome.extension.getURL('help.html')});
 }
 
+/**
+ * Opens the dialog to import user data from JSON format
+ */
 function openImportDialog() {
     chrome.tabs.create({'url': chrome.extension.getURL('import.html')});
 }
 
+/**
+ * Opens the dialog to export user data as JSON
+ */
 function openExportDialog() {
     chrome.tabs.create({'url': chrome.extension.getURL('export.html')});
 }
 
+/**
+ * Deletes a list
+ */
 function deleteList() {
     if (getSelectedListID() === "-1") {
         alert("You need to select a list");
@@ -269,6 +318,9 @@ function deleteList() {
     }
 }
 
+/**
+ * Creates a window to edit the selected list
+ */
 function editSelectedList() {
     if (getSelectedListID() === "-1") {
         alert("You need to select a list");
@@ -277,14 +329,27 @@ function editSelectedList() {
     chrome.tabs.create({'url': chrome.extension.getURL('editlist.html?id=' + getSelectedListID() + "&name=" + getSelectedList())});
 }
 
+/**
+ *  Gets the selected list name
+ * @returns {string | jQuery}   Selected list name
+ */
 function getSelectedList() {
     return $("#savedLists option:selected").html();
 }
 
+/**
+ * Gets the currently selected list id
+ * @returns {string | jQuery}   List id
+ */
 function getSelectedListID() {
     return $('select[id="savedLists"] option:selected').attr('id');
 }
 
+/**
+ * Gets a specified setting for the user
+ * @param setting   The setting to fetch
+ * @returns {*} The setting value
+ */
 function getSetting(setting) {
     const settingSelected = setting.toLowerCase();
     for (let i = 0; i < localStorage.length; i++) {
@@ -311,11 +376,18 @@ function getSetting(setting) {
     }
 }
 
+/**
+ * Gets the current version of the extension from the manifest
+ * @returns {string}    The current version
+ */
 function getCurrentVersion() {
     const manifestData = chrome.runtime.getManifest();
     return (manifestData.version);
 }
 
+/**
+ * Creates the extension in a popup window
+ */
 function popupMain() {
     chrome.windows.create({
         url: "popup.html?popup=true",
@@ -325,6 +397,9 @@ function popupMain() {
     });
 }
 
+/**
+ * Upgrades users from the old array based storage to the new JSON based storage
+ */
 function upgradeToJSONFormatting() {
     for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
