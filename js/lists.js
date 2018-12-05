@@ -101,12 +101,11 @@ function getNextAvailableID() {
     for (let i = 0; i < localStorage.length; i++) {
         const results = localStorage.getItem(localStorage.key(i));
         try {
-            const result = JSON.parse(results);
-            if (result.object_description === "list_storage") {
-                availableID = result.list_id + 1;
+            if (localStorage.key(i) === "maxID") {
+                availableID = parseInt(results) + 1;
             }
         } catch (e) {
-
+            alert("Unexpected error occurred");
         }
     }
     return availableID;
