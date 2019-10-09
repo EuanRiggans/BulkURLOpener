@@ -18,21 +18,25 @@ function linksIterator(i, strings, tabCreationDelay) {
         if (!isProbablyUrl(url)) {
             url = 'http://www.google.com/search?q=' + encodeURI(url);
         }
-        chrome.tabs.create({'url':url,'selected':false});
+        chrome.tabs.create({'url': url, 'selected': false});
         i++;
-        if(i - 1 < strings.length) {
-            if(strings[i] == null || strings[i].trim() === '') {
+        if (i - 1 < strings.length) {
+            if (strings[i] == null || strings[i].trim() === '') {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('completed').style.display = 'block';
                 window.close();
             }
             setTimeout(linksIterator, tabCreationDelay, i, strings, tabCreationDelay);
         }
     } else {
         i++;
-        if(i >= strings.length) {
+        if (i >= strings.length) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('completed').style.display = 'block';
             window.close();
         }
-        if(i < strings.length) {
-            linksIterator(i, strings, tabCreationDelay);            
+        if (i < strings.length) {
+            linksIterator(i, strings, tabCreationDelay);
         }
     }
 }
@@ -58,17 +62,17 @@ function isProbablyUrl(string) {
         return true;
     }
 
-	return false;
+    return false;
 }
 
 function getSetting(setting) {
     const settingSelected = setting.toLowerCase();
-    for (let i = 0; i < localStorage.length; i++){
+    for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
-        if(localStorage.key(i) === "settings") {
+        if (localStorage.key(i) === "settings") {
             const userSettings = JSON.parse(tempArray);
             console.dir(userSettings);
-            switch(settingSelected) {
+            switch (settingSelected) {
                 case "tab_creation_delay":
                     return userSettings.tab_creation_delay;
                     break;

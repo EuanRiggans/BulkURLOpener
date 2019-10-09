@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<title>Opening New Tabs</title>
+    <title>Opening New Tabs</title>
     <link href="css/bootstrap.min.css" rel="stylesheet" id="bootstrap">
     <link href="css/font-awesome.min.css" rel="stylesheet" id="font-awesome">
     <link href="css/style.css" rel="stylesheet" id="styles">
@@ -9,14 +9,21 @@
     <link href="css/openingtabs.css" rel="stylesheet">
 </head>
 <body>
-    <div class="main">
-        <p>Your tabs are currently being opened. Please do not close this window</p>
+<div class="main">
+    <div id="loading">
+        <p>Your tabs are currently being opened. Please do not close this window.</p>
         <i class="fa fa-refresh fa-spin fa-3x fa-fw"></i>
         <span class="sr-only">Loading...</span>
     </div>
+    <div id="completed" style="display:none">
+        <p>Your tabs have all been opened, you can now close ths window.</p>
+        <i class="fa fa-check fa-3x fa-fw"></i>
+        <span class="sr-only">Loading...</span>
+    </div>
+</div>
 </body>
 <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
-<script type="text/javascript" src="js/bootstrap.min.js"></script>   
+<script src="js/bootstrap.min.js" type="text/javascript"></script>
 <script type="text/javascript" src="js/openingtabs.js"></script>
 <script type="text/javascript" src="js/lists.js"></script>
 <script type="text/javascript" src="js/custom-styles.js" id="tempStylesheetLoader"></script>
