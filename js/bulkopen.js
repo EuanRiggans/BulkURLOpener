@@ -18,18 +18,7 @@ $(() => {
         });
     }
     if (getSetting("default_list_open") === -1 || getSetting("default_list_open") === undefined) {
-        chrome.windows.getCurrent(function (window) {
-            chrome.tabs.getAllInWindow(window.id, function (tabs) {
-                if (!tabs.length) return;
-
-                const listTextArea = document.getElementById("list");
-
-                for (let i = 0; i < tabs.length; ++i) {
-                    listTextArea.value += tabs[i].url + "\n";
-                }
-                listTextArea.select();
-            });
-        });
+        getCurrentTabs();
     } else {
         openListByID(getSetting("default_list_open"));
     }
@@ -102,18 +91,20 @@ function openTextAreaList() {
  * Gets all of the urls for the currently opened tabs
  */
 function getCurrentTabs() {
-    chrome.windows.getCurrent(function (window) {
-        chrome.tabs.getAllInWindow(window.id, function (tabs) {
-            if (!tabs.length) {
-                return;
-            }
-            const listTextArea = document.getElementById("list");
-            listTextArea.value = "";
-            for (let i = 0; i < tabs.length; ++i) {
-                listTextArea.value += tabs[i].url + "\n";
-            }
-            listTextArea.select();
-        });
+    chrome.tabs.query({}, tabs => {
+        const tabsArray = [];
+        for (let tab of tabs) {
+            tabsArray.push(tab.url);
+        }
+        if (!tabsArray.length) {
+            return;
+        }
+        const listTextArea = document.getElementById("list");
+        clearLinksList();
+        for (let i = 0; i < tabs.length; ++i) {
+            listTextArea.value += tabsArray[i] + "\n";
+        }
+        listTextArea.select();
     });
 }
 
