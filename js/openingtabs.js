@@ -18,7 +18,10 @@ function linksIterator(i, strings, tabCreationDelay) {
         if (!isProbablyUrl(url)) {
             url = 'http://www.google.com/search?q=' + encodeURI(url);
         }
-        chrome.tabs.create({'url': url, 'selected': false});
+        chrome.tabs.create({
+            active: false,
+            'url': url
+        });
         i++;
         if (i - 1 < strings.length) {
             if (strings[i] == null || strings[i].trim() === '') {

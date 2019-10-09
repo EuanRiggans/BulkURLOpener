@@ -174,7 +174,9 @@ function openList(list) {
             linksToOpen.list_links.push(link);
         }
         localStorage.setItem("linksToOpen", JSON.stringify(linksToOpen));
-        chrome.tabs.create({'url': chrome.extension.getURL('openingtabs.html')});
+        chrome.tabs.create({
+            'url': chrome.extension.getURL('openingtabs.html')
+        });
     }
 }
 
@@ -193,7 +195,10 @@ function linksIterator(i, strings, tabCreationDelay) {
     if (!isProbablyUrl(url)) {
         url = 'http://www.google.com/search?q=' + encodeURI(url);
     }
-    chrome.tabs.create({'url': url, 'selected': false});
+    chrome.tabs.create({
+        active: false,
+        'url': url
+    });
     i++;
     if (i < strings.length) {
         setTimeout(linksIterator, tabCreationDelay, i, strings, tabCreationDelay);
@@ -216,7 +221,9 @@ function openSaveNewListDialog() {
 
     }
     localStorage.setItem("temp", JSON.stringify(tempList));
-    chrome.tabs.create({'url': chrome.extension.getURL('newlist.html')});
+    chrome.tabs.create({
+        'url': chrome.extension.getURL('newlist.html')
+    });
 }
 
 /**
@@ -272,28 +279,36 @@ function openListByID(id) {
  * Opens the settings page
  */
 function openSettingsDialog() {
-    chrome.tabs.create({'url': chrome.extension.getURL('settings.html')});
+    chrome.tabs.create({
+        'url': chrome.extension.getURL('settings.html')
+    });
 }
 
 /**
  * Opens the help page
  */
 function openHelpDialog() {
-    chrome.tabs.create({'url': chrome.extension.getURL('help.html')});
+    chrome.tabs.create({
+        'url': chrome.extension.getURL('help.html')
+    });
 }
 
 /**
  * Opens the dialog to import user data from JSON format
  */
 function openImportDialog() {
-    chrome.tabs.create({'url': chrome.extension.getURL('import.html')});
+    chrome.tabs.create({
+        'url': chrome.extension.getURL('import.html')
+    });
 }
 
 /**
  * Opens the dialog to export user data as JSON
  */
 function openExportDialog() {
-    chrome.tabs.create({'url': chrome.extension.getURL('export.html')});
+    chrome.tabs.create({
+        'url': chrome.extension.getURL('export.html')
+    });
 }
 
 /**
@@ -317,7 +332,9 @@ function editSelectedList() {
         alert("You need to select a list");
         return;
     }
-    chrome.tabs.create({'url': chrome.extension.getURL('editlist.html?id=' + getSelectedListID() + "&name=" + getSelectedList())});
+    chrome.tabs.create({
+        'url': chrome.extension.getURL('editlist.html?id=' + getSelectedListID() + "&name=" + getSelectedList())
+    });
 }
 
 /**
