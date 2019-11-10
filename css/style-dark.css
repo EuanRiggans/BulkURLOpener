@@ -6,7 +6,7 @@ a {
     font-weight: bold;
 }
 
-body, #list, #savedLists, #defaultList, #customTheme {
+body, #list, #savedLists, #defaultList, #customTheme, #currentlyOpenedSetting {
     color: #fff;
     background-color: #404040;
 }

@@ -4,10 +4,13 @@ $(document).ready(function () {
     const $autoOpenSelector = $('#autoOpenLists');
     let selectedListID = -1;
     let selectedTheme = "defaultBootstrap";
+    let currentlyOpenedTabsSetting = "allOpenedTabs";
     $tabCreationDelaySelector.val(0);
+    let settingsObjPresent = false;
     for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
         if (localStorage.key(i) === "settings") {
+            settingsObjPresent = true;
             const userSettings = JSON.parse(tempArray);
             if ($tabCreationDelaySelector.val() === undefined) {
                 $tabCreationDelaySelector.val(0);
@@ -46,6 +49,10 @@ $(document).ready(function () {
             }
         }
     }
+    if (!settingsObjPresent) {
+        $('#nightModeGroup').append('<div class="checkbox"><label><input type="checkbox" id="nightMode">&nbsp; Enable night theme</label></div>');
+        $('#autoOpenListsGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoOpenLists">&nbsp; Automatically open lists <a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a><b> (Experimental feature)</b></label></div>');
+    }
     for (let i = 0; i < localStorage.length; i++) {
         const tempStorageArray = loadList(localStorage.key(i));
         try {
@@ -54,6 +61,7 @@ $(document).ready(function () {
                 $('#defaultList').append('<option id="' + parsedList.list_id + '">' + parsedList.list_name + '</option>');
             }
             if (parsedList.object_description === "user_settings") {
+                currentlyOpenedTabsSetting = parsedList.currently_opened_tabs_display;
                 selectedTheme = parsedList.custom_theme;
             }
         } catch (e) {
@@ -62,10 +70,8 @@ $(document).ready(function () {
     }
     $("#defaultList option[id=" + selectedListID + "]").prop('selected', true);
     $("#customTheme option[id=" + selectedTheme + "]").prop('selected', true);
+    $("#currentlyOpenedSetting option[id=" + currentlyOpenedTabsSetting + "]").prop('selected', true);
     document.getElementById("closeModal").addEventListener('click', (e) => {
-        window.close();
-    });
-    document.getElementById("closeModalFooter").addEventListener('click', (e) => {
         window.close();
     });
     document.getElementById("saveSettings").addEventListener('click', (e) => {
@@ -103,6 +109,7 @@ function initSettingsSave() {
     let autoOpenLists = 0;
     const defaultList = getSelectedListID();
     const theme = getSelectedTheme();
+    const currentlyOpenedTabsSetting = getCurrentlyOpenedTabsSetting();
     if ($nightModeSelector.is(":checked")) {
         nightMode = 1;
     }
@@ -119,13 +126,15 @@ function initSettingsSave() {
         night_mode: 0,
         auto_open_lists: 0,
         default_list_open: -1,
-        custom_theme: "defaultBoostrap"
+        custom_theme: "defaultBoostrap",
+        currently_opened_tabs_display: "allOpenedTabs"
     };
     userSettings.tab_creation_delay = tabCreationDelay;
     userSettings.night_mode = nightMode;
     userSettings.auto_open_lists = autoOpenLists;
     userSettings.default_list_open = parseInt(defaultList);
     userSettings.custom_theme = theme;
+    userSettings.currently_opened_tabs_display = currentlyOpenedTabsSetting;
     saveSettings(userSettings);
 }
 
@@ -139,4 +148,8 @@ function getSelectedListID() {
 
 function getSelectedTheme() {
     return $('select[id="customTheme"] option:selected').attr('id');
+}
+
+function getCurrentlyOpenedTabsSetting() {
+    return $('select[id="currentlyOpenedSetting"] option:selected').attr('id');
 }

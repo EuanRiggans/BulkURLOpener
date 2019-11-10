@@ -91,7 +91,11 @@ function openTextAreaList() {
  * Gets all of the urls for the currently opened tabs
  */
 function getCurrentTabs() {
-    chrome.tabs.query({}, tabs => {
+    let currentWindowSetting = getSetting("currently_opened_tabs_display") !== "allOpenedTabs";
+    if (currentWindowSetting === false) {
+        currentWindowSetting = undefined;
+    }
+    chrome.tabs.query({currentWindow: currentWindowSetting}, tabs => {
         const tabsArray = [];
         for (let tab of tabs) {
             tabsArray.push(tab.url);
@@ -367,16 +371,14 @@ function getSetting(setting) {
             switch (settingSelected) {
                 case "tab_creation_delay":
                     return userSettings.tab_creation_delay;
-                    break;
                 case "auto_open_lists":
                     return userSettings.auto_open_lists;
-                    break;
                 case "default_list_open":
                     return userSettings.default_list_open;
-                    break;
                 case "custom_theme":
                     return userSettings.custom_theme;
-                    break;
+                case "currently_opened_tabs_display":
+                    return userSettings.currently_opened_tabs_display;
                 default:
                     break;
             }
