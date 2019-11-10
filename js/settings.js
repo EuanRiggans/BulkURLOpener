@@ -127,7 +127,7 @@ function initSettingsSave() {
         auto_open_lists: 0,
         default_list_open: -1,
         custom_theme: "defaultBoostrap",
-        currently_opened_tabs_display: "allOpenedTabs"
+        currently_opened_tabs_display: "currentWindow"
     };
     userSettings.tab_creation_delay = tabCreationDelay;
     userSettings.night_mode = nightMode;

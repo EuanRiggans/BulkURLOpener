@@ -451,7 +451,8 @@ function createSettings() {
             night_mode: 0,
             auto_open_lists: 0,
             default_list_open: -1,
-            custom_theme: "defaultBoostrap"
+            custom_theme: "defaultBoostrap",
+            currently_opened_tabs_display: "currentWindow"
         };
         localStorage.setItem("settings", JSON.stringify(newSettings));
     }
