@@ -12,3 +12,4 @@
 *.sln
 *.sw*
 *.txt
+/web-ext-artifacts/

@@ -95,7 +95,9 @@ function getCurrentTabs() {
     if (currentWindowSetting === false) {
         currentWindowSetting = undefined;
     }
-    chrome.tabs.query({currentWindow: currentWindowSetting}, tabs => {
+    chrome.tabs.query({
+        currentWindow: currentWindowSetting
+    }, tabs => {
         const tabsArray = [];
         for (let tab of tabs) {
             tabsArray.push(tab.url);
@@ -191,18 +193,30 @@ function openList(list) {
  * @param tabCreationDelay  The delay between opening a new url
  */
 function linksIterator(i, strings, tabCreationDelay) {
+    let ignoreURL = false;
     strings[i] = strings[i].trim();
     if (strings[i] === '') {
         return;
     }
     let url = strings[i];
-    if (!isProbablyUrl(url)) {
-        url = 'http://www.google.com/search?q=' + encodeURI(url);
+    if (!isProbablyUrl(url) && getSetting('non_url_handler') === "searchForString") {
+        url = encodeSearchQuery(url);
+    } else if (!isProbablyUrl(url) && getSetting('non_url_handler') === "ignoreString") {
+        ignoreURL = true;
+    } else if (!isProbablyUrl(url) && getSetting('non_url_handler') === "attemptToExtractURL") {
+        const extractedString = extractURLFromString(url);
+        if (isProbablyUrl(extractedString)) {
+            url = extractedString;
+        } else {
+            ignoreURL = true;
+        }
     }
-    chrome.tabs.create({
-        active: false,
-        'url': url
-    });
+    if (!ignoreURL) {
+        chrome.tabs.create({
+            active: false,
+            'url': url
+        });
+    }
     i++;
     if (i < strings.length) {
         setTimeout(linksIterator, tabCreationDelay, i, strings, tabCreationDelay);
@@ -379,11 +393,46 @@ function getSetting(setting) {
                     return userSettings.custom_theme;
                 case "currently_opened_tabs_display":
                     return userSettings.currently_opened_tabs_display;
+                case "non_url_handler":
+                    return userSettings.non_url_handler;
+                case "search_engine":
+                    return userSettings.search_engine;
                 default:
                     break;
             }
         }
     }
+}
+
+/**
+ * Builds search engine query url from a string
+ * @param {*} string 
+ */
+function encodeSearchQuery(string) {
+    const setting = getSetting("search_engine");
+    if (setting === "googleEngine") {
+        string = 'http://www.google.com/search?q=' + encodeURI(string);
+    } else if (setting === "duckduckgoEngine") {
+        string = 'https://duckduckgo.com/?q=' + encodeURI(string);
+    } else if (setting === "bingEngine") {
+        string = 'https://www.bing.com/search?q=' + encodeURI(string);
+    }
+    return string;
+}
+
+/**
+ * Attempts to extract a url from a string
+ * @param {*} string 
+ */
+function extractURLFromString(string) {
+    const urlRegex = /(https?:\/\/[^ ]*)/;
+    let url;
+    if (string.match(urlRegex)) {
+        url = string.match(urlRegex)[1];
+    } else {
+        url = "noextractionsuccess";
+    }
+    return url;
 }
 
 /**
@@ -452,7 +501,9 @@ function createSettings() {
             auto_open_lists: 0,
             default_list_open: -1,
             custom_theme: "defaultBoostrap",
-            currently_opened_tabs_display: "currentWindow"
+            currently_opened_tabs_display: "currentWindow",
+            non_url_handler: "searchForString",
+            search_engine: "googleEngine"
         };
         localStorage.setItem("settings", JSON.stringify(newSettings));
     }

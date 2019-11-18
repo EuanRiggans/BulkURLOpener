@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Settings</title>
     <link href="css/bootstrap.min.css" rel="stylesheet" id="bootstrap">
@@ -7,74 +8,98 @@
     <link href="css/style.css" rel="stylesheet" id="styles">
     <link href="css/modalstyles.css" rel="stylesheet">
 </head>
-<body>
-<div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h4 class="modal-title">Settings</h4>
-            <button type="button" class="close" id="closeModal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
 
-        <div class="modal-body">
-            <div id="tabCreationDelayGroup">
-                <p class="setting-title">Tab Creation Delay:</p>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="delay-addon">Tab creation delay (Seconds):</span>
+<body>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Settings</h4>
+                <button type="button" class="close" id="closeModal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div id="tabCreationDelayGroup">
+                    <p class="setting-title">Tab Creation Delay:</p>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="delay-addon">Tab creation delay (Seconds):</span>
+                        </div>
+                        <input type="number" class="form-control" placeholder="Delay in seconds" id="tabCreationDelay"
+                            aria-describedby="delay-addon">
                     </div>
-                    <input type="number" class="form-control" placeholder="Delay in seconds" id="tabCreationDelay"
-                           aria-describedby="delay-addon">
+                </div>
+                <hr>
+                <div id="autoOpenListsGroup">
+                    <p class="setting-title">Automatically open lists:</p>
+                    <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
+                </div>
+                <hr>
+                <div id="defaultListGroup">
+                    <p class="setting-title">Default list to display:</p>
+                    <label for="defaultList">The list that will be displayed when you open the extension:</label>
+                    <select class="form-control" id="defaultList">
+                        <option id="-1" value="" selected>Currently opened tabs</option>
+                    </select>
+                </div>
+                <hr>
+                <div id="nightModeGroup">
+                    <p class="setting-title">Enable night theme:</p>
+                    <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
+                </div>
+                <hr>
+                <div id="customThemeGroup">
+                    <p class="setting-title">Custom theme:</p>
+                    <label for="customTheme">Custom themes to change the look of Bulk URL Opener:</label>
+                    <select class="form-control" id="customTheme">
+                        <option id="defaultBoostrap" value="" selected>Default Bootstrap</option>
+                        <option id="fluentDesignBootstrap" value="">Fluent Design Bootstrap</option>
+                    </select>
+                </div>
+                <hr>
+                <div id="currentlyOpenedTabsSettingGroup">
+                    <p class="setting-title">Currently opened tabs display:</p>
+                    <label for="currentlyOpenedSetting">Which URLS should be shown as 'currently opened':</label>
+                    <select class="form-control" id="currentlyOpenedSetting">
+                        <option id="currentWindow" selected value="">Current window tabs</option>
+                        <option id="allOpenedTabs" value="">All opened tabs</option>
+                    </select>
+                </div>
+                <hr>
+                <div id="nonURLHandler">
+                    <p class="setting-title">How to handle non-urls:</p>
+                    <label for="nonURLHandlerSetting">What should happen if a string is detected as not being a
+                        url:</label>
+                    <select class="form-control" id="nonURLHandlerSetting">
+                        <option id="searchForString" value="" selected>Open in a search window</option>
+                        <option id="ignoreString" value="">Completely ignore the string</option>
+                        <option id="attemptToExtractURL" value="">Attempt to extract a url from the string</option>
+                    </select>
+                </div>
+                <hr>
+                <div id="selectedSearchEngine">
+                    <p class="setting-title">Search Engine Selection:</p>
+                    <label for="selectedSearchEngineSetting">If a non-url is to be searched for (depending on the above
+                        setting), which search engine should be used:</label>
+                    <select class="form-control" id="selectedSearchEngineSetting">
+                        <option id="googleEngine" value="" selected>Google</option>
+                        <option id="duckduckgoEngine" value="">DuckDuckGo</option>
+                        <option id="bingEngine" value="">Bing</option>
+                    </select>
                 </div>
             </div>
-            <hr>
-            <div id="autoOpenListsGroup">
-                <p class="setting-title">Automatically open lists:</p>
-                <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
+            <div class="modal-footer">
+                <button class="btn btn-outline-danger" id="closeModalFooter" type="button">Close</button>
+                <button class="btn btn-outline-primary" id="saveSettings" type="button">Save settings</button>
             </div>
-            <hr>
-            <div id="defaultListGroup">
-                <p class="setting-title">Default list to display:</p>
-                <label for="defaultList">The list that will be displayed when you open the extension:</label>
-                <select class="form-control" id="defaultList">
-                    <option id="-1" value="" selected>Currently opened tabs</option>
-                </select>
-            </div>
-            <hr>
-            <div id="nightModeGroup">
-                <p class="setting-title">Enable night theme:</p>
-                <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
-            </div>
-            <hr>
-            <div id="customThemeGroup">
-                <p class="setting-title">Custom theme:</p>
-                <label for="customTheme">Custom themes to change the look of Bulk URL Opener:</label>
-                <select class="form-control" id="customTheme">
-                    <option id="defaultBoostrap" value="" selected>Default Bootstrap</option>
-                    <option id="fluentDesignBootstrap" value="">Fluent Design Bootstrap</option>
-                </select>
-            </div>
-            <hr>
-            <div id="currentlyOpenedTabsSettingGroup">
-                <p class="setting-title">Currently opened tabs display:</p>
-                <label for="currentlyOpenedSetting">Which URLS should be shown as 'currently opened':</label>
-                <select class="form-control" id="currentlyOpenedSetting">
-                    <option id="currentWindow" selected value="">Current window tabs</option>
-                    <option id="allOpenedTabs" value="">All opened tabs</option>
-                </select>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-outline-danger" id="closeModalFooter" type="button">Close</button>
-            <button class="btn btn-outline-primary" id="saveSettings" type="button">Save settings</button>
         </div>
     </div>
-</div>
-<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
-<script type="text/javascript" src="js/bootstrap.min.js"></script>
-<script type="text/javascript" src="js/settings.js"></script>
-<script type="text/javascript" src="js/lists.js"></script>
-<script type="text/javascript" src="js/custom-styles.js" id="tempStylesheetLoader"></script>
+    <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/settings.js"></script>
+    <script type="text/javascript" src="js/lists.js"></script>
+    <script type="text/javascript" src="js/custom-styles.js" id="tempStylesheetLoader"></script>
 </body>
+
 </html>
