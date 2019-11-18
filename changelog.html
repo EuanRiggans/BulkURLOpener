@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Changelog</title>
     <link href="css/bootstrap.min.css" rel="stylesheet" id="bootstrap">
@@ -8,91 +9,110 @@
     <link href="css/modalstyles.css" rel="stylesheet">
     <link href="css/changelog.css" rel="stylesheet">
 </head>
+
 <body>
-<div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h4 class="modal-title">Changelog</h4>
-            <button type="button" class="close" id="closeModal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div class="modal-body">
-            <h5 class="version">1.4.0</h5>
-            <p class="notes">Added new setting to allow user to choose which tabs should be displayed when the
-                'Currently opened tabs' setting is selected. Either all opened tabs, or just those in the current
-                window.</p>
-            <p class="notes">Fixed bug which would cause the 'Automatically open lists' and 'Enable Night Theme' options
-                not to display if no settings object was present in the browser storage.</p>
-            <h5 class="version">1.3.4</h5>
-            <p class="notes">Removed deprecated API chrome.tabs.getAllInWindow</p>
-            <p class="notes">If a user uses Tab Creation Delay, once all tabs are opened the message on the page will
-                change to inform the user that all links are opened</p>
-            <p class="notes">Tidied up tab creation and remove deprecated 'selected' parameter</p>
-            <h5 class="version">1.3.3</h5>
-            <p class="notes">Fixed bug which would stop the user from creating more than 10 lists. Causing the list with
-                the id 10 to be overwritten with a new list.</p>
-            <h5 class="version">1.3.2</h5>
-            <p class="notes">Small code optimization for loading popup load times</p>
-            <p class="notes">Improved shadow for modals</p>
-            <h5 class="version">1.3.1</h5>
-            <p class="notes">Fixed bug where checkboxes would be missing on the settings page if the user had not saved
-                settings previously</p>
-            <p class="notes">Fluent design bootstrap is now provided with the extension package rather than being loaded
-                over cdn</p>
-            <h5 class="version">1.3.0</h5>
-            <p class="notes">Added a simple night mode</p>
-            <p class="notes">Added setting that allows users to change their bootstrap theme. Currently only supports
-                default bootstrap and fluent design bootstrap.</p>
-            <h5 class="version">1.2.0</h5>
-            <p class="notes">Added a setting to automatically open a list when it is selected from the extensions popup.
-                (This setting can be overruled by holding the ctrl key before selecting a list from the dropdown) (User
-                requested feature)</p>
-            <p class="notes">Added a setting to change the default list that is loaded when the extension is launched
-                (User requested feature)</p>
-            <p class="notes">Added button on popup to open the extension in a popup window</p>
-            <p class="notes">Link lists and settings are now stored using JSON this improves the stability of the
-                extension as more settings are added. Old lists and settings should be automatically converted</p>
-            <p class="notes">Performance improvements, removed duplicate jQuery selectors to improve performance</p>
-            <p class="notes">Added a new re-designed icon</p>
-            <p class="notes">The extension is now open source. You can view the repository <a
-                    href="https://github.com/EuanRiggans/BulkURLOpener">here</a>.</p>
-            <p class="notes">Updated bootstrap to v4.1.1</p>
-            <p class="notes">Updated jquery to v3.1.1</p>
-            <h5 class="version">1.1.4</h5>
-            <p class="notes">Fixed an issue where many links on the help page would not work correctly</p>
-            <h5 class="version">1.1.3</h5>
-            <p class="notes">Fixed a bug where lists without a trailing new line would not open the last link in the
-                list</p>
-            <p class="notes">Help page now contains links to get support, report bugs or suggest new features</p>
-            <h5 class="version">1.1.2</h5>
-            <p class="notes">Fixed an issue where Vivaldi users would not be able to open more than 9 tabs in one go</p>
-            <h5 class="version">1.1.1</h5>
-            <p class="notes">Fixed tab naming issue when Tab Creation Delay is used</p>
-            <p class="notes">Removed unnecessary font files to reduce extension size</p>
-            <h5 class="version">1.1.0:</h5>
-            <p class="notes">New method of storing lists of URLs. Old lists will be converted automatically</p>
-            <p class="notes">Added settings page</p>
-            <p class="notes">Added help page</p>
-            <p class="notes">Added changelog page</p>
-            <p class="notes">Added 'Tab Creation Delay' functionality (User requested feature)</p>
-            <p class="notes">Code optimizations</p>
-            <h5 class="version">1.0.1:</h5>
-            <p class="notes">Small code optimization</p>
-            <h5 class="version">1.0.0:</h5>
-            <p class="notes">Initial release</p>
-        </div>
-        <div class="modal-footer">
-            <small>If you need any extra info you can get it from this extensions support page on the chrome extension
-                store
-            </small>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Changelog</h4>
+                <button type="button" class="close" id="closeModal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h5 class="version">1.5.0</h5>
+                <p class="notes">Added setting for user to decide how non-urls should be handled when encountered. User
+                    can choose to either: Open the non-url in a search engine, Ignore the non-url, Attempt to extract
+                    the non-url.</p>
+                <p class="notes">Added setting so user can decide which search engine should be used if a non-url is
+                    going to be opened in a search engine.</p>
+                <h5 class="version">1.4.0</h5>
+                <p class="notes">Added new setting to allow user to choose which tabs should be displayed when the
+                    'Currently opened tabs' setting is selected. Either all opened tabs, or just those in the current
+                    window.</p>
+                <p class="notes">Fixed bug which would cause the 'Automatically open lists' and 'Enable Night Theme'
+                    options
+                    not to display if no settings object was present in the browser storage.</p>
+                <h5 class="version">1.3.4</h5>
+                <p class="notes">Removed deprecated API chrome.tabs.getAllInWindow</p>
+                <p class="notes">If a user uses Tab Creation Delay, once all tabs are opened the message on the page
+                    will
+                    change to inform the user that all links are opened</p>
+                <p class="notes">Tidied up tab creation and remove deprecated 'selected' parameter</p>
+                <h5 class="version">1.3.3</h5>
+                <p class="notes">Fixed bug which would stop the user from creating more than 10 lists. Causing the list
+                    with
+                    the id 10 to be overwritten with a new list.</p>
+                <h5 class="version">1.3.2</h5>
+                <p class="notes">Small code optimization for loading popup load times</p>
+                <p class="notes">Improved shadow for modals</p>
+                <h5 class="version">1.3.1</h5>
+                <p class="notes">Fixed bug where checkboxes would be missing on the settings page if the user had not
+                    saved
+                    settings previously</p>
+                <p class="notes">Fluent design bootstrap is now provided with the extension package rather than being
+                    loaded
+                    over cdn</p>
+                <h5 class="version">1.3.0</h5>
+                <p class="notes">Added a simple night mode</p>
+                <p class="notes">Added setting that allows users to change their bootstrap theme. Currently only
+                    supports
+                    default bootstrap and fluent design bootstrap.</p>
+                <h5 class="version">1.2.0</h5>
+                <p class="notes">Added a setting to automatically open a list when it is selected from the extensions
+                    popup.
+                    (This setting can be overruled by holding the ctrl key before selecting a list from the dropdown)
+                    (User
+                    requested feature)</p>
+                <p class="notes">Added a setting to change the default list that is loaded when the extension is
+                    launched
+                    (User requested feature)</p>
+                <p class="notes">Added button on popup to open the extension in a popup window</p>
+                <p class="notes">Link lists and settings are now stored using JSON this improves the stability of the
+                    extension as more settings are added. Old lists and settings should be automatically converted</p>
+                <p class="notes">Performance improvements, removed duplicate jQuery selectors to improve performance</p>
+                <p class="notes">Added a new re-designed icon</p>
+                <p class="notes">The extension is now open source. You can view the repository <a
+                        href="https://github.com/EuanRiggans/BulkURLOpener">here</a>.</p>
+                <p class="notes">Updated bootstrap to v4.1.1</p>
+                <p class="notes">Updated jquery to v3.1.1</p>
+                <h5 class="version">1.1.4</h5>
+                <p class="notes">Fixed an issue where many links on the help page would not work correctly</p>
+                <h5 class="version">1.1.3</h5>
+                <p class="notes">Fixed a bug where lists without a trailing new line would not open the last link in the
+                    list</p>
+                <p class="notes">Help page now contains links to get support, report bugs or suggest new features</p>
+                <h5 class="version">1.1.2</h5>
+                <p class="notes">Fixed an issue where Vivaldi users would not be able to open more than 9 tabs in one go
+                </p>
+                <h5 class="version">1.1.1</h5>
+                <p class="notes">Fixed tab naming issue when Tab Creation Delay is used</p>
+                <p class="notes">Removed unnecessary font files to reduce extension size</p>
+                <h5 class="version">1.1.0:</h5>
+                <p class="notes">New method of storing lists of URLs. Old lists will be converted automatically</p>
+                <p class="notes">Added settings page</p>
+                <p class="notes">Added help page</p>
+                <p class="notes">Added changelog page</p>
+                <p class="notes">Added 'Tab Creation Delay' functionality (User requested feature)</p>
+                <p class="notes">Code optimizations</p>
+                <h5 class="version">1.0.1:</h5>
+                <p class="notes">Small code optimization</p>
+                <h5 class="version">1.0.0:</h5>
+                <p class="notes">Initial release</p>
+            </div>
+            <div class="modal-footer">
+                <small>If you need any extra info you can get it from this extensions support page on the chrome
+                    extension
+                    store
+                </small>
+            </div>
         </div>
     </div>
-</div>
-<script src="js/jquery-3.3.1.min.js" type="text/javascript"></script>
-<script src="js/bootstrap.min.js" type="text/javascript"></script>
-<script src="js/lists.js" type="text/javascript"></script>
-<script src="js/changelog.js" type="text/javascript"></script>
-<script type="text/javascript" src="js/custom-styles.js" id="tempStylesheetLoader"></script>
+    <script src="js/jquery-3.3.1.min.js" type="text/javascript"></script>
+    <script src="js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="js/lists.js" type="text/javascript"></script>
+    <script src="js/changelog.js" type="text/javascript"></script>
+    <script type="text/javascript" src="js/custom-styles.js" id="tempStylesheetLoader"></script>
 </body>
+
 </html>
