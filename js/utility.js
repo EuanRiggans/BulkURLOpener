@@ -28,6 +28,34 @@ function prependHttpIfNotExist(url) {
     return url;
 }
 
+function linksIteratorProcessURL(url) {
+    if (!isProbablyUrl(url) && getSetting('non_url_handler') === "searchForString") {
+        url = encodeSearchQuery(url);
+    } else if (!isProbablyUrl(url) && getSetting('non_url_handler') === "ignoreString") {
+        ignoreURL = true;
+    } else if (!isProbablyUrl(url) && getSetting('non_url_handler') === "attemptToExtractURL") {
+        const extractedString = extractURLFromString(url);
+        if (isProbablyUrl(extractedString)) {
+            url = extractedString;
+        } else {
+            ignoreURL = true;
+        }
+    }
+    if (!ignoreURL) {
+        url = prependHttpIfNotExist(url);
+        if (checkHostType() === "firefox") {
+            browser.tabs.create({
+                'url': url
+            });
+        } else if (checkHostType() === "chrome") {
+            chrome.tabs.create({
+                active: false,
+                'url': url
+            });
+        }
+    }
+}
+
 /**
  * Checks if a string is likely to be a valid url
  * @param string    String to check

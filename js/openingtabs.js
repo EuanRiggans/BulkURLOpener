@@ -16,31 +16,7 @@ function linksIterator(i, strings, tabCreationDelay) {
     let ignoreURL = false;
     if (!(strings[i] === '') && !(strings[i] === "linksToOpen")) {
         let url = strings[i];
-        if (!isProbablyUrl(url) && getSetting('non_url_handler') === "searchForString") {
-            url = encodeSearchQuery(url);
-        } else if (!isProbablyUrl(url) && getSetting('non_url_handler') === "ignoreString") {
-            ignoreURL = true;
-        } else if (!isProbablyUrl(url) && getSetting('non_url_handler') === "attemptToExtractURL") {
-            const extractedString = extractURLFromString(url);
-            if (isProbablyUrl(extractedString)) {
-                url = extractedString;
-            } else {
-                ignoreURL = true;
-            }
-        }
-        if (!ignoreURL) {
-            url = prependHttpIfNotExist(url);
-            if (checkHostType() === "firefox") {
-                browser.tabs.create({
-                    'url': url
-                });
-            } else if (checkHostType() === "chrome") {
-                chrome.tabs.create({
-                    active: false,
-                    'url': url
-                });
-            }
-        }
+        linksIteratorProcessURL(url);
         i++;
         if (i - 1 < strings.length) {
             if (strings[i] == null || strings[i].trim() === '') {
