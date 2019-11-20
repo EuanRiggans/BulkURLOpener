@@ -28,9 +28,9 @@ $(document).ready(function () {
                 }
 
                 if (userSettings.auto_open_lists === 1) {
-                    $('#autoOpenListsGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="autoOpenLists" checked><label class="form-check-label" for="autoOpenLists">&nbsp; Automatically open lists<a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a><b>(Experimental feature)</b></label></div>')
+                    $('#autoOpenListsGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="autoOpenLists" checked><label class="form-check-label" for="autoOpenLists">&nbsp; Automatically open lists<a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a></label></div>')
                 } else {
-                    $('#autoOpenListsGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="autoOpenLists"><label class="form-check-label" for="autoOpenLists">&nbsp; Automatically open lists<a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a><b>(Experimental feature)</b></label></div>')
+                    $('#autoOpenListsGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="autoOpenLists"><label class="form-check-label" for="autoOpenLists">&nbsp; Automatically open lists<a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a></label></div>')
                 }
             } else {
                 if (userSettings.night_mode === 1) {
@@ -40,9 +40,9 @@ $(document).ready(function () {
                 }
 
                 if (userSettings.auto_open_lists === 1) {
-                    $('#autoOpenListsGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoOpenLists" checked>&nbsp; Automatically open lists <a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a><b> (Experimental feature)</b></label></div>');
+                    $('#autoOpenListsGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoOpenLists" checked>&nbsp; Automatically open lists <a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a></label></div>');
                 } else {
-                    $('#autoOpenListsGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoOpenLists">&nbsp; Automatically open lists <a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a><b> (Experimental feature)</b></label></div>');
+                    $('#autoOpenListsGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoOpenLists">&nbsp; Automatically open lists <a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a></label></div>');
                 }
             }
 
