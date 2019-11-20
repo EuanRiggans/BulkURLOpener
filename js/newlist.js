@@ -13,14 +13,16 @@ $(document).ready(function () {
 
             }
             removeTempList();
-            listTextArea.select(); 
-        }        
-    } 
+            listTextArea.select();
+        }
+    }
     $('#closeModal').click(function () {
-        window.close();
-    });
-    $('#closeModalFooter').click(function () {
-        window.close();
+        if (checkHostType() === "firefox") {
+            alert("Unable to close window due to Firefox security policy. Please close this window manually.");
+            // window.close();
+        } else if (checkHostType() === "chrome") {
+            window.close();
+        }
     });
     $('#saveList').click(function () {
         const $linksListSelector = $('#list');
@@ -38,7 +40,7 @@ $(document).ready(function () {
             if(!(lines[i]) == "\n") {
                 console.log(lines[i]);
                 newList.list_links.push(lines[i]);
-            }            
+            }
         }
         if ($linksListSelector.val().trim() === "") {
             alert("No URLs given for the list!");

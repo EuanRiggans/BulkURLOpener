@@ -1,30 +1,22 @@
 $(document).ready(function () {
     $('#closeModal').click(function () {
-        window.close();
+        if (checkHostType() === "firefox") {
+            alert("Unable to close window due to Firefox security policy. Please close this window manually.");
+            // window.close();
+        } else if (checkHostType() === "chrome") {
+            window.close();
+        }
     });
     $('#openChangelog').click(function () {
-        chrome.tabs.create({
-            'url': chrome.extension.getURL('changelog.html')
-        });
-    });
-    $('#openSupportURLBugs').click(function () {
-        chrome.tabs.create({
-            'url': "https:chrome.google.com/webstore/detail/" + chrome.runtime.id + "/support"
-        });
-    });
-    $('#openSupportURL').click(function () {
-        chrome.tabs.create({
-            'url': "https:chrome.google.com/webstore/detail/" + chrome.runtime.id + "/support"
-        });
-    });
-    $('#experimentalReport').click(function () {
-        chrome.tabs.create({
-            'url': "https:chrome.google.com/webstore/detail/" + chrome.runtime.id + "/support"
-        });
-    });
-    $('#openSupportURLFooter').click(function () {
-        chrome.tabs.create({
-            'url': "https:chrome.google.com/webstore/detail/" + chrome.runtime.id + "/support"
-        });
+        if (checkHostType() === "firefox") {
+            browser.tabs.create({
+                active: true,
+                'url': browser.extension.getURL('changelog.html')
+            });
+        } else if (checkHostType() === "chrome") {
+            chrome.tabs.create({
+                'url': chrome.extension.getURL('changelog.html')
+            });
+        }
     });
 });

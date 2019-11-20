@@ -78,7 +78,12 @@ $(document).ready(function () {
     $("#nonURLHandlerSetting option[id=" + nonURLHandlerSetting + "]").prop('selected', true);
     $("#selectedSearchEngineSetting option[id=" + searchEngineSetting + "]").prop('selected', true);
     document.getElementById("closeModal").addEventListener('click', (e) => {
-        window.close();
+        if (checkHostType() === "firefox") {
+            alert("Unable to close window due to Firefox security policy. Please close this window manually.");
+            // window.close();
+        } else if (checkHostType() === "chrome") {
+            window.close();
+        }
     });
     document.getElementById("saveSettings").addEventListener('click', (e) => {
         initSettingsSave();

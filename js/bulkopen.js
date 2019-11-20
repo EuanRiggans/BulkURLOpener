@@ -38,7 +38,6 @@ $(() => {
     } else {
         document.getElementById("openInPopup").addEventListener('click', () => {
             popupMain();
-            window.close();
         });
     }
     document.getElementById("openButton").addEventListener('click', () => {
@@ -86,7 +85,6 @@ $(() => {
 function openTextAreaList() {
     openList(document.getElementById("list").value);
 }
-
 /**
  * Gets all of the urls for the currently opened tabs
  */
@@ -95,23 +93,45 @@ function getCurrentTabs() {
     if (currentWindowSetting === false) {
         currentWindowSetting = undefined;
     }
-    chrome.tabs.query({
-        currentWindow: currentWindowSetting
-    }, tabs => {
-        const tabsArray = [];
-        for (let tab of tabs) {
-            tabsArray.push(tab.url);
-        }
-        if (!tabsArray.length) {
-            return;
-        }
-        const listTextArea = document.getElementById("list");
-        clearLinksList();
-        for (let i = 0; i < tabs.length; ++i) {
-            listTextArea.value += tabsArray[i] + "\n";
-        }
-        listTextArea.select();
-    });
+    if (checkHostType() === "firefox") {
+        browser.tabs.query({
+            currentWindow: currentWindowSetting
+        }, tabs => {
+            const tabsArray = [];
+            for (let tab of tabs) {
+                tabsArray.push(tab.url);
+            }
+            if (!tabsArray.length) {
+                return;
+            }
+            const listTextArea = document.getElementById("list");
+            clearLinksList();
+            for (let i = 0; i < tabs.length; ++i) {
+                listTextArea.value += tabsArray[i] + "\n";
+            }
+            listTextArea.select();
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.query({
+            currentWindow: currentWindowSetting
+        }, tabs => {
+            const tabsArray = [];
+            for (let tab of tabs) {
+                tabsArray.push(tab.url);
+            }
+            if (!tabsArray.length) {
+                return;
+            }
+            const listTextArea = document.getElementById("list");
+            clearLinksList();
+            for (let i = 0; i < tabs.length; ++i) {
+                listTextArea.value += tabsArray[i] + "\n";
+            }
+            listTextArea.select();
+        });
+    } else {
+        alert("Could not detect which browser you are using.")
+    }
 }
 
 /**
@@ -125,35 +145,6 @@ function clearLinksList() {
 String.prototype.trim = function () {
     return this.replace(/^\s+|\s+$/g, '');
 };
-
-/**
- * Checks if a given string is a valid url
- * @param string    The string to check
- * @returns {boolean}   Whether string is valid url
- */
-function isProbablyUrl(string) {
-    let substr = string.substring(0, 4).toLowerCase();
-    if (substr === 'ftp:' || substr === 'www.') {
-        return true;
-    }
-
-    substr = string.substring(0, 5).toLowerCase();
-    if (substr === 'http:') {
-        return true;
-    }
-
-    substr = string.substring(0, 6).toLowerCase();
-    if (substr === 'https:') {
-        return true;
-    }
-
-    substr = string.substring(0, 7).toLowerCase();
-    if (substr === 'chrome:') {
-        return true;
-    }
-
-    return false;
-}
 
 /**
  * Handles the opening of lists
@@ -180,9 +171,16 @@ function openList(list) {
             linksToOpen.list_links.push(link);
         }
         localStorage.setItem("linksToOpen", JSON.stringify(linksToOpen));
-        chrome.tabs.create({
-            'url': chrome.extension.getURL('openingtabs.html')
-        });
+        if (checkHostType() === "firefox") {
+            browser.tabs.create({
+                active: true,
+                'url': browser.extension.getURL('openingtabs.html')
+            });
+        } else if (checkHostType() === "chrome") {
+            chrome.tabs.create({
+                'url': chrome.extension.getURL('openingtabs.html')
+            });
+        }
     }
 }
 
@@ -212,10 +210,16 @@ function linksIterator(i, strings, tabCreationDelay) {
         }
     }
     if (!ignoreURL) {
-        chrome.tabs.create({
-            active: false,
-            'url': url
-        });
+        if (checkHostType() === "firefox") {
+            browser.tabs.create({
+                'url': url
+            });
+        } else if (checkHostType() === "chrome") {
+            chrome.tabs.create({
+                active: false,
+                'url': url
+            });
+        }
     }
     i++;
     if (i < strings.length) {
@@ -239,9 +243,16 @@ function openSaveNewListDialog() {
 
     }
     localStorage.setItem("temp", JSON.stringify(tempList));
-    chrome.tabs.create({
-        'url': chrome.extension.getURL('newlist.html')
-    });
+    if (checkHostType() === "firefox") {
+        browser.tabs.create({
+            active: true,
+            'url': browser.extension.getURL('newlist.html')
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.create({
+            'url': chrome.extension.getURL('newlist.html')
+        });
+    }
 }
 
 /**
@@ -297,36 +308,64 @@ function openListByID(id) {
  * Opens the settings page
  */
 function openSettingsDialog() {
-    chrome.tabs.create({
-        'url': chrome.extension.getURL('settings.html')
-    });
+    if (checkHostType() === "firefox") {
+        browser.tabs.create({
+            active: true,
+            'url': browser.extension.getURL('settings.html')
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.create({
+            'url': chrome.extension.getURL('settings.html')
+        });
+    }
 }
 
 /**
  * Opens the help page
  */
 function openHelpDialog() {
-    chrome.tabs.create({
-        'url': chrome.extension.getURL('help.html')
-    });
+    if (checkHostType() === "firefox") {
+        browser.tabs.create({
+            active: true,
+            'url': browser.extension.getURL('help.html')
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.create({
+            'url': chrome.extension.getURL('help.html')
+        });
+    }
 }
 
 /**
  * Opens the dialog to import user data from JSON format
  */
 function openImportDialog() {
-    chrome.tabs.create({
-        'url': chrome.extension.getURL('import.html')
-    });
+    if (checkHostType() === "firefox") {
+        browser.tabs.create({
+            active: true,
+            'url': browser.extension.getURL('import.html')
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.create({
+            'url': chrome.extension.getURL('import.html')
+        });
+    }
 }
 
 /**
  * Opens the dialog to export user data as JSON
  */
 function openExportDialog() {
-    chrome.tabs.create({
-        'url': chrome.extension.getURL('export.html')
-    });
+    if (checkHostType() === "firefox") {
+        browser.tabs.create({
+            active: true,
+            'url': browser.extension.getURL('export.html')
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.create({
+            'url': chrome.extension.getURL('export.html')
+        });
+    }
 }
 
 /**
@@ -350,9 +389,16 @@ function editSelectedList() {
         alert("You need to select a list");
         return;
     }
-    chrome.tabs.create({
-        'url': chrome.extension.getURL('editlist.html?id=' + getSelectedListID() + "&name=" + getSelectedList())
-    });
+    if (checkHostType() === "firefox") {
+        browser.tabs.create({
+            active: true,
+            'url': browser.extension.getURL('editlist.html?id=' + getSelectedListID() + "&name=" + getSelectedList())
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.create({
+            'url': chrome.extension.getURL('editlist.html?id=' + getSelectedListID() + "&name=" + getSelectedList())
+        });
+    }
 }
 
 /**
@@ -372,88 +418,24 @@ function getSelectedListID() {
 }
 
 /**
- * Gets a specified setting for the user
- * @param setting   The setting to fetch
- * @returns {*} The setting value
- */
-function getSetting(setting) {
-    const settingSelected = setting.toLowerCase();
-    for (let i = 0; i < localStorage.length; i++) {
-        const tempStorage = loadList(localStorage.key(i));
-        if (localStorage.key(i) === "settings") {
-            const userSettings = JSON.parse(tempStorage);
-            switch (settingSelected) {
-                case "tab_creation_delay":
-                    return userSettings.tab_creation_delay;
-                case "auto_open_lists":
-                    return userSettings.auto_open_lists;
-                case "default_list_open":
-                    return userSettings.default_list_open;
-                case "custom_theme":
-                    return userSettings.custom_theme;
-                case "currently_opened_tabs_display":
-                    return userSettings.currently_opened_tabs_display;
-                case "non_url_handler":
-                    return userSettings.non_url_handler;
-                case "search_engine":
-                    return userSettings.search_engine;
-                default:
-                    break;
-            }
-        }
-    }
-}
-
-/**
- * Builds search engine query url from a string
- * @param {*} string 
- */
-function encodeSearchQuery(string) {
-    const setting = getSetting("search_engine");
-    if (setting === "googleEngine") {
-        string = 'http://www.google.com/search?q=' + encodeURI(string);
-    } else if (setting === "duckduckgoEngine") {
-        string = 'https://duckduckgo.com/?q=' + encodeURI(string);
-    } else if (setting === "bingEngine") {
-        string = 'https://www.bing.com/search?q=' + encodeURI(string);
-    }
-    return string;
-}
-
-/**
- * Attempts to extract a url from a string
- * @param {*} string 
- */
-function extractURLFromString(string) {
-    const urlRegex = /(https?:\/\/[^ ]*)/;
-    let url;
-    if (string.match(urlRegex)) {
-        url = string.match(urlRegex)[1];
-    } else {
-        url = "noextractionsuccess";
-    }
-    return url;
-}
-
-/**
- * Gets the current version of the extension from the manifest
- * @returns {string}    The current version
- */
-function getCurrentVersion() {
-    const manifestData = chrome.runtime.getManifest();
-    return (manifestData.version);
-}
-
-/**
  * Creates the extension in a popup window
  */
 function popupMain() {
-    chrome.windows.create({
-        url: "popup.html?popup=true",
-        type: "popup",
-        width: 755,
-        height: 610,
-    });
+    if (checkHostType() === "firefox") {
+        browser.windows.create({
+            url: "popup.html?popup=true",
+            type: "popup",
+            width: 755,
+            height: 610,
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.windows.create({
+            url: "popup.html?popup=true",
+            type: "popup",
+            width: 755,
+            height: 610,
+        });
+    }
 }
 
 /**
