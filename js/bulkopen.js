@@ -191,7 +191,6 @@ function openList(list) {
  * @param tabCreationDelay  The delay between opening a new url
  */
 function linksIterator(i, strings, tabCreationDelay) {
-    let ignoreURL = false;
     strings[i] = strings[i].trim();
     if (strings[i] === '') {
         return;

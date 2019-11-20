@@ -13,7 +13,6 @@ $(document).ready(function () {
 
 function linksIterator(i, strings, tabCreationDelay) {
     strings[i] = strings[i].trim();
-    let ignoreURL = false;
     if (!(strings[i] === '') && !(strings[i] === "linksToOpen")) {
         let url = strings[i];
         linksIteratorProcessURL(url);

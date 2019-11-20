@@ -29,6 +29,7 @@ function prependHttpIfNotExist(url) {
 }
 
 function linksIteratorProcessURL(url) {
+    let ignoreURL = false;
     if (!isProbablyUrl(url) && getSetting('non_url_handler') === "searchForString") {
         url = encodeSearchQuery(url);
     } else if (!isProbablyUrl(url) && getSetting('non_url_handler') === "ignoreString") {
