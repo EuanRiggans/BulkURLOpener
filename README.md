@@ -1,5 +1,4 @@
 # BulkURLOpener
-The Firefox version of the Google Chrome extension of the same name.
 
 # Known Issues
 
