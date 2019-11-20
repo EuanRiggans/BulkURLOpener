@@ -62,12 +62,12 @@ function isProbablyUrl(string) {
     }
 
     substr = string.substring(0, 5).toLowerCase();
-    if (substr === 'http:' || substr === 'file:') {
+    if (substr === 'http:') {
         return true;
     }
 
     substr = string.substring(0, 6).toLowerCase();
-    if (substr === 'https:' || substr === 'about:') {
+    if (substr === 'https:') {
         return true;
     }
 
