@@ -1,3 +1,7 @@
+/**
+ * Checks which browser is being used - as this determines which api to use (chrome or browser)
+ * @returns {string}
+ */
 function checkHostType() {
     let hostType;
     if (typeof browser === "undefined") {
@@ -12,6 +16,16 @@ function checkHostType() {
         }
     }
     return hostType;
+}
+
+/**
+ * Prepends http to a string if it is not present
+ */
+function prependHttpIfNotExist(url) {
+    if (!/^https?:\/\//i.test(url)) {
+        url = 'http://' + url;
+    }
+    return url;
 }
 
 /**

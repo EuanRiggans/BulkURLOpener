@@ -29,6 +29,7 @@ function linksIterator(i, strings, tabCreationDelay) {
             }
         }
         if (!ignoreURL) {
+            url = prependHttpIfNotExist(url);
             if (checkHostType() === "firefox") {
                 browser.tabs.create({
                     'url': url
