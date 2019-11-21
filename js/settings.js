@@ -53,7 +53,7 @@ $(document).ready(function () {
     }
     if (!settingsObjPresent) {
         $('#nightModeGroup').append('<div class="checkbox"><label><input type="checkbox" id="nightMode">&nbsp; Enable night theme</label></div>');
-        $('#autoOpenListsGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoOpenLists">&nbsp; Automatically open lists <a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a><b> (Experimental feature)</b></label></div>');
+        $('#autoOpenListsGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoOpenLists">&nbsp; Automatically open lists <a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a></label></div>');
     }
     for (let i = 0; i < localStorage.length; i++) {
         const tempStorageArray = loadList(localStorage.key(i));
