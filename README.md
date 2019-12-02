@@ -1,5 +1,11 @@
 # BulkURLOpener
 
+## Install / Download Links
+
+- Chrome: https://chrome.google.com/webstore/detail/bulk-url-opener/kgnfciolbjojfdbbelbdbhhocjmhenep
+- Firefox: https://addons.mozilla.org/en-GB/firefox/addon/bulkurlopener/
+- Desktop: https://github.com/EuanRiggans/BulkURLOpener/releases
+
 ## Known Issues
 
 - Close buttons not working. This is because Firefox does not allow a window to be closed by a script, if that window was opened by a script.
