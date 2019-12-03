@@ -15,7 +15,9 @@
 ## To Do List
 
 - Merge Electron and Browser repositories into one.
+- Export / Import settings & lists in JSON.
 - New setting: "Automatically load list" - When a list is selected from the dropdown, automatically load it into the textarea.
+- Make version that runs in the browser, rather than on desktop / browser addons
 - Completely remove dependency on Jquery.
 - Improve regex extraction of URLS.
 - Refactor old pieces of code that lack quality.
