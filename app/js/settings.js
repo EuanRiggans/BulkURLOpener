@@ -32,6 +32,18 @@ $(document).ready(function () {
                 } else {
                     $('#autoOpenListsGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="autoOpenLists"><label class="form-check-label" for="autoOpenLists">&nbsp; Automatically open lists<a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a></label></div>')
                 }
+
+                if (userSettings.new_tabs_active === 1) {
+                    $('#activeNewTabsGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="activeNewTabs" checked><label class="form-check-label" for="activeNewTabs">&nbsp; Set new tabs as Active</label></div>');
+                } else {
+                    $('#activeNewTabsGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="activeNewTabs"><label class="form-check-label" for="activeNewTabs">&nbsp; Set new tabs as Active</label></div>');
+                }
+
+                if (userSettings.auto_load_into_textarea === 1) {
+                    $('#autoLoadIntoTextAreaGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="autoLoadIntoTextArea" checked><label class="form-check-label" for="autoLoadIntoTextArea">&nbsp; When a list is selected, automatically open it into the text box</label></div>');
+                } else {
+                    $('#autoLoadIntoTextAreaGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="autoLoadIntoTextArea"><label class="form-check-label" for="autoLoadIntoTextArea">&nbsp; When a list is selected, automatically open it into the text box</label></div>');
+                }
             } else {
                 if (userSettings.night_mode === 1) {
                     $('#nightModeGroup').append('<div class="checkbox"><label><input type="checkbox" id="nightMode" checked>&nbsp; Enable night theme</label></div>');
@@ -44,6 +56,18 @@ $(document).ready(function () {
                 } else {
                     $('#autoOpenListsGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoOpenLists">&nbsp; Automatically open lists <a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a></label></div>');
                 }
+
+                if (userSettings.new_tabs_active === 1) {
+                    $('#activeNewTabsGroup').append('<div class="checkbox"><label><input type="checkbox" id="activeNewTabs" checked>&nbsp; Set new tabs as Active</label></div>');
+                } else {
+                    $('#activeNewTabsGroup').append('<div class="checkbox"><label><input type="checkbox" id="activeNewTabs">&nbsp; Set new tabs as Active</label></div>');
+                }
+
+                if (userSettings.auto_load_into_textarea === 1) {
+                    $('#autoLoadIntoTextAreaGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoLoadIntoTextArea" checked>&nbsp; When a list is selected, automatically open it into the text box</label></div>');
+                } else {
+                    $('#autoLoadIntoTextAreaGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoLoadIntoTextArea">&nbsp; When a list is selected, automatically open it into the text box</label></div>');
+                }
             }
 
             if (userSettings.default_list_open !== -1) {
@@ -54,6 +78,9 @@ $(document).ready(function () {
     if (!settingsObjPresent) {
         $('#nightModeGroup').append('<div class="checkbox"><label><input type="checkbox" id="nightMode">&nbsp; Enable night theme</label></div>');
         $('#autoOpenListsGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoOpenLists">&nbsp; Automatically open lists <a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a></label></div>');
+        $('#activeNewTabsGroup').append('<div class="checkbox"><label><input type="checkbox" id="activeNewTabs">&nbsp; Set new tabs as Active</label></div>');
+        $('#autoLoadIntoTextAreaGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoLoadIntoTextArea">&nbsp; When a list is selected, automatically open it into the text box</label></div>');
+
     }
     for (let i = 0; i < localStorage.length; i++) {
         const tempStorageArray = loadList(localStorage.key(i));
@@ -117,9 +144,13 @@ function initSettingsSave() {
     const $tabCeationDelaySelector = $('#tabCreationDelay');
     const $nightModeSelector = $('#nightMode');
     const $autoOpenListsSelector = $('#autoOpenLists');
+    const $activeNewTabsSelector = $('#activeNewTabs');
+    const $autoLoadIntoTextareaSelector = $('#autoLoadIntoTextArea');
     const tabCreationDelay = parseInt($tabCeationDelaySelector.val());
     let nightMode = 0;
     let autoOpenLists = 0;
+    let activeNewTabs = 0;
+    let autoLoadIntoTextArea = 0;
     const defaultList = getSelectedListID();
     const theme = getSelectedTheme();
     const currentlyOpenedTabsSetting = getCurrentlyOpenedTabsSetting();
@@ -130,6 +161,12 @@ function initSettingsSave() {
     }
     if ($autoOpenListsSelector.is(":checked")) {
         autoOpenLists = 1;
+    }
+    if ($activeNewTabsSelector.is(":checked")) {
+        activeNewTabs = 1;
+    }
+    if ($autoLoadIntoTextareaSelector.is(":checked")) {
+        autoLoadIntoTextArea = 1;
     }
     if (!(isNumber(tabCreationDelay)) || tabCreationDelay < 0) {
         alert("Your tab creation delay must be zero or a positive number!");
@@ -144,7 +181,9 @@ function initSettingsSave() {
         custom_theme: "defaultBoostrap",
         currently_opened_tabs_display: "currentWindow",
         non_url_handler: "searchForString",
-        search_engine: "googleEngine"
+        search_engine: "googleEngine",
+        new_tabs_active: 0,
+        auto_load_into_textarea: 0
     };
     userSettings.tab_creation_delay = tabCreationDelay;
     userSettings.night_mode = nightMode;
@@ -154,6 +193,8 @@ function initSettingsSave() {
     userSettings.currently_opened_tabs_display = currentlyOpenedTabsSetting;
     userSettings.non_url_handler = nonURLHandlerSetting;
     userSettings.search_engine = searchEngineSetting;
+    userSettings.new_tabs_active = activeNewTabs;
+    userSettings.auto_load_into_textarea = autoLoadIntoTextArea;
     saveSettings(userSettings);
 }
 

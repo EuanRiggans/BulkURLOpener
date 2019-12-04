@@ -53,13 +53,15 @@ function linksIteratorProcessURL(url) {
     }
     if (!ignoreURL) {
         url = prependHttpIfNotExist(url);
+        const openAsActive = getSetting("new_tabs_active") === 1;
         if (checkHostType() === "firefox") {
             browser.tabs.create({
+                'active': openAsActive,
                 'url': url
             });
         } else if (checkHostType() === "chrome") {
             chrome.tabs.create({
-                active: false,
+                'active': openAsActive,
                 'url': url
             });
         } else if (checkHostType() === "electron") {
@@ -126,6 +128,10 @@ function getSetting(setting) {
                     return userSettings.non_url_handler;
                 case "search_engine":
                     return userSettings.search_engine;
+                case "new_tabs_active":
+                    return userSettings.new_tabs_active;
+                case "auto_load_into_textarea":
+                    return userSettings.auto_load_into_textarea;
                 default:
                     break;
             }

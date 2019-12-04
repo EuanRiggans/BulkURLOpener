@@ -8,11 +8,13 @@ $(() => {
             $('#savedListsOptions').after("<label for=\"overrideAutoOpen\"><input type=\"checkbox\" id=\"overrideAutoOpen\">&nbsp;Override Auto Open</label>");
         }
         $(document).on('change', '#savedLists', function (e) {
-            const $overrideSelector = $('#overrideAutoOpen');
-            if (!$overrideSelector.is(':checked')) {
-                if (getSetting('auto_open_lists') === 1) {
-                    openSelectedList();
-                    openTextAreaList();
+            if (document.getElementById('overrideAutoOpen')) {
+                const $overrideSelector = $('#overrideAutoOpen');
+                if (!$overrideSelector.is(':checked')) {
+                    if (getSetting('auto_open_lists') === 1) {
+                        openSelectedList();
+                        openTextAreaList();
+                    }
                 }
             }
         });
@@ -82,6 +84,12 @@ $(() => {
         document.getElementById("openInPopup").remove();
         document.getElementById("copyCurrentOpen").remove();
     }
+
+    $(document).on('change', '#savedLists', function (e) {
+        if (getSetting('auto_load_into_textarea') === 1) {
+            openSelectedList();
+        }
+    });
 
     document.getElementById("version").textContent = "- Version " + getCurrentVersion();
 });
@@ -483,7 +491,9 @@ function createSettings() {
                 custom_theme: "defaultBoostrap",
                 currently_opened_tabs_display: "currentWindow",
                 non_url_handler: "searchForString",
-                search_engine: "googleEngine"
+                search_engine: "googleEngine",
+                new_tabs_active: 0,
+                auto_load_into_textarea: 0
             };
             localStorage.setItem("settings", JSON.stringify(newSettings));
             return;
@@ -497,7 +507,9 @@ function createSettings() {
             custom_theme: "defaultBoostrap",
             currently_opened_tabs_display: "currentWindow",
             non_url_handler: "searchForString",
-            search_engine: "googleEngine"
+            search_engine: "googleEngine",
+            new_tabs_active: 0,
+            auto_load_into_textarea: 0
         };
         localStorage.setItem("settings", JSON.stringify(newSettings));
     }

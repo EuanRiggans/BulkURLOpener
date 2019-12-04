@@ -61,7 +61,7 @@ $(document).ready(function () {
                 newList.list_links.push(lines[i]);
             }
         }
-        if(lines.length <= 3) {
+        if (lines.length <= 1) {
             alert("No URLs given for the list!");
             return;
         } else if ($listNameSelector.val().trim() === "") {
