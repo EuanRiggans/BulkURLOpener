@@ -5,6 +5,7 @@
 - Chrome: https://chrome.google.com/webstore/detail/bulk-url-opener/kgnfciolbjojfdbbelbdbhhocjmhenep
 - Firefox: https://addons.mozilla.org/en-GB/firefox/addon/bulkurlopener/
 - Desktop: https://github.com/EuanRiggans/BulkURLOpener/releases
+- Desktop (Snap): https://snapcraft.io/bulkurlopener
 
 ## Running From Source
 
