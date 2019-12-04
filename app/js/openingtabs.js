@@ -26,6 +26,8 @@ function linksIterator(i, strings, tabCreationDelay) {
                     // window.close();
                 } else if (checkHostType() === "chrome") {
                     window.close();
+                } else if (checkHostType() === "electron") {
+                    window.location.replace("popup.html");
                 }
             }
             setTimeout(linksIterator, tabCreationDelay, i, strings, tabCreationDelay);
@@ -40,6 +42,8 @@ function linksIterator(i, strings, tabCreationDelay) {
                 // window.close();
             } else if (checkHostType() === "chrome") {
                 window.close();
+            } else if (checkHostType() === "electron") {
+                window.location.replace("popup.html");
             }
         }
         if (i < strings.length) {

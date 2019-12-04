@@ -18,7 +18,9 @@ $(() => {
         });
     }
     if (getSetting("default_list_open") === -1 || getSetting("default_list_open") === undefined) {
-        getCurrentTabs();
+        if (!(checkHostType() === "electron")) {
+            getCurrentTabs();
+        }
     } else {
         openListByID(getSetting("default_list_open"));
     }
@@ -75,6 +77,11 @@ $(() => {
     document.getElementById("openHelp").addEventListener('click', () => {
         openHelpDialog();
     });
+
+    if (checkHostType() === "electron") {
+        document.getElementById("openInPopup").remove();
+        document.getElementById("copyCurrentOpen").remove();
+    }
 
     document.getElementById("version").textContent = "- Version " + getCurrentVersion();
 });
@@ -180,6 +187,8 @@ function openList(list) {
             chrome.tabs.create({
                 'url': chrome.extension.getURL('openingtabs.html')
             });
+        } else if (checkHostType() === "electron") {
+            window.location.replace('openingtabs.html');
         }
     }
 }
@@ -228,6 +237,8 @@ function openSaveNewListDialog() {
         chrome.tabs.create({
             'url': chrome.extension.getURL('newlist.html')
         });
+    } else if (checkHostType() === "electron") {
+        window.location.replace('newlist.html');
     }
 }
 
@@ -293,6 +304,8 @@ function openSettingsDialog() {
         chrome.tabs.create({
             'url': chrome.extension.getURL('settings.html')
         });
+    } else if (checkHostType() === "electron") {
+        window.location.replace('settings.html');
     }
 }
 
@@ -309,6 +322,8 @@ function openHelpDialog() {
         chrome.tabs.create({
             'url': chrome.extension.getURL('help.html')
         });
+    } else if (checkHostType() === "electron") {
+        window.location.replace('help.html');
     }
 }
 
@@ -325,6 +340,8 @@ function openImportDialog() {
         chrome.tabs.create({
             'url': chrome.extension.getURL('import.html')
         });
+    } else if (checkHostType() === "electron") {
+        window.location.replace('import.html');
     }
 }
 
@@ -341,6 +358,8 @@ function openExportDialog() {
         chrome.tabs.create({
             'url': chrome.extension.getURL('export.html')
         });
+    } else if (checkHostType() === "electron") {
+        window.location.replace('export.html');
     }
 }
 
@@ -374,6 +393,8 @@ function editSelectedList() {
         chrome.tabs.create({
             'url': chrome.extension.getURL('editlist.html?id=' + getSelectedListID() + "&name=" + getSelectedList())
         });
+    } else if (checkHostType() === "electron") {
+        window.location.replace('editlist.html?id=' + getSelectedListID() + "&name=" + getSelectedList());
     }
 }
 
@@ -452,6 +473,21 @@ function createSettings() {
     let settingsFound = false;
     const settingsList = loadList("settings");
     if (!settingsList) {
+        if (checkHostType() === "electron") {
+            const newSettings = {
+                object_description: "user_settings",
+                tab_creation_delay: 1,
+                night_mode: 0,
+                auto_open_lists: 0,
+                default_list_open: -1,
+                custom_theme: "defaultBoostrap",
+                currently_opened_tabs_display: "currentWindow",
+                non_url_handler: "searchForString",
+                search_engine: "googleEngine"
+            };
+            localStorage.setItem("settings", JSON.stringify(newSettings));
+            return;
+        }
         const newSettings = {
             object_description: "user_settings",
             tab_creation_delay: 0,

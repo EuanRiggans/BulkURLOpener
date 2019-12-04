@@ -3,10 +3,16 @@
  * @returns {string}
  */
 function checkHostType() {
-    let hostType;
+    let hostType = null;
+    if (typeof require === "function") {
+        hostType = "electron";
+        return hostType;
+    }
     if (typeof browser === "undefined") {
-        if (typeof chrome.tabs.create === "function") {
-            hostType = "chrome";
+        if (typeof chrome === "object") {
+            if (typeof chrome.tabs.create === "function") {
+                hostType = "chrome";
+            }
         }
     } else if (typeof browser === "object") {
         if (typeof browser.tabs.create === "function") {
@@ -14,6 +20,9 @@ function checkHostType() {
         } else if (typeof chrome.tabs.create === "function") {
             hostType = "chrome";
         }
+    } else {
+        // Fallback if all checks fail, then the app is most likely the web app version.
+        hostType = "webapp";
     }
     return hostType;
 }
@@ -53,6 +62,11 @@ function linksIteratorProcessURL(url) {
                 active: false,
                 'url': url
             });
+        } else if (checkHostType() === "electron") {
+            const {
+                shell
+            } = require('electron');
+            shell.openExternal(url);
         }
     }
 }
@@ -158,12 +172,13 @@ function getCurrentVersion() {
     let manifestData;
     if (checkHostType() === "firefox") {
         manifestData = browser.runtime.getManifest();
-
+        return (manifestData.version);
     } else if (checkHostType() === "chrome") {
         manifestData = chrome.runtime.getManifest();
-
+        return (manifestData.version);
+    } else {
+        return "1.7.0";
     }
-    return (manifestData.version);
 }
 
 /**
@@ -180,6 +195,8 @@ function saveList(Id, newListObject) {
         // window.close();
     } else if (checkHostType() === "chrome") {
         window.close();
+    } else if (checkHostType() === "electron") {
+        window.location.replace("popup.html");
     }
 }
 
@@ -196,6 +213,8 @@ function saveSettings(userSettings) {
         // window.close();
     } else if (checkHostType() === "chrome") {
         window.close();
+    } else if (checkHostType() === "electron") {
+        window.location.replace("popup.html");
     }
 }
 
@@ -309,6 +328,24 @@ function getParameterByName(name, url) {
         return '';
     }
     return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+/**
+ * Gets the string to display in the footer
+ * @returns {string}
+ */
+function getFooterText() {
+    let footerString = "Bulk URL Opener";
+    if (checkHostType() === "firefox") {
+        footerString = "Bulk URL Opener - Firefox";
+    } else if (checkHostType() === "chrome") {
+        footerString = "Bulk URL Opener - Chromium";
+    } else if (checkHostType() === "electron") {
+        footerString = "Bulk URL Opener - Electron";
+    } else if (checkHostType() === "webapp") {
+        footerString = "Bulk URL Opener - Web App";
+    }
+    return footerString;
 }
 
 /**

@@ -1,0 +1,6 @@
+Size		Use for icon
+
+16x16		favicon on the extension's pages
+32x32		Windows computers often require this size. Providing this option will prevent size distortion from shrinking the 48x48 option.
+48x48		displays on the extensions management page
+128x128		displays on installation and in the Chrome Webstore

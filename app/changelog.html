@@ -20,6 +20,9 @@
             </button>
         </div>
         <div class="modal-body">
+            <h5 class="version">1.7.0</h5>
+            <p class="notes">All versions of the app (Chrome, Firefox, Electron) are now in one single code base,
+                meaning all features will be available on all platforms. Built using a shell script.</p>
             <h5 class="version">1.6.0</h5>
             <p class="notes">The browser-based versions of the application are now in a single code-base. So it will be
                 easier to develop, test and deploy changes.</p>
@@ -82,7 +85,7 @@
             <p class="notes">Performance improvements, removed duplicate jQuery selectors to improve performance</p>
             <p class="notes">Added a new re-designed icon</p>
             <p class="notes">The extension is now open source. You can view the repository <a
-                    href="https://github.com/EuanRiggans/BulkURLOpener">here</a>.</p>
+                    href="#" id="view-source">here</a>.</p>
             <p class="notes">Updated bootstrap to v4.1.1</p>
             <p class="notes">Updated jquery to v3.1.1</p>
             <h5 class="version">1.1.4</h5>
@@ -110,15 +113,24 @@
             <p class="notes">Initial release</p>
         </div>
         <div class="modal-footer">
-            <small>Bulk URL Opener Browser Version</small>
+            <small id="changelog-footer">Bulk URL Opener Browser Version</small>
         </div>
     </div>
 </div>
+<script>
+    if (typeof module === 'object') {
+        window.module = module;
+        module = undefined;
+    }
+</script>
 <script src="js/jquery-3.3.1.min.js" type="text/javascript"></script>
 <script src="js/bootstrap.min.js" type="text/javascript"></script>
 <script src="js/utility.js" type="text/javascript"></script>
 <script src="js/changelog.js" type="text/javascript"></script>
 <script id="tempStylesheetLoader" src="js/custom-styles.js" type="text/javascript"></script>
+<script>
+    if (window.module) module = window.module;
+</script>
 </body>
 
 </html>

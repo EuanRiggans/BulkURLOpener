@@ -25,15 +25,15 @@
                     until all tabs have been created, this is due to how javascript runs in browsers.</p>
                 <h5 class="question">Can I view the source code for this addon?</h5>
                 <p class="answer">Yes. The code for the Chrome, Firefox and Electron versions can be found on my github,
-                    <a href="https://euan.link/github" target="_blank">here</a></p>
+                    <a href="#" id="openGithub">here</a></p>
                 <h5 class="question">Where can I find the changelog:</h5>
                 <p class="answer">The changelog can be found by clicking <a href="#" id="openChangelog">here</a></p>
                 <h5 class="question">How can I report a bug:</h5>
                 <p class="answer">Bugs can be reported on this projects Github page, found <a
-                        href="https://euan.link/buo-ff-issue" target="_blank">here</a></p>
+                        href="#" id="openGithubBugs">here</a></p>
                 <h5 class="question">How can I get support or suggest a feature:</h5>
                 <p class="answer">You can make suggestions or ask for help on this projects Github page, found <a
-                        href="https://euan.link/buo-ff-issue" target="_blank">here</a></p>
+                        href="#" id="openGithubSuggestions">here</a></p>
                 <h5 class="question">What is an experimental feature:</h5>
                 <p class="answer">Many new features have been added to the extension that can not be full tested before
                     release. So these features are marked as experimental for a period while any usability issues or
@@ -52,15 +52,24 @@
                         href="https://euan.link/buo-ff-issues" target="_blank">here</a></p>
             </div>
             <div class="modal-footer">
-                <small>Bulk URL Opener Browser Version</small>
+                <small id="help-footer">Bulk URL Opener</small>
             </div>
         </div>
     </div>
-    <script src="js/jquery-3.3.1.min.js" type="text/javascript"></script>
-    <script src="js/bootstrap.min.js" type="text/javascript"></script>
-    <script src="js/utility.js" type="text/javascript"></script>
-    <script src="js/help.js" type="text/javascript"></script>
-    <script type="text/javascript" src="js/custom-styles.js" id="tempStylesheetLoader"></script>
 </body>
+<script>
+    if (typeof module === 'object') {
+        window.module = module;
+        module = undefined;
+    }
+</script>
+<script src="js/jquery-3.3.1.min.js" type="text/javascript"></script>
+<script src="js/bootstrap.min.js" type="text/javascript"></script>
+<script src="js/utility.js" type="text/javascript"></script>
+<script src="js/help.js" type="text/javascript"></script>
+<script id="tempStylesheetLoader" src="js/custom-styles.js" type="text/javascript"></script>
+<script>
+    if (window.module) module = window.module;
+</script>
 
 </html>
