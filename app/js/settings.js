@@ -32,6 +32,7 @@ $(document).ready(function () {
     let currentlyOpenedTabsSetting = "allOpenedTabs";
     let nonURLHandlerSetting = "searchForString";
     let searchEngineSetting = "googleEngine";
+    let buttonLookSetting = "alwaysOutline";
     $tabCreationDelaySelector.val(0);
     let settingsObjPresent = false;
     for (let i = 0; i < localStorage.length; i++) {
@@ -119,6 +120,7 @@ $(document).ready(function () {
                 selectedTheme = parsedList.custom_theme;
                 nonURLHandlerSetting = parsedList.non_url_handler;
                 searchEngineSetting = parsedList.search_engine;
+                buttonLookSetting = parsedList.button_look;
             }
         } catch (e) {
             console.log(e);
@@ -129,6 +131,7 @@ $(document).ready(function () {
     $("#currentlyOpenedSetting option[id=" + currentlyOpenedTabsSetting + "]").prop('selected', true);
     $("#nonURLHandlerSetting option[id=" + nonURLHandlerSetting + "]").prop('selected', true);
     $("#selectedSearchEngineSetting option[id=" + searchEngineSetting + "]").prop('selected', true);
+    $("#buttonLookSetting option[id=" + buttonLookSetting + "]").prop('selected', true);
     document.getElementById("nightMode").addEventListener('change', (e) => {
         const isChecked = document.getElementById("nightMode").checked;
         if (isChecked) {
@@ -168,6 +171,7 @@ function initSettingsSave() {
     const currentlyOpenedTabsSetting = getCurrentlyOpenedTabsSetting();
     const nonURLHandlerSetting = getNonURLHandlerSetting();
     const searchEngineSetting = getSearchEngineSetting();
+    const buttonLookSetting = getButtonLookSetting();
     if ($nightModeSelector.is(":checked")) {
         nightMode = 1;
     }
@@ -195,7 +199,8 @@ function initSettingsSave() {
         non_url_handler: "searchForString",
         search_engine: "googleEngine",
         new_tabs_active: 0,
-        auto_load_into_textarea: 0
+        auto_load_into_textarea: 0,
+        button_look: "alwaysOutline"
     };
     userSettings.tab_creation_delay = tabCreationDelay;
     userSettings.night_mode = nightMode;
@@ -207,6 +212,7 @@ function initSettingsSave() {
     userSettings.search_engine = searchEngineSetting;
     userSettings.new_tabs_active = activeNewTabs;
     userSettings.auto_load_into_textarea = autoLoadIntoTextArea;
+    userSettings.button_look = buttonLookSetting;
     saveSettings(userSettings);
 }
 
@@ -262,4 +268,8 @@ function getNonURLHandlerSetting() {
 
 function getSearchEngineSetting() {
     return $('select[id="selectedSearchEngineSetting"] option:selected').attr('id');
+}
+
+function getButtonLookSetting() {
+    return $('select[id="buttonLookSetting"] option:selected').attr('id');
 }

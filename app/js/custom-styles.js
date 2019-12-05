@@ -1,18 +1,4 @@
 /**
- * Checks if the user has enabled night mode
- * @returns {boolean}   Whether night mode in enabled
- */
-function isNightModeEnabled() {
-    for (let i = 0; i < localStorage.length; i++) {
-        const tempStorage = loadList(localStorage.key(i));
-        if (localStorage.key(i) === "settings") {
-            const userSettings = JSON.parse(tempStorage);
-            return parseInt(userSettings.night_mode) === 1;
-        }
-    }
-}
-
-/**
  * Gets the users currently selected custom theme
  * @returns {string}    The users custom theme
  */

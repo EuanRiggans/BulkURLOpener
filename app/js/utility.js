@@ -1,3 +1,18 @@
+(() => {
+        if (getSetting("button_look") === "alwaysFilled") {
+            switchOutlineButtons();
+        } else if (getSetting("button_look") === "filledNight") {
+            if (isNightModeEnabled()) {
+                switchOutlineButtons();
+            }
+        } else if (getSetting("button_look") === "filledLight") {
+            if (!isNightModeEnabled()) {
+                switchOutlineButtons();
+            }
+        }
+    }
+)();
+
 /**
  * Checks which browser is being used - as this determines which api to use (chrome or browser)
  * @returns {string}
@@ -132,6 +147,8 @@ function getSetting(setting) {
                     return userSettings.new_tabs_active;
                 case "auto_load_into_textarea":
                     return userSettings.auto_load_into_textarea;
+                case "button_look":
+                    return userSettings.button_look;
                 default:
                     break;
             }
@@ -376,5 +393,95 @@ function outputAllLists() {
     }
     if (counter === 0) {
         console.log("No lists found");
+    }
+}
+
+/**
+ * Checks if the user has enabled night mode
+ * @returns {boolean}   Whether night mode in enabled
+ */
+function isNightModeEnabled() {
+    for (let i = 0; i < localStorage.length; i++) {
+        const tempStorage = loadList(localStorage.key(i));
+        if (localStorage.key(i) === "settings") {
+            const userSettings = JSON.parse(tempStorage);
+            return parseInt(userSettings.night_mode) === 1;
+        }
+    }
+}
+
+function switchOutlineButtons() {
+    let buttonsToSwitch = [];
+    let temp;
+    temp = document.getElementsByClassName("btn-outline-primary");
+    for (let i = 0; i < temp.length; i++) {
+        buttonsToSwitch.push(temp[i]);
+    }
+    for (let element of buttonsToSwitch) {
+        element.classList.add("btn-primary");
+        element.classList.remove("btn-outline-primary");
+    }
+    buttonsToSwitch = [];
+    temp = document.getElementsByClassName("btn-outline-secondary");
+    for (let i = 0; i < temp.length; i++) {
+        buttonsToSwitch.push(temp[i]);
+    }
+    for (let element of buttonsToSwitch) {
+        element.classList.add("btn-secondary");
+        element.classList.remove("btn-outline-secondary");
+    }
+    buttonsToSwitch = [];
+    temp = document.getElementsByClassName("btn-outline-success");
+    for (let i = 0; i < temp.length; i++) {
+        buttonsToSwitch.push(temp[i]);
+    }
+    for (let element of buttonsToSwitch) {
+        element.classList.add("btn-success");
+        element.classList.remove("btn-outline-success");
+    }
+    buttonsToSwitch = [];
+    temp = document.getElementsByClassName("btn-outline-danger");
+    for (let i = 0; i < temp.length; i++) {
+        buttonsToSwitch.push(temp[i]);
+    }
+    for (let element of buttonsToSwitch) {
+        element.classList.add("btn-danger");
+        element.classList.remove("btn-outline-danger");
+    }
+    buttonsToSwitch = [];
+    temp = document.getElementsByClassName("btn-outline-warning");
+    for (let i = 0; i < temp.length; i++) {
+        buttonsToSwitch.push(temp[i]);
+    }
+    for (let element of buttonsToSwitch) {
+        element.classList.add("btn-warning");
+        element.classList.remove("btn-outline-warning");
+    }
+    buttonsToSwitch = [];
+    temp = document.getElementsByClassName("btn-outline-info");
+    for (let i = 0; i < temp.length; i++) {
+        buttonsToSwitch.push(temp[i]);
+    }
+    for (let element of buttonsToSwitch) {
+        element.classList.add("btn-info");
+        element.classList.remove("btn-outline-info");
+    }
+    buttonsToSwitch = [];
+    temp = document.getElementsByClassName("btn-outline-light");
+    for (let i = 0; i < temp.length; i++) {
+        buttonsToSwitch.push(temp[i]);
+    }
+    for (let element of buttonsToSwitch) {
+        element.classList.add("btn-light");
+        element.classList.remove("btn-outline-light");
+    }
+    buttonsToSwitch = [];
+    temp = document.getElementsByClassName("btn-outline-dark");
+    for (let i = 0; i < temp.length; i++) {
+        buttonsToSwitch.push(temp[i]);
+    }
+    for (let element of buttonsToSwitch) {
+        element.classList.add("btn-dark");
+        element.classList.remove("btn-outline-dark");
     }
 }

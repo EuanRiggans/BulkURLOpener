@@ -493,7 +493,8 @@ function createSettings() {
                 non_url_handler: "searchForString",
                 search_engine: "googleEngine",
                 new_tabs_active: 0,
-                auto_load_into_textarea: 0
+                auto_load_into_textarea: 0,
+                button_look: "alwaysOutline"
             };
             localStorage.setItem("settings", JSON.stringify(newSettings));
             return;
@@ -509,7 +510,8 @@ function createSettings() {
             non_url_handler: "searchForString",
             search_engine: "googleEngine",
             new_tabs_active: 0,
-            auto_load_into_textarea: 0
+            auto_load_into_textarea: 0,
+            button_look: "alwaysOutline"
         };
         localStorage.setItem("settings", JSON.stringify(newSettings));
     }

@@ -100,6 +100,18 @@
                 <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
             </div>
             <hr>
+            <div id="buttonLookGroup">
+                <p class="setting-title">Buttons Look:</p>
+                <label for="selectedSearchEngineSetting">Change how the buttons look (Always use filled buttons can help
+                    with readability):</label>
+                <select class="form-control" id="buttonLookSetting">
+                    <option id="alwaysOutline" selected value="">Always Use Outline Buttons</option>
+                    <option id="alwaysFilled" value="">Always Use Filled Buttons</option>
+                    <option id="filledNight" value="">Use Filled Buttons On Night Mode</option>
+                    <option id="filledLight" value="">Use Filled Buttons On Light Mode</option>
+                </select>
+            </div>
+            <hr>
             <div id="importExportGroup">
                 <p class="setting-title">Import / Export Settings & Lists</p>
                 <button class="btn btn-primary" id="openImport" type="button">Import &nbsp; <i
@@ -109,7 +121,7 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-primary" id="saveSettings" type="button">Save settings</button>
+            <button class="btn btn-outline-primary" id="saveSettings" type="button">Save settings</button>
         </div>
     </div>
 </div>

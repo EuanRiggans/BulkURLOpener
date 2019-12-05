@@ -15,7 +15,8 @@ body,
 #customTheme,
 #currentlyOpenedSetting,
 #nonURLHandlerSetting,
-#selectedSearchEngineSetting {
+#selectedSearchEngineSetting,
+#buttonLookSetting {
     color: #fff;
     background-color: #404040;
 }
