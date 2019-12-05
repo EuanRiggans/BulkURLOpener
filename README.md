@@ -33,7 +33,6 @@ electron .
 
 ## To Do List
 
-- Export / Import settings & lists in JSON.
 - Make version that runs in the browser, rather than on desktop / browser addons
 - Completely remove dependency on Jquery.
 - Improve regex extraction of URLS.
