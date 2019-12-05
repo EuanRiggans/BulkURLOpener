@@ -56,7 +56,7 @@ cp -r ./app/* ./dist/browser/
 npm run make:all
 cd ./dist/browser/
 web-ext build
-mv ./web-ext-artifacts/bulk_url_opener-1.6.0.zip ../bulkurlopener-$VERSION-browser.zip
+mv ./web-ext-artifacts/bulk_url_opener-$VERSION.zip ../bulkurlopener-$VERSION-browser.zip
 cd ..
 rm -r browser/
 zip -r bulkurlopener-$VERSION-windows.zip win-unpacked
