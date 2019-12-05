@@ -51,9 +51,6 @@ function importData() {
         if (!skipSettings) {
             userSettings = parsedJSON.settings;
         }
-        console.log(maxID);
-        console.log(userLists);
-        console.log(userSettings);
         localStorage.setItem("maxID", maxID);
         for (let list of userLists) {
             localStorage.setItem(list.list_id, JSON.stringify(list));
