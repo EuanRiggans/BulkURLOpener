@@ -1,3 +1,28 @@
+(() => {
+    document.getElementById("saveSettings").addEventListener('click', (e) => {
+        initSettingsSave();
+    });
+
+    document.getElementById('openImport').addEventListener('click', (e) => {
+        openImport();
+    });
+
+    document.getElementById('openExport').addEventListener('click', (e) => {
+        openExport();
+    });
+
+    document.getElementById("closeModal").addEventListener('click', (e) => {
+        if (checkHostType() === "firefox") {
+            alert("Unable to close window due to Firefox security policy. Please close this window manually.");
+            // window.close();
+        } else if (checkHostType() === "chrome") {
+            window.close();
+        } else if (checkHostType() === "electron") {
+            window.location.replace("popup.html");
+        }
+    });
+})();
+
 $(document).ready(function () {
     const $tabCreationDelaySelector = $('#tabCreationDelay');
     const $nightModeSelector = $('#nightMode');
@@ -104,19 +129,6 @@ $(document).ready(function () {
     $("#currentlyOpenedSetting option[id=" + currentlyOpenedTabsSetting + "]").prop('selected', true);
     $("#nonURLHandlerSetting option[id=" + nonURLHandlerSetting + "]").prop('selected', true);
     $("#selectedSearchEngineSetting option[id=" + searchEngineSetting + "]").prop('selected', true);
-    document.getElementById("closeModal").addEventListener('click', (e) => {
-        if (checkHostType() === "firefox") {
-            alert("Unable to close window due to Firefox security policy. Please close this window manually.");
-            // window.close();
-        } else if (checkHostType() === "chrome") {
-            window.close();
-        } else if (checkHostType() === "electron") {
-            window.location.replace("popup.html");
-        }
-    });
-    document.getElementById("saveSettings").addEventListener('click', (e) => {
-        initSettingsSave();
-    });
     document.getElementById("nightMode").addEventListener('change', (e) => {
         const isChecked = document.getElementById("nightMode").checked;
         if (isChecked) {
@@ -133,7 +145,7 @@ $(document).ready(function () {
                 document.getElementById("styles-dark").remove();
             }
         }
-    })
+    });
 });
 
 function isNumber(varToTest) {
@@ -196,6 +208,36 @@ function initSettingsSave() {
     userSettings.new_tabs_active = activeNewTabs;
     userSettings.auto_load_into_textarea = autoLoadIntoTextArea;
     saveSettings(userSettings);
+}
+
+function openImport() {
+    if (checkHostType() === "firefox") {
+        browser.tabs.create({
+            active: true,
+            'url': browser.extension.getURL('import.html')
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.create({
+            'url': chrome.extension.getURL('import.html')
+        });
+    } else if (checkHostType() === "electron") {
+        window.location.replace("import.html");
+    }
+}
+
+function openExport() {
+    if (checkHostType() === "firefox") {
+        browser.tabs.create({
+            active: true,
+            'url': browser.extension.getURL('export.html')
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.create({
+            'url': chrome.extension.getURL('export.html')
+        });
+    } else if (checkHostType() === "electron") {
+        window.location.replace("export.html");
+    }
 }
 
 function getSelectedList() {
