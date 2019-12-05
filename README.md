@@ -37,4 +37,4 @@ electron .
 - Make version that runs in the browser, rather than on desktop / browser addons
 - Completely remove dependency on Jquery.
 - Improve regex extraction of URLS.
-- Refactor old pieces of code that lack quality.
+- Refactor some of the old code which is quite clunky
