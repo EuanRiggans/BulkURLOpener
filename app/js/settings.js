@@ -188,6 +188,10 @@ function initSettingsSave() {
         alert("Your tab creation delay must be zero or a positive number!");
         return;
     }
+    if (checkHostType() === "electron" && tabCreationDelay < 1) {
+        alert("Tab Creation Delay must be at least one second. This is due to a limitation in the way electron opens urls.");
+        return;
+    }
     const userSettings = {
         object_description: "user_settings",
         tab_creation_delay: 0,
