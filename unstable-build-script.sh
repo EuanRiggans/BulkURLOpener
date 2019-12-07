@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Requirements: zip, npm, web-ext, sha256sum
+# Requirements: zip, npm, web-ext, sha256sum, Electron Builder
 
 # Checking requirements are met.
 
@@ -21,6 +21,11 @@ fi
 
 if ! [ -x "$(command -v zip)" ]; then
   echo 'Error: zip is not installed.' >&2
+  exit 1
+fi
+
+if ! [ -x "$(command -v electron-builder)" ]; then
+  echo 'Error: electron-builder is not installed.' >&2
   exit 1
 fi
 
