@@ -21,99 +21,118 @@
             window.location.replace("popup.html");
         }
     });
-})();
 
-$(document).ready(function () {
-    const $tabCreationDelaySelector = $('#tabCreationDelay');
-    const $nightModeSelector = $('#nightMode');
-    const $autoOpenSelector = $('#autoOpenLists');
+    const tabCreationDelayElement = document.getElementById('tabCreationDelay');
+    const nightModeGroup = document.getElementById('nightModeGroup');
+    const autoOpenListsGroup = document.getElementById('autoOpenListsGroup');
+    const activeNewTabsGroup = document.getElementById('activeNewTabsGroup');
+    const autoLoadIntoTextAreaGroup = document.getElementById('autoLoadIntoTextAreaGroup');
     let selectedListID = -1;
     let selectedTheme = "defaultBootstrap";
     let currentlyOpenedTabsSetting = "allOpenedTabs";
     let nonURLHandlerSetting = "searchForString";
     let searchEngineSetting = "googleEngine";
     let buttonLookSetting = "alwaysOutline";
-    $tabCreationDelaySelector.val(0);
+    tabCreationDelayElement.value = 0;
     let settingsObjPresent = false;
+
     for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
         if (localStorage.key(i) === "settings") {
             settingsObjPresent = true;
             const userSettings = JSON.parse(tempArray);
-            if ($tabCreationDelaySelector.val() === undefined) {
-                $tabCreationDelaySelector.val(0);
+            if (tabCreationDelayElement.value === false) {
+                tabCreationDelayElement.value = 0;
             } else {
-                $tabCreationDelaySelector.val(userSettings.tab_creation_delay);
+                tabCreationDelayElement.value = userSettings.tab_creation_delay;
             }
-
             if (userSettings.custom_theme === "fluentDesignBootstrap") {
                 if (userSettings.night_mode === 1) {
-                    $('#nightModeGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="nightMode" checked><label class="form-check-label" for="nightMode">&nbsp; Enable night theme</label></div>');
+                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"nightMode\" checked><label class=\"form-check-label\" for=\"nightMode\">&nbsp; Enable night theme</label></div>";
+                    appendHtml(nightModeGroup, html);
                 } else {
-                    $('#nightModeGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="nightMode"><label class="form-check-label" for="nightMode">&nbsp; Enable night theme</label></div>');
+                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"nightMode\"><label class=\"form-check-label\" for=\"nightMode\">&nbsp; Enable night theme</label></div>";
+                    appendHtml(nightModeGroup, html);
                 }
 
                 if (userSettings.auto_open_lists === 1) {
-                    $('#autoOpenListsGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="autoOpenLists" checked><label class="form-check-label" for="autoOpenLists">&nbsp; Automatically open lists<a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a></label></div>')
+                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"autoOpenLists\" checked><label class=\"form-check-label\" for=\"autoOpenLists\">&nbsp; Automatically open lists<a id=\"autoOpenListsTooltip\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"When you select a link list from the dropdown, it will be automatically opened.\">(?)</a></label></div>";
+                    appendHtml(autoOpenListsGroup, html);
                 } else {
-                    $('#autoOpenListsGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="autoOpenLists"><label class="form-check-label" for="autoOpenLists">&nbsp; Automatically open lists<a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a></label></div>')
+                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"autoOpenLists\"><label class=\"form-check-label\" for=\"autoOpenLists\">&nbsp; Automatically open lists<a id=\"autoOpenListsTooltip\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"When you select a link list from the dropdown, it will be automatically opened.\">(?)</a></label></div>";
+                    appendHtml(autoOpenListsGroup, html);
                 }
 
                 if (userSettings.new_tabs_active === 1) {
-                    $('#activeNewTabsGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="activeNewTabs" checked><label class="form-check-label" for="activeNewTabs">&nbsp; Set new tabs as Active</label></div>');
+                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"activeNewTabs\" checked><label class=\"form-check-label\" for=\"activeNewTabs\">&nbsp; Set new tabs as Active</label></div>";
+                    appendHtml(activeNewTabsGroup, html);
                 } else {
-                    $('#activeNewTabsGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="activeNewTabs"><label class="form-check-label" for="activeNewTabs">&nbsp; Set new tabs as Active</label></div>');
+                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"activeNewTabs\"><label class=\"form-check-label\" for=\"activeNewTabs\">&nbsp; Set new tabs as Active</label></div>";
+                    appendHtml(activeNewTabsGroup, html);
                 }
 
                 if (userSettings.auto_load_into_textarea === 1) {
-                    $('#autoLoadIntoTextAreaGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="autoLoadIntoTextArea" checked><label class="form-check-label" for="autoLoadIntoTextArea">&nbsp; When a list is selected, automatically open it into the text box</label></div>');
+                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"autoLoadIntoTextArea\" checked><label class=\"form-check-label\" for=\"autoLoadIntoTextArea\">&nbsp; When a list is selected, automatically open it into the text box</label></div>";
+                    appendHtml(autoLoadIntoTextAreaGroup, html);
                 } else {
-                    $('#autoLoadIntoTextAreaGroup').append('<div class="form-check pl-0 checkbox"><input class="form-check-input" type="checkbox" value="" id="autoLoadIntoTextArea"><label class="form-check-label" for="autoLoadIntoTextArea">&nbsp; When a list is selected, automatically open it into the text box</label></div>');
+                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"autoLoadIntoTextArea\"><label class=\"form-check-label\" for=\"autoLoadIntoTextArea\">&nbsp; When a list is selected, automatically open it into the text box</label></div>";
+                    appendHtml(autoLoadIntoTextAreaGroup, html);
                 }
             } else {
                 if (userSettings.night_mode === 1) {
-                    $('#nightModeGroup').append('<div class="checkbox"><label><input type="checkbox" id="nightMode" checked>&nbsp; Enable night theme</label></div>');
+                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"nightMode\" checked>&nbsp; Enable night theme</label></div>";
+                    appendHtml(nightModeGroup, html);
                 } else {
-                    $('#nightModeGroup').append('<div class="checkbox"><label><input type="checkbox" id="nightMode">&nbsp; Enable night theme</label></div>');
+                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"nightMode\">&nbsp; Enable night theme</label></div>";
+                    appendHtml(nightModeGroup, html);
                 }
 
                 if (userSettings.auto_open_lists === 1) {
-                    $('#autoOpenListsGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoOpenLists" checked>&nbsp; Automatically open lists <a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a></label></div>');
+                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"autoOpenLists\" checked>&nbsp; Automatically open lists <a id=\"autoOpenListsTooltip\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"When you select a link list from the dropdown, it will be automatically opened.\">(?)</a></label></div>";
+                    appendHtml(autoOpenListsGroup, html);
                 } else {
-                    $('#autoOpenListsGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoOpenLists">&nbsp; Automatically open lists <a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a></label></div>');
+                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"autoOpenLists\">&nbsp; Automatically open lists <a id=\"autoOpenListsTooltip\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"When you select a link list from the dropdown, it will be automatically opened.\">(?)</a></label></div>";
+                    appendHtml(autoOpenListsGroup, html);
                 }
 
                 if (userSettings.new_tabs_active === 1) {
-                    $('#activeNewTabsGroup').append('<div class="checkbox"><label><input type="checkbox" id="activeNewTabs" checked>&nbsp; Set new tabs as Active</label></div>');
+                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"activeNewTabs\" checked>&nbsp; Set new tabs as Active</label></div>";
+                    appendHtml(activeNewTabsGroup, html);
                 } else {
-                    $('#activeNewTabsGroup').append('<div class="checkbox"><label><input type="checkbox" id="activeNewTabs">&nbsp; Set new tabs as Active</label></div>');
+                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"activeNewTabs\">&nbsp; Set new tabs as Active</label></div>";
+                    appendHtml(activeNewTabsGroup, html);
                 }
 
                 if (userSettings.auto_load_into_textarea === 1) {
-                    $('#autoLoadIntoTextAreaGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoLoadIntoTextArea" checked>&nbsp; When a list is selected, automatically open it into the text box</label></div>');
+                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"autoLoadIntoTextArea\" checked>&nbsp; When a list is selected, automatically open it into the text box</label></div>";
+                    appendHtml(autoLoadIntoTextAreaGroup, html);
                 } else {
-                    $('#autoLoadIntoTextAreaGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoLoadIntoTextArea">&nbsp; When a list is selected, automatically open it into the text box</label></div>');
+                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"autoLoadIntoTextArea\">&nbsp; When a list is selected, automatically open it into the text box</label></div>";
+                    appendHtml(autoLoadIntoTextAreaGroup, html);
+
                 }
             }
-
             if (userSettings.default_list_open !== -1) {
                 selectedListID = userSettings.default_list_open;
             }
         }
     }
     if (!settingsObjPresent) {
-        $('#nightModeGroup').append('<div class="checkbox"><label><input type="checkbox" id="nightMode">&nbsp; Enable night theme</label></div>');
-        $('#autoOpenListsGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoOpenLists">&nbsp; Automatically open lists <a id="autoOpenListsTooltip" data-toggle="tooltip" data-placement="top" title="When you select a link list from the dropdown, it will be automatically opened.">(?)</a></label></div>');
-        $('#activeNewTabsGroup').append('<div class="checkbox"><label><input type="checkbox" id="activeNewTabs">&nbsp; Set new tabs as Active</label></div>');
-        $('#autoLoadIntoTextAreaGroup').append('<div class="checkbox"><label><input type="checkbox" id="autoLoadIntoTextArea">&nbsp; When a list is selected, automatically open it into the text box</label></div>');
-
+        const nightModeHTML = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"nightMode\">&nbsp; Enable night theme</label></div>";
+        appendHtml(nightModeGroup, nightModeHTML);
+        const autoOpenListsHTML = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"autoOpenLists\">&nbsp; Automatically open lists <a id=\"autoOpenListsTooltip\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"When you select a link list from the dropdown, it will be automatically opened.\">(?)</a></label></div>";
+        appendHtml(autoOpenListsGroup, autoOpenListsHTML);
+        const activeNewTabsHTML = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"activeNewTabs\">&nbsp; Set new tabs as Active</label></div>";
+        appendHtml(activeNewTabsGroup, activeNewTabsHTML);
+        const autoLoadIntoTextAreaHTML = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"autoLoadIntoTextArea\">&nbsp; When a list is selected, automatically open it into the text box</label></div>";
+        appendHtml(autoLoadIntoTextAreaGroup, autoLoadIntoTextAreaHTML);
     }
     for (let i = 0; i < localStorage.length; i++) {
         const tempStorageArray = loadList(localStorage.key(i));
         try {
             const parsedList = JSON.parse(tempStorageArray);
             if (parsedList.object_description === "list_storage") {
-                $('#defaultList').append('<option id="' + parsedList.list_id + '">' + parsedList.list_name + '</option>');
+                appendHtml(document.getElementById('defaultList'), '<option id="' + parsedList.list_id + '">' + parsedList.list_name + '</option>');
             }
             if (parsedList.object_description === "user_settings") {
                 currentlyOpenedTabsSetting = parsedList.currently_opened_tabs_display;
@@ -126,12 +145,8 @@ $(document).ready(function () {
             console.log(e);
         }
     }
-    $("#defaultList option[id=" + selectedListID + "]").prop('selected', true);
-    $("#customTheme option[id=" + selectedTheme + "]").prop('selected', true);
-    $("#currentlyOpenedSetting option[id=" + currentlyOpenedTabsSetting + "]").prop('selected', true);
-    $("#nonURLHandlerSetting option[id=" + nonURLHandlerSetting + "]").prop('selected', true);
-    $("#selectedSearchEngineSetting option[id=" + searchEngineSetting + "]").prop('selected', true);
-    $("#buttonLookSetting option[id=" + buttonLookSetting + "]").prop('selected', true);
+    setActiveSelectOptions(selectedListID, selectedTheme, currentlyOpenedTabsSetting, nonURLHandlerSetting, searchEngineSetting, buttonLookSetting);
+
     document.getElementById("nightMode").addEventListener('change', (e) => {
         const isChecked = document.getElementById("nightMode").checked;
         if (isChecked) {
@@ -149,19 +164,19 @@ $(document).ready(function () {
             }
         }
     });
-});
+})();
 
 function isNumber(varToTest) {
     return !isNaN(parseFloat(varToTest))
 }
 
 function initSettingsSave() {
-    const $tabCeationDelaySelector = $('#tabCreationDelay');
-    const $nightModeSelector = $('#nightMode');
-    const $autoOpenListsSelector = $('#autoOpenLists');
-    const $activeNewTabsSelector = $('#activeNewTabs');
-    const $autoLoadIntoTextareaSelector = $('#autoLoadIntoTextArea');
-    const tabCreationDelay = parseInt($tabCeationDelaySelector.val());
+    const tabCreationDelayElement = document.getElementById('tabCreationDelay');
+    const nightModeElement = document.getElementById('nightMode');
+    const autoOpenListsElement = document.getElementById('autoOpenLists');
+    const activeNewTabsElement = document.getElementById('activeNewTabs');
+    const autoLoadIntoTextareaElement = document.getElementById('autoLoadIntoTextArea');
+    const tabCreationDelay = parseInt(tabCreationDelayElement.value);
     let nightMode = 0;
     let autoOpenLists = 0;
     let activeNewTabs = 0;
@@ -172,16 +187,16 @@ function initSettingsSave() {
     const nonURLHandlerSetting = getNonURLHandlerSetting();
     const searchEngineSetting = getSearchEngineSetting();
     const buttonLookSetting = getButtonLookSetting();
-    if ($nightModeSelector.is(":checked")) {
+    if (nightModeElement.checked) {
         nightMode = 1;
     }
-    if ($autoOpenListsSelector.is(":checked")) {
+    if (autoOpenListsElement.checked) {
         autoOpenLists = 1;
     }
-    if ($activeNewTabsSelector.is(":checked")) {
+    if (activeNewTabsElement.checked) {
         activeNewTabs = 1;
     }
-    if ($autoLoadIntoTextareaSelector.is(":checked")) {
+    if (autoLoadIntoTextareaElement.checked) {
         autoLoadIntoTextArea = 1;
     }
     if (!(isNumber(tabCreationDelay)) || tabCreationDelay < 0) {
@@ -250,30 +265,49 @@ function openExport() {
     }
 }
 
+function setActiveSelectOptions(selectedListID, selectedTheme, currentlyOpenedTabsSetting, nonURLHandlerSetting, searchEngineSetting, buttonLookSetting) {
+    setActive(document.getElementById('defaultList'), selectedListID);
+    setActive(document.getElementById('customTheme'), selectedTheme);
+    setActive(document.getElementById('currentlyOpenedSetting'), currentlyOpenedTabsSetting);
+    setActive(document.getElementById('nonURLHandlerSetting'), nonURLHandlerSetting);
+    setActive(document.getElementById('selectedSearchEngineSetting'), searchEngineSetting);
+    setActive(document.getElementById('buttonLookSetting'), buttonLookSetting);
+}
+
+function setActive(selectEl, id) {
+    let counter = 0;
+    for (let opt of selectEl.options) {
+        if (opt.id === String(id)) {
+            selectEl.selectedIndex = counter;
+        }
+        counter++;
+    }
+}
+
 function getSelectedList() {
-    return $("#defaultList option:selected").html();
+    return document.getElementById('defaultList').options[document.getElementById('defaultList').selectedIndex].text;
 }
 
 function getSelectedListID() {
-    return $('select[id="defaultList"] option:selected').attr('id');
+    return document.getElementById('defaultList').options[document.getElementById('defaultList').selectedIndex].id;
 }
 
 function getSelectedTheme() {
-    return $('select[id="customTheme"] option:selected').attr('id');
+    return document.getElementById('customTheme').options[document.getElementById('customTheme').selectedIndex].id;
 }
 
 function getCurrentlyOpenedTabsSetting() {
-    return $('select[id="currentlyOpenedSetting"] option:selected').attr('id');
+    return document.getElementById('currentlyOpenedSetting').options[document.getElementById('currentlyOpenedSetting').selectedIndex].id;
 }
 
 function getNonURLHandlerSetting() {
-    return $('select[id="nonURLHandlerSetting"] option:selected').attr('id');
+    return document.getElementById('nonURLHandlerSetting').options[document.getElementById('nonURLHandlerSetting').selectedIndex].id;
 }
 
 function getSearchEngineSetting() {
-    return $('select[id="selectedSearchEngineSetting"] option:selected').attr('id');
+    return document.getElementById('selectedSearchEngineSetting').options[document.getElementById('selectedSearchEngineSetting').selectedIndex].id;
 }
 
 function getButtonLookSetting() {
-    return $('select[id="buttonLookSetting"] option:selected').attr('id');
+    return document.getElementById('buttonLookSetting').options[document.getElementById('buttonLookSetting').selectedIndex].id;
 }

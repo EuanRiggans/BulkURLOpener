@@ -277,7 +277,7 @@ function removeList(id, noAlert) {
         try {
             const parsedList = JSON.parse(tempArray);
             if (parsedList.list_id === parseInt(id)) {
-                localStorage.removeItem(localStorage.key(i));
+                document.getElementById(id).remove();
                 $('select option[id="' + id + '"]').remove();
                 if (!(noAlert)) {
                     alert("List successfully deleted");
@@ -483,5 +483,13 @@ function switchOutlineButtons() {
     for (let element of buttonsToSwitch) {
         element.classList.add("btn-dark");
         element.classList.remove("btn-outline-dark");
+    }
+}
+
+function appendHtml(el, str) {
+    const div = document.createElement('div');
+    div.innerHTML = str;
+    while (div.children.length > 0) {
+        el.appendChild(div.children[0]);
     }
 }

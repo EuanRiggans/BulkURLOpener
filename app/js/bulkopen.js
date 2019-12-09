@@ -412,7 +412,7 @@ function editSelectedList() {
  * @returns {string | jQuery}   Selected list name
  */
 function getSelectedList() {
-    return $("#savedLists option:selected").html();
+    return document.getElementById('savedLists').options[document.getElementById('savedLists').selectedIndex].text;
 }
 
 /**
