@@ -52,7 +52,7 @@ function prependHttpIfNotExist(url) {
     return url;
 }
 
-function linksIteratorProcessURL(url) {
+function linksIteratorProcessURL(url, last = false) {
     let ignoreURL = false;
     if (!isProbablyUrl(url) && getSetting('non_url_handler') === "searchForString") {
         url = encodeSearchQuery(url);
@@ -68,7 +68,7 @@ function linksIteratorProcessURL(url) {
     }
     if (!ignoreURL) {
         url = prependHttpIfNotExist(url);
-        const openAsActive = getSetting("new_tabs_active") === 1;
+        const openAsActive = getSetting("new_tabs_active") === 1 && last;
         if (checkHostType() === "firefox") {
             browser.tabs.create({
                 'active': openAsActive,
@@ -200,7 +200,7 @@ function getCurrentVersion() {
         manifestData = chrome.runtime.getManifest();
         return (manifestData.version);
     } else {
-        return "1.7.0";
+        return "1.7.1";
     }
 }
 
