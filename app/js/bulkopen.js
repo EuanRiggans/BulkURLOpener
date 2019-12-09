@@ -212,8 +212,9 @@ function linksIterator(i, strings, tabCreationDelay) {
     if (strings[i] === '') {
         return;
     }
+    const last = strings[i + 1] === undefined;
     let url = strings[i];
-    linksIteratorProcessURL(url);
+    linksIteratorProcessURL(url, last);
     i++;
     if (i < strings.length) {
         setTimeout(linksIterator, tabCreationDelay, i, strings, tabCreationDelay);
