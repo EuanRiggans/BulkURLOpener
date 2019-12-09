@@ -1,6 +1,6 @@
 {
   "name": "bulkurlopener",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Desktop version of the Bulk URL Opener browser extension",
   "main": "main.js",
   "scripts": {
