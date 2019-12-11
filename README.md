@@ -35,7 +35,6 @@ electron .
 
 ## To Do List
 
-- Make version that runs in the browser, rather than on desktop / browser addons
 - Completely remove dependency on Jquery.
 - Improve regex extraction of URLS.
 - Refactor some of the old code which is quite clunky
