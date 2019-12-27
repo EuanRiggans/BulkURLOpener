@@ -7,8 +7,24 @@ const {
 // be closed automatically when the JavaScript object is garbage collected.
 let win;
 
+// Array containing all of the cli args that can be used
+const validArgs = [
+    '-v',
+    '--version'
+];
+
+// Object containing the long and short versions of cli arguments
+const argDefinitions = {
+    'version': {
+        short: '-v',
+        long: '--version'
+    }
+};
+
+// Array of the arguments (if any) provided by the user
+let receivedArgs = [];
+
 function createWindow() {
-    // Create the browser window.
     win = new BrowserWindow({
         width: 1000,
         height: 620,
@@ -23,36 +39,104 @@ function createWindow() {
     // Open the DevTools. Automated test to make sure this is closed(?)
     // win.webContents.openDevTools()
 
-    // Emitted when the window is closed.
     win.on('closed', () => {
-        // Dereference the window object, usually you would store windows
-        // in an array if your app supports multi windows, this is the time
-        // when you should delete the corresponding element.
+        /**
+         * Dereference the window object, usually you would store windows in an array if your app supports multi
+         * windows, this is the time when you should delete the corresponding element.
+         */
         win = null
     })
 }
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', createWindow);
+/**
+ * This method will be called when Electron has finished initialization and is ready to create browser windows.
+ * Some APIs can only be used after this event occurs.
+ */
+app.on('ready', () => {
+    let isCalledViaCLI = checkIfCalledViaCLI(process.argv);
+    if (isCalledViaCLI) {
+        win = new BrowserWindow({show: false, width: 0, height: 0});
+        win.hide();
+        processArgs(receivedArgs);
+        win.close();
+    } else {
+        createWindow();
+    }
+});
 
-// Quit when all windows are closed.
+/**
+ * Quit when all windows are closed.
+ */
 app.on('window-all-closed', () => {
-    // On macOS it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
     if (process.platform !== 'darwin') {
         app.quit()
     }
 });
 
 app.on('activate', () => {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (win === null) {
         createWindow()
     }
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+/**
+ * Checks if the app has been called from the cli (With valid arguments / flags)
+ * @param args          The arguments provided to the app
+ * @returns {boolean}   Whether called from CLI with valid arguments or not
+ */
+function checkIfCalledViaCLI(args) {
+    return !!(args && args.length > 1 && checkValidArgs(args));
+
+}
+
+/**
+ * Checks if the arguments provided to the app are valid (Valid meaning the given argument actually does something)
+ * @param args          Array of arguments
+ * @returns {boolean}   True if any valid argument is found in array
+ */
+function checkValidArgs(args) {
+    let valid = false;
+    for (let arg in args) {
+        if (args.hasOwnProperty(arg)) {
+            if (validArgs.includes(args[arg])) {
+                receivedArgs.push(args[arg]);
+                valid = true;
+            }
+        }
+    }
+    return valid;
+}
+
+/**
+ * Will loop through all arguments provided, and will process the argument if the use is found
+ * @param args  Arguments to process
+ */
+function processArgs(args) {
+    for (let arg in args) {
+        if (args.hasOwnProperty(arg)) {
+            switch (getArgumentDefinitionFromArgument(args[arg])) {
+                case 'version':
+                    console.log(app.getVersion());
+                    break;
+                default:
+                    console.warn("Unable to find the use of argument: " + args[arg]);
+            }
+        }
+    }
+}
+
+/**
+ * Gets the argument name from the argument provided. For example, if provided with '-v' will return 'version'
+ * @param argument              The argument
+ * @returns {string|undefined}  Argument name. Undefined if not found.
+ */
+function getArgumentDefinitionFromArgument(argument) {
+    for (let arg in argDefinitions) {
+        if (argDefinitions.hasOwnProperty(arg)) {
+            if (argDefinitions[arg].short === argument || argDefinitions[arg].long === argument) {
+                return arg;
+            }
+        }
+    }
+    return undefined;
+}
