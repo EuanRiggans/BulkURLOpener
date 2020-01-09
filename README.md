@@ -7,8 +7,7 @@
 - Chrome: https://chrome.google.com/webstore/detail/bulk-url-opener/kgnfciolbjojfdbbelbdbhhocjmhenep
 - Firefox: https://addons.mozilla.org/en-GB/firefox/addon/bulkurlopener/
 - Desktop: https://github.com/EuanRiggans/BulkURLOpener/releases
-- Desktop (Snap): https://snapcraft.io/bulkurlopener
-
+- Desktop (Snap): https://snapcraft.io/bulkurlopener [![bulkurlopener](https://snapcraft.io//bulkurlopener/badge.svg)](https://snapcraft.io/bulkurlopener)
 ## Running From Source
 
 #### Browser Extension
