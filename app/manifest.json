@@ -14,6 +14,10 @@
     "default_title": "Bulk URL Open",
     "default_popup": "popup.html"
   },
+  "options_ui": {
+    "page": "settings.html",
+    "open_in_tab": true
+  },
   "icons": {
     "16": "icon/16.png",
     "32": "icon/32.png",
