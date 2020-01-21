@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Requirements: zip, npm, web-ext, sha256sum, Electron Builder
+# Requirements: zip, npm, web-ext, sha256sum, Electron Builder, wine
 
 # Checking requirements are met.
 
