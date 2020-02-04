@@ -1,5 +1,4 @@
 (() => {
-
     document.getElementById("help-footer").innerText = getFooterText();
 
     document.getElementById('openGithub').addEventListener('click', () => {
@@ -13,7 +12,7 @@
     });
 })();
 
-$('#closeModal').click(function () {
+document.getElementById('closeModal').addEventListener('click', () => {
     if (checkHostType() === "firefox") {
         alert("Unable to close window due to Firefox security policy. Please close this window manually.");
         // window.close();
@@ -23,7 +22,8 @@ $('#closeModal').click(function () {
         window.location.replace("popup.html");
     }
 });
-$('#openChangelog').click(function () {
+
+document.getElementById('openChangelog').addEventListener('click', () => {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
