@@ -1,4 +1,4 @@
-$(document).ready(function () {
+(() => {
     $listNameSelector = $('#listName');
     if (!(document.location.search.length) || getParameterByName('ID') == null || getParameterByName('name') == null) {
         alert("No list data present.");
@@ -10,8 +10,8 @@ $(document).ready(function () {
             window.location.replace("popup.html");
         }
     }
-    $('#listID').val(getParameterByName('ID'));
-    $listNameSelector.val(getParameterByName('name'));
+    document.getElementById('listID').value = getParameterByName('ID');
+    document.getElementById('listName').value = getParameterByName('name');
     const id = getParameterByName('ID');
     for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
@@ -19,7 +19,7 @@ $(document).ready(function () {
             const parsedList = JSON.parse(tempArray);
             if (parsedList.list_id === parseInt(id)) {
                 const listTextArea = document.getElementById("list");
-                $('#list').val('');
+                document.getElementById('list').value = "";
                 for (const link of parsedList.list_links) {
                     listTextArea.value += link + "\n";
                 }
@@ -29,7 +29,7 @@ $(document).ready(function () {
 
         }
     }
-    $('#closeModal').click(function () {
+    document.getElementById('closeModal').addEventListener('click', () => {
         if (checkHostType() === "firefox") {
             alert("Unable to close window due to Firefox security policy. Please close this window manually.");
             // window.close();
@@ -39,8 +39,8 @@ $(document).ready(function () {
             window.location.replace("popup.html");
         }
     });
-    $('#saveList').click(function () {
-        const listID = $('#listID').val();
+    document.getElementById('saveList').addEventListener('click', () => {
+        const listID = document.getElementById('listID').value;
         removeList(listID, true);
         const newList = {
             object_description: "list_storage",
@@ -54,9 +54,9 @@ $(document).ready(function () {
 
         }
         newList.list_name = $listNameSelector.val();
-        const lines = $('#list').val().split('\n');
-        for(let i = 0; i < lines.length; i++) {
-            if(!(lines[i]) == "\n") {
+        const lines = document.getElementById("list").value.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+            if (!(lines[i]) == "\n") {
                 console.log(lines[i]);
                 newList.list_links.push(lines[i]);
             }
@@ -70,5 +70,5 @@ $(document).ready(function () {
         }
         saveList(listID, newList);
     });
-    $('#listName').select();
-});
+    document.getElementById('listName').focus();
+})();
