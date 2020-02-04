@@ -1,16 +1,17 @@
-$(() => {
+(() => {
     upgradeToJSONFormatting();
     createSettings();
     if (getSetting('auto_open_lists') === 1) {
         if (getSetting('custom_theme') === "fluentDesignBootstrap") {
-            $('#savedListsOptions').after("<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"overrideAutoOpen\"><label class=\"form-check-label\" for=\"overrideAutoOpen\">&nbsp;Override Auto Open</label></div>");
+            let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"overrideAutoOpen\"><label class=\"form-check-label\" for=\"overrideAutoOpen\">&nbsp;Override Auto Open</label></div>"
+            appendHtml(document.getElementById('controls'), html);
         } else {
-            $('#savedListsOptions').after("<label for=\"overrideAutoOpen\"><input type=\"checkbox\" id=\"overrideAutoOpen\">&nbsp;Override Auto Open</label>");
+            let html = "<label for=\"overrideAutoOpen\"><input type=\"checkbox\" id=\"overrideAutoOpen\">&nbsp;Override Auto Open</label>";
+            appendHtml(document.getElementById('controls'), html);
         }
-        $(document).on('change', '#savedLists', function (e) {
+        document.getElementById('savedLists').addEventListener('change', () => {
             if (document.getElementById('overrideAutoOpen')) {
-                const $overrideSelector = $('#overrideAutoOpen');
-                if (!$overrideSelector.is(':checked')) {
+                if (!(document.getElementById('overrideAutoOpen').checked)) {
                     if (getSetting('auto_open_lists') === 1) {
                         openSelectedList();
                         openTextAreaList();
@@ -31,12 +32,20 @@ $(() => {
         try {
             const parsedList = JSON.parse(tempStorageArray);
             if (parsedList.object_description === "list_storage") {
-                $('#savedLists').append('<option id="' + parsedList.list_id + '">' + parsedList.list_name + '</option>');
+                let html = '<option id="' + parsedList.list_id + '">' + parsedList.list_name + '</option>';
+                appendHtml(document.getElementById('savedLists'), html);
             }
         } catch (e) {
 
         }
     }
+
+    document.getElementById('savedLists').addEventListener('change', () => {
+        if (getSetting('auto_load_into_textarea') === 1) {
+            openSelectedList();
+        }
+    });
+
     if (getParameterByName("popup", window.location) === "true") {
         document.getElementById("openInPopup").remove();
     } else {
@@ -85,14 +94,8 @@ $(() => {
         document.getElementById("copyCurrentOpen").remove();
     }
 
-    $(document).on('change', '#savedLists', function (e) {
-        if (getSetting('auto_load_into_textarea') === 1) {
-            openSelectedList();
-        }
-    });
-
     document.getElementById("version").textContent = "- Version " + getCurrentVersion();
-});
+})();
 
 /**
  *  Will open all of the urls in the textarea
@@ -156,10 +159,6 @@ function clearLinksList() {
     const listTextArea = document.getElementById("list");
     listTextArea.value = "";
 }
-
-String.prototype.trim = function () {
-    return this.replace(/^\s+|\s+$/g, '');
-};
 
 /**
  * Handles the opening of lists
@@ -225,7 +224,7 @@ function linksIterator(i, strings, tabCreationDelay) {
  * Opens the page to create a new list of urls
  */
 function openSaveNewListDialog() {
-    const lines = $('#list').val().split('\n');
+    const lines = document.getElementById("list").value.split('\n');
     const tempList = {
         object_description: "temp_storage",
         list_links: []
@@ -265,7 +264,7 @@ function openSelectedList() {
             const parsedList = JSON.parse(tempArray);
             if (parsedList.list_id === parseInt(getSelectedListID())) {
                 const listTextArea = document.getElementById("list");
-                $('#list').val('');
+                clearLinksTextArea();
                 for (const link of parsedList.list_links) {
                     listTextArea.value += link + "\n";
                 }
@@ -288,7 +287,7 @@ function openListByID(id) {
             const parsedList = JSON.parse(tempArray);
             if (parsedList.list_id === parseInt(id)) {
                 const listTextArea = document.getElementById("list");
-                $('#list').val('');
+                clearLinksTextArea();
                 for (const link of parsedList.list_links) {
                     listTextArea.value += link + "\n";
                 }
@@ -420,7 +419,7 @@ function getSelectedList() {
  * @returns {string | jQuery}   List id
  */
 function getSelectedListID() {
-    return $('select[id="savedLists"] option:selected').attr('id');
+    return document.getElementById('savedLists').options[document.getElementById('savedLists').selectedIndex].id;
 }
 
 /**
@@ -519,6 +518,13 @@ function createSettings() {
 }
 
 /**
+ * Clears all data from the text area
+ */
+function clearLinksTextArea() {
+    document.getElementById("list").value = "";
+}
+
+/**
  * Automatically converted lists from pre 1.1.0 into the new list format. Now for all versions 1.1.4 > lists are stored using json, so this list has been deprecated
  * @deprecated
  */
@@ -539,3 +545,7 @@ function convertOldURLLists() {
         }
     }
 }
+
+String.prototype.trim = function () {
+    return this.replace(/^\s+|\s+$/g, '');
+};
