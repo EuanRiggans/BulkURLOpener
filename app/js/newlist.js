@@ -1,9 +1,9 @@
-$(document).ready(function () {
-    const $listNameSelector = $('#listName');
+(() => {
+    const listNameElement = document.getElementById('listName');
     for (let i = 0; i < localStorage.length; i++){
         if (localStorage.key(i) === "temp") {
             const listTextArea = document.getElementById("list");
-            $('#list').val('');
+            document.getElementById('list').value = "";
             try {
                 const parsedList = JSON.parse(loadList(localStorage.key(i)));
                 for (const link of parsedList.list_links) {
@@ -16,7 +16,7 @@ $(document).ready(function () {
             listTextArea.select();
         }
     }
-    $('#closeModal').click(function () {
+    document.getElementById('closeModal').addEventListener('click', () => {
         if (checkHostType() === "firefox") {
             alert("Unable to close window due to Firefox security policy. Please close this window manually.");
             // window.close();
@@ -26,8 +26,7 @@ $(document).ready(function () {
             window.location.replace("popup.html");
         }
     });
-    $('#saveList').click(function () {
-        const $linksListSelector = $('#list');
+    document.getElementById('saveList').addEventListener('click', () => {
         const listID = getNextAvailableID();
         const newList = {
             object_description: "list_storage",
@@ -36,22 +35,22 @@ $(document).ready(function () {
             list_links: []
         };
         newList.list_id = listID;
-        newList.list_name = $listNameSelector.val();
-        const lines = $linksListSelector.val().split('\n');
+        newList.list_name = listNameElement.value;
+        const lines = document.getElementById("list").value.split('\n');
         for(let i = 0; i < lines.length; i++) {
             if(!(lines[i]) == "\n") {
                 console.log(lines[i]);
                 newList.list_links.push(lines[i]);
             }
         }
-        if ($linksListSelector.val().trim() === "") {
+        if (document.getElementById('list').value.trim() === "") {
             alert("No URLs given for the list!");
             return;
-        } else if($('#listName').val().trim() === "") {
+        } else if (document.getElementById('list').value.trim() === "") {
             alert("You need to give a name for your list!");
             return;
         }
         saveList(listID, newList);
     });
-    $listNameSelector.select();
-});
+    listNameElement.focus();
+})();
