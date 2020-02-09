@@ -25,7 +25,7 @@ If you have any relevant screenshots, please add them.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. Windows 10, Ubuntu 18.04]
- - Browser / Desktop version of app [e.g. chrome, firefox]
+ - Browser / Desktop version of app. Are you running the app as a browser extension / addon, or are you running it as a desktop app.
  - Browser (If applicable) [e.g. chrome, firefox]
  - Version [e.g. 1.7.0]
 
