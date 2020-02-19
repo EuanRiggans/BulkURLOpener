@@ -494,7 +494,8 @@ function createSettings() {
                 search_engine: "googleEngine",
                 new_tabs_active: 0,
                 auto_load_into_textarea: 0,
-                button_look: "alwaysOutline"
+                button_look: "alwaysOutline",
+                open_on_launch: "no_list"
             };
             localStorage.setItem("settings", JSON.stringify(newSettings));
             return;
@@ -511,7 +512,8 @@ function createSettings() {
             search_engine: "googleEngine",
             new_tabs_active: 0,
             auto_load_into_textarea: 0,
-            button_look: "alwaysOutline"
+            button_look: "alwaysOutline",
+            open_on_launch: "no_list"
         };
         localStorage.setItem("settings", JSON.stringify(newSettings));
     }

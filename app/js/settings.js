@@ -33,6 +33,7 @@
     let nonURLHandlerSetting = "searchForString";
     let searchEngineSetting = "googleEngine";
     let buttonLookSetting = "alwaysOutline";
+    let openListOnStartup = "no_list";
     tabCreationDelayElement.value = 0;
     let settingsObjPresent = false;
 
@@ -133,6 +134,7 @@
             const parsedList = JSON.parse(tempStorageArray);
             if (parsedList.object_description === "list_storage") {
                 appendHtml(document.getElementById('defaultList'), '<option id="' + parsedList.list_id + '">' + parsedList.list_name + '</option>');
+                appendHtml(document.getElementById('loadListOnStartup'), '<option id="' + parsedList.list_id + '">' + parsedList.list_name + '</option>');
             }
             if (parsedList.object_description === "user_settings") {
                 currentlyOpenedTabsSetting = parsedList.currently_opened_tabs_display;
@@ -140,12 +142,14 @@
                 nonURLHandlerSetting = parsedList.non_url_handler;
                 searchEngineSetting = parsedList.search_engine;
                 buttonLookSetting = parsedList.button_look;
+                openListOnStartup = parsedList.open_on_launch;
+
             }
         } catch (e) {
             console.log(e);
         }
     }
-    setActiveSelectOptions(selectedListID, selectedTheme, currentlyOpenedTabsSetting, nonURLHandlerSetting, searchEngineSetting, buttonLookSetting);
+    setActiveSelectOptions(selectedListID, selectedTheme, currentlyOpenedTabsSetting, nonURLHandlerSetting, searchEngineSetting, buttonLookSetting, openListOnStartup);
 
     document.getElementById("nightMode").addEventListener('change', (e) => {
         const isChecked = document.getElementById("nightMode").checked;
@@ -187,6 +191,7 @@ function initSettingsSave() {
     const nonURLHandlerSetting = getNonURLHandlerSetting();
     const searchEngineSetting = getSearchEngineSetting();
     const buttonLookSetting = getButtonLookSetting();
+    const openListOnStartup = getLoadListOnStartupSetting();
     if (nightModeElement.checked) {
         nightMode = 1;
     }
@@ -219,7 +224,8 @@ function initSettingsSave() {
         search_engine: "googleEngine",
         new_tabs_active: 0,
         auto_load_into_textarea: 0,
-        button_look: "alwaysOutline"
+        button_look: "alwaysOutline",
+        open_on_launch: "no_list"
     };
     userSettings.tab_creation_delay = tabCreationDelay;
     userSettings.night_mode = nightMode;
@@ -232,6 +238,7 @@ function initSettingsSave() {
     userSettings.new_tabs_active = activeNewTabs;
     userSettings.auto_load_into_textarea = autoLoadIntoTextArea;
     userSettings.button_look = buttonLookSetting;
+    userSettings.open_on_launch = openListOnStartup;
     saveSettings(userSettings);
 }
 
@@ -265,13 +272,14 @@ function openExport() {
     }
 }
 
-function setActiveSelectOptions(selectedListID, selectedTheme, currentlyOpenedTabsSetting, nonURLHandlerSetting, searchEngineSetting, buttonLookSetting) {
+function setActiveSelectOptions(selectedListID, selectedTheme, currentlyOpenedTabsSetting, nonURLHandlerSetting, searchEngineSetting, buttonLookSetting, openListOnStartup) {
     setActive(document.getElementById('defaultList'), selectedListID);
     setActive(document.getElementById('customTheme'), selectedTheme);
     setActive(document.getElementById('currentlyOpenedSetting'), currentlyOpenedTabsSetting);
     setActive(document.getElementById('nonURLHandlerSetting'), nonURLHandlerSetting);
     setActive(document.getElementById('selectedSearchEngineSetting'), searchEngineSetting);
     setActive(document.getElementById('buttonLookSetting'), buttonLookSetting);
+    setActive(document.getElementById('loadListOnStartup'), openListOnStartup);
 }
 
 function setActive(selectEl, id) {
@@ -310,4 +318,8 @@ function getSearchEngineSetting() {
 
 function getButtonLookSetting() {
     return document.getElementById('buttonLookSetting').options[document.getElementById('buttonLookSetting').selectedIndex].id;
+}
+
+function getLoadListOnStartupSetting() {
+    return document.getElementById('loadListOnStartup').options[document.getElementById('loadListOnStartup').selectedIndex].id;
 }

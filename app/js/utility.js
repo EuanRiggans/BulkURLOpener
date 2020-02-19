@@ -153,6 +153,8 @@ function getSetting(setting) {
                     return userSettings.auto_load_into_textarea;
                 case "button_look":
                     return userSettings.button_look;
+                case "open_on_launch":
+                    return userSettings.open_on_launch;
                 default:
                     break;
             }
