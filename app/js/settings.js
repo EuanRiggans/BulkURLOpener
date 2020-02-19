@@ -27,6 +27,7 @@
     const autoOpenListsGroup = document.getElementById('autoOpenListsGroup');
     const activeNewTabsGroup = document.getElementById('activeNewTabsGroup');
     const autoLoadIntoTextAreaGroup = document.getElementById('autoLoadIntoTextAreaGroup');
+    const loadTabOnFocusGroup = document.getElementById('loadTabOnFocusGroup');
     let selectedListID = -1;
     let selectedTheme = "defaultBootstrap";
     let currentlyOpenedTabsSetting = "allOpenedTabs";
@@ -79,6 +80,14 @@
                     let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"autoLoadIntoTextArea\"><label class=\"form-check-label\" for=\"autoLoadIntoTextArea\">&nbsp; When a list is selected, automatically open it into the text box</label></div>";
                     appendHtml(autoLoadIntoTextAreaGroup, html);
                 }
+
+                if (userSettings.load_on_focus === 1) {
+                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"delayUntilFocus\" checked><label class=\"form-check-label\" for=\"delayUntilFocus\">&nbsp; Delay loading tab until tab is selected</label></div>";
+                    appendHtml(loadTabOnFocusGroup, html);
+                } else {
+                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"delayUntilFocus\"><label class=\"form-check-label\" for=\"delayUntilFocus\">&nbsp; Delay loading tab until tab is selected</label></div>";
+                    appendHtml(loadTabOnFocusGroup, html);
+                }
             } else {
                 if (userSettings.night_mode === 1) {
                     let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"nightMode\" checked>&nbsp; Enable night theme</label></div>";
@@ -110,7 +119,14 @@
                 } else {
                     let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"autoLoadIntoTextArea\">&nbsp; When a list is selected, automatically open it into the text box</label></div>";
                     appendHtml(autoLoadIntoTextAreaGroup, html);
+                }
 
+                if (userSettings.load_on_focus === 1) {
+                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"delayUntilFocus\" checked>&nbsp; Delay tab loading until tab is selected</label></div>";
+                    appendHtml(loadTabOnFocusGroup, html);
+                } else {
+                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"delayUntilFocus\">&nbsp; Delay tab loading until tab is selected</label></div>";
+                    appendHtml(loadTabOnFocusGroup, html);
                 }
             }
             if (userSettings.default_list_open !== -1) {
@@ -180,11 +196,13 @@ function initSettingsSave() {
     const autoOpenListsElement = document.getElementById('autoOpenLists');
     const activeNewTabsElement = document.getElementById('activeNewTabs');
     const autoLoadIntoTextareaElement = document.getElementById('autoLoadIntoTextArea');
+    const delayTabLoadingElement = document.getElementById('delayUntilFocus');
     const tabCreationDelay = parseInt(tabCreationDelayElement.value);
     let nightMode = 0;
     let autoOpenLists = 0;
     let activeNewTabs = 0;
     let autoLoadIntoTextArea = 0;
+    let delayTabLoading = 0;
     const defaultList = getSelectedListID();
     const theme = getSelectedTheme();
     const currentlyOpenedTabsSetting = getCurrentlyOpenedTabsSetting();
@@ -204,6 +222,9 @@ function initSettingsSave() {
     if (autoLoadIntoTextareaElement.checked) {
         autoLoadIntoTextArea = 1;
     }
+    if (delayTabLoadingElement.checked) {
+        delayTabLoading = 1;
+    }
     if (!(isNumber(tabCreationDelay)) || tabCreationDelay < 0) {
         alert("Your tab creation delay must be zero or a positive number!");
         return;
@@ -211,6 +232,9 @@ function initSettingsSave() {
     if (checkHostType() === "electron" && tabCreationDelay < 1) {
         alert("Tab Creation Delay must be at least one second. This is due to a limitation in the way electron opens urls.");
         return;
+    }
+    if (checkHostType() === "electron") {
+        delayTabLoading = 0;
     }
     const userSettings = {
         object_description: "user_settings",
@@ -225,7 +249,8 @@ function initSettingsSave() {
         new_tabs_active: 0,
         auto_load_into_textarea: 0,
         button_look: "alwaysOutline",
-        open_on_launch: "no_list"
+        open_on_launch: "no_list",
+        load_on_focus: 0,
     };
     userSettings.tab_creation_delay = tabCreationDelay;
     userSettings.night_mode = nightMode;
@@ -239,6 +264,7 @@ function initSettingsSave() {
     userSettings.auto_load_into_textarea = autoLoadIntoTextArea;
     userSettings.button_look = buttonLookSetting;
     userSettings.open_on_launch = openListOnStartup;
+    userSettings.load_on_focus = delayTabLoading;
     saveSettings(userSettings);
 }
 

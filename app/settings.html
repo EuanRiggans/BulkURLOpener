@@ -119,6 +119,19 @@
                 <button class="btn btn-primary" id="openExport" type="button">Export &nbsp; <i
                         class="fa fa-upload"></i></button>
             </div>
+            <hr>
+            <div id="loadOnBrowserStart">
+                <p class="setting-title">Load list on browser start</p>
+                <label for="loadListOnStartup">Should a list be loaded when the browser launches?</label>
+                <select class="form-control" id="loadListOnStartup">
+                    <option id="no_list" selected value="">Do not load a list</option>
+                </select>
+            </div>
+            <hr>
+            <div id="loadTabOnFocusGroup">
+                <p class="setting-title">Delay tab loading until tab is selected</p>
+                <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
+            </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-outline-primary" id="saveSettings" type="button">Save settings</button>

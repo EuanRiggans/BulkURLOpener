@@ -155,6 +155,8 @@ function getSetting(setting) {
                     return userSettings.button_look;
                 case "open_on_launch":
                     return userSettings.open_on_launch;
+                case "load_on_focus":
+                    return userSettings.load_on_focus;
                 default:
                     break;
             }

@@ -103,6 +103,7 @@
 function openTextAreaList() {
     openList(document.getElementById("list").value);
 }
+
 /**
  * Gets all of the urls for the currently opened tabs
  */
@@ -168,6 +169,22 @@ function openList(list) {
     const strings = list.split(/\r\n|\r|\n/);
     let tabCreationDelay = getSetting("tab_creation_delay");
     if (!(tabCreationDelay > 0) || !(strings.length > 1)) {
+        if (getSetting("load_on_focus") === 1) {
+            for (let i = 0; i < strings.length; i++) {
+                let plainURL = strings[i];
+                if (checkHostType() === "firefox") {
+                    browser.tabs.create({
+                        active: true,
+                        'url': browser.extension.getURL('delayedloading.html?url=') + encodeURI(plainURL)
+                    });
+                } else if (checkHostType() === "chrome") {
+                    chrome.tabs.create({
+                        'url': chrome.extension.getURL('delayedloading.html?url=') + encodeURI(plainURL)
+                    });
+                }
+            }
+            return;
+        }
         for (let i = 0; i < strings.length; i++) {
             if (strings[i].trim() === '') {
                 strings.splice(i, 1);
@@ -176,6 +193,8 @@ function openList(list) {
         }
         tabCreationDelay = tabCreationDelay * 1000;
         linksIterator(0, strings, tabCreationDelay);
+    } else if (getSetting("load_on_focus") === 1) {
+
     } else {
         const linksToOpen = {
             object_description: "link_to_open",
@@ -495,7 +514,8 @@ function createSettings() {
                 new_tabs_active: 0,
                 auto_load_into_textarea: 0,
                 button_look: "alwaysOutline",
-                open_on_launch: "no_list"
+                open_on_launch: "no_list",
+                load_on_focus: 0
             };
             localStorage.setItem("settings", JSON.stringify(newSettings));
             return;
@@ -513,7 +533,8 @@ function createSettings() {
             new_tabs_active: 0,
             auto_load_into_textarea: 0,
             button_look: "alwaysOutline",
-            open_on_launch: "no_list"
+            open_on_launch: "no_list",
+            load_on_focus: 0
         };
         localStorage.setItem("settings", JSON.stringify(newSettings));
     }
