@@ -16,7 +16,8 @@ body,
 #currentlyOpenedSetting,
 #nonURLHandlerSetting,
 #selectedSearchEngineSetting,
-#buttonLookSetting {
+#buttonLookSetting,
+#loadListOnStartup {
     color: #fff;
     background-color: #404040;
 }
