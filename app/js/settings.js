@@ -184,6 +184,13 @@
             }
         }
     });
+
+    if (checkHostType() === "electron") {
+        document.getElementById('loadOnBrowserStart').style.display = "none";
+        document.getElementById('loadTabOnFocusGroup').style.display = "none";
+        document.getElementById('loadOnBrowserStartGroupHR').style.display = "none";
+        document.getElementById('loadTabOnFocusGroupHR').style.display = "none";
+    }
 })();
 
 function isNumber(varToTest) {
