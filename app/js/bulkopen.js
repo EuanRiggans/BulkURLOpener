@@ -172,15 +172,17 @@ function openList(list) {
         if (getSetting("load_on_focus") === 1) {
             for (let i = 0; i < strings.length; i++) {
                 let plainURL = strings[i];
-                if (checkHostType() === "firefox") {
-                    browser.tabs.create({
-                        active: true,
-                        'url': browser.extension.getURL('delayedloading.html?url=') + encodeURI(plainURL)
-                    });
-                } else if (checkHostType() === "chrome") {
-                    chrome.tabs.create({
-                        'url': chrome.extension.getURL('delayedloading.html?url=') + encodeURI(plainURL)
-                    });
+                if (plainURL.trim() !== "") {
+                    if (checkHostType() === "firefox") {
+                        browser.tabs.create({
+                            active: true,
+                            'url': browser.extension.getURL('delayedloading.html?url=') + encodeURI(plainURL)
+                        });
+                    } else if (checkHostType() === "chrome") {
+                        chrome.tabs.create({
+                            'url': chrome.extension.getURL('delayedloading.html?url=') + encodeURI(plainURL)
+                        });
+                    }
                 }
             }
             return;
