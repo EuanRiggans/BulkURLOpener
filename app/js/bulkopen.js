@@ -193,8 +193,6 @@ function openList(list) {
         }
         tabCreationDelay = tabCreationDelay * 1000;
         linksIterator(0, strings, tabCreationDelay);
-    } else if (getSetting("load_on_focus") === 1) {
-
     } else {
         const linksToOpen = {
             object_description: "link_to_open",
