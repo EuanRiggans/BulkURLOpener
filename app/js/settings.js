@@ -1,4 +1,5 @@
 (() => {
+    createSettings();
     document.getElementById("saveSettings").addEventListener('click', (e) => {
         initSettingsSave();
     });

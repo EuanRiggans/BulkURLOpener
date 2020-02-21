@@ -208,7 +208,7 @@ function getCurrentVersion() {
         manifestData = chrome.runtime.getManifest();
         return (manifestData.version);
     } else {
-        return "1.7.1";
+        return "1.8.0";
     }
 }
 
@@ -499,5 +499,52 @@ function appendHtml(el, str) {
     div.innerHTML = str;
     while (div.children.length > 0) {
         el.appendChild(div.children[0]);
+    }
+}
+
+/**
+ *  Creates the settings json for the user if the do not have settings
+ */
+function createSettings() {
+    let settingsFound = false;
+    const settingsList = loadList("settings");
+    if (!settingsList) {
+        if (checkHostType() === "electron") {
+            const newSettings = {
+                object_description: "user_settings",
+                tab_creation_delay: 1,
+                night_mode: 0,
+                auto_open_lists: 0,
+                default_list_open: -1,
+                custom_theme: "defaultBoostrap",
+                currently_opened_tabs_display: "currentWindow",
+                non_url_handler: "searchForString",
+                search_engine: "googleEngine",
+                new_tabs_active: 0,
+                auto_load_into_textarea: 0,
+                button_look: "alwaysOutline",
+                open_on_launch: "no_list",
+                load_on_focus: 0
+            };
+            localStorage.setItem("settings", JSON.stringify(newSettings));
+            return;
+        }
+        const newSettings = {
+            object_description: "user_settings",
+            tab_creation_delay: 0,
+            night_mode: 0,
+            auto_open_lists: 0,
+            default_list_open: -1,
+            custom_theme: "defaultBoostrap",
+            currently_opened_tabs_display: "currentWindow",
+            non_url_handler: "searchForString",
+            search_engine: "googleEngine",
+            new_tabs_active: 0,
+            auto_load_into_textarea: 0,
+            button_look: "alwaysOutline",
+            open_on_launch: "no_list",
+            load_on_focus: 0
+        };
+        localStorage.setItem("settings", JSON.stringify(newSettings));
     }
 }
