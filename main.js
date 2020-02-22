@@ -10,7 +10,9 @@ let win;
 // Array containing all of the cli args that can be used
 const validArgs = [
     '-v',
-    '--version'
+    '--version',
+    '-h',
+    '--help'
 ];
 
 // Object containing the long and short versions of cli arguments
@@ -18,6 +20,10 @@ const argDefinitions = {
     'version': {
         short: '-v',
         long: '--version'
+    },
+    'help': {
+        short: '-h',
+        long: '--help'
     }
 };
 
@@ -27,13 +33,14 @@ let receivedArgs = [];
 function createWindow() {
     win = new BrowserWindow({
         width: 1000,
-        height: 620,
+        height: 640,
         webPreferences: {
             nodeIntegration: true
         },
         icon: './app/icon/128.png'
     });
     win.autoHideMenuBar = true;
+    win.removeMenu()
     win.loadFile('./app/popup.html');
 
     // Open the DevTools. Automated test to make sure this is closed(?)
@@ -117,6 +124,11 @@ function processArgs(args) {
             switch (getArgumentDefinitionFromArgument(args[arg])) {
                 case 'version':
                     console.log(app.getVersion());
+                    break;
+                case 'help':
+                    console.log('Valid command line arguments and their use:');
+                    console.log('  -v or --version        Displays the version of the app');
+                    console.log('  -h or --help           Outputs this message');
                     break;
                 default:
                     console.warn("Unable to find the use of argument: " + args[arg]);
