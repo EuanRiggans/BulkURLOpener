@@ -222,7 +222,7 @@ function getCurrentVersion() {
         manifestData = chrome.runtime.getManifest();
         return (manifestData.version);
     } else {
-        return "1.8.0";
+        return "1.8.1";
     }
 }
 

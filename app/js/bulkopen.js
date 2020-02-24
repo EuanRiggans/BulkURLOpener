@@ -383,6 +383,7 @@ function deleteList() {
     // Cannot confirm on Firefox as alerts will close popup
     if (checkHostType() === "firefox") {
         removeList(getSelectedListID());
+        return;
     }
     if (confirm("Are you sure you wish to delete the list: " + getSelectedList())) {
         removeList(getSelectedListID());
