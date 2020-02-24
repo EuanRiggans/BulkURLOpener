@@ -169,24 +169,6 @@ function openList(list) {
     const strings = list.split(/\r\n|\r|\n/);
     let tabCreationDelay = getSetting("tab_creation_delay");
     if (!(tabCreationDelay > 0) || !(strings.length > 1)) {
-        if (getSetting("load_on_focus") === 1) {
-            for (let i = 0; i < strings.length; i++) {
-                let plainURL = strings[i];
-                if (plainURL.trim() !== "") {
-                    if (checkHostType() === "firefox") {
-                        browser.tabs.create({
-                            active: true,
-                            'url': browser.extension.getURL('delayedloading.html?url=') + encodeURI(plainURL)
-                        });
-                    } else if (checkHostType() === "chrome") {
-                        chrome.tabs.create({
-                            'url': chrome.extension.getURL('delayedloading.html?url=') + encodeURI(plainURL)
-                        });
-                    }
-                }
-            }
-            return;
-        }
         for (let i = 0; i < strings.length; i++) {
             if (strings[i].trim() === '') {
                 strings.splice(i, 1);
@@ -397,6 +379,10 @@ function deleteList() {
     if (getSelectedListID() === "-1") {
         alert("You need to select a list");
         return;
+    }
+    // Cannot confirm on Firefox as alerts will close popup
+    if (checkHostType() === "firefox") {
+        removeList(getSelectedListID());
     }
     if (confirm("Are you sure you wish to delete the list: " + getSelectedList())) {
         removeList(getSelectedListID());

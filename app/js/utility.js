@@ -56,7 +56,7 @@ function prependHttpIfNotExist(url) {
     return url;
 }
 
-function linksIteratorProcessURL(url, last = false) {
+function linksIteratorProcessURL(url, last = false, delayedLoading = false) {
     let ignoreURL = false;
     if (!isProbablyUrl(url) && getSetting('non_url_handler') === "searchForString") {
         url = encodeSearchQuery(url);
@@ -71,23 +71,37 @@ function linksIteratorProcessURL(url, last = false) {
         }
     }
     if (!ignoreURL) {
-        url = prependHttpIfNotExist(url);
-        const openAsActive = getSetting("new_tabs_active") === 1 && last;
-        if (checkHostType() === "firefox") {
-            browser.tabs.create({
-                'active': openAsActive,
-                'url': url
-            });
-        } else if (checkHostType() === "chrome") {
-            chrome.tabs.create({
-                'active': openAsActive,
-                'url': url
-            });
-        } else if (checkHostType() === "electron") {
-            const {
-                shell
-            } = require('electron');
-            shell.openExternal(url);
+        if (getSetting("load_on_focus") === 1) {
+            if (checkHostType() === "firefox") {
+                browser.tabs.create({
+                    active: false,
+                    'url': browser.extension.getURL('delayedloading.html?url=') + encodeURI(url)
+                });
+            } else if (checkHostType() === "chrome") {
+                chrome.tabs.create({
+                    active: false,
+                    'url': chrome.extension.getURL('delayedloading.html?url=') + encodeURI(url)
+                });
+            }
+        } else {
+            url = prependHttpIfNotExist(url);
+            const openAsActive = getSetting("new_tabs_active") === 1 && last;
+            if (checkHostType() === "firefox") {
+                browser.tabs.create({
+                    'active': openAsActive,
+                    'url': url
+                });
+            } else if (checkHostType() === "chrome") {
+                chrome.tabs.create({
+                    'active': openAsActive,
+                    'url': url
+                });
+            } else if (checkHostType() === "electron") {
+                const {
+                    shell
+                } = require('electron');
+                shell.openExternal(url);
+            }
         }
     }
 }
@@ -285,6 +299,7 @@ function removeList(id, noAlert) {
         try {
             const parsedList = JSON.parse(tempArray);
             if (parsedList.list_id === parseInt(id)) {
+                localStorage.removeItem(localStorage.key(i));
                 document.getElementById(id).remove();
                 $('select option[id="' + id + '"]').remove();
                 if (!(noAlert)) {
