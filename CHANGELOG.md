@@ -1,3 +1,7 @@
+## 1.8.2
+
+- Fixed bug where if "Delay tab loading until tab is selected" setting was enabled, the url would be truncated after the first parameter in the query string.
+
 ## 1.8.1
 
 - Firefox bug fix when deleting lists.
