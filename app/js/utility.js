@@ -75,12 +75,12 @@ function linksIteratorProcessURL(url, last = false, delayedLoading = false) {
             if (checkHostType() === "firefox") {
                 browser.tabs.create({
                     active: false,
-                    'url': browser.extension.getURL('delayedloading.html?url=') + encodeURI(url)
+                    'url': browser.extension.getURL('delayedloading.html?url=') + encodeURIComponent(url)
                 });
             } else if (checkHostType() === "chrome") {
                 chrome.tabs.create({
                     active: false,
-                    'url': chrome.extension.getURL('delayedloading.html?url=') + encodeURI(url)
+                    'url': chrome.extension.getURL('delayedloading.html?url=') + encodeURIComponent(url)
                 });
             }
         } else {
@@ -222,7 +222,7 @@ function getCurrentVersion() {
         manifestData = chrome.runtime.getManifest();
         return (manifestData.version);
     } else {
-        return "1.8.1";
+        return "1.8.2";
     }
 }
 

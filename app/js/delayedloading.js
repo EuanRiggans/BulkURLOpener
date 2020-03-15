@@ -1,6 +1,6 @@
 (() => {
-    document.getElementById('loadURL').innerText = getParameterByName("url");
-    document.getElementById('page-title').innerText = getParameterByName("url");
+    document.getElementById('loadURL').innerText = decodeURIComponent(getParameterByName("url"));
+    document.getElementById('page-title').innerText = decodeURIComponent(getParameterByName("url"));
 })();
 
 window.addEventListener('focus', () => {
