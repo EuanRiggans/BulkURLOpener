@@ -1,3 +1,7 @@
+## 1.8.3
+
+- Fixed wording on buttons on extension popup to make them clearer and less confusing.
+
 ## 1.8.2
 
 - Fixed bug where if "Delay tab loading until tab is selected" setting was enabled, the url would be truncated after the first parameter in the query string.
