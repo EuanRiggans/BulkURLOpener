@@ -36,4 +36,5 @@ electron .
 
 - Completely remove dependency on Jquery.
 - Improve regex extraction of URLS.
-- Refactor some of the old code which is quite clunky
+- Refactor some of the old code which is quite clunky.
+- Improve design of settings page.
