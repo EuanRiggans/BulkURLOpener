@@ -12,7 +12,7 @@
 
 #### Browser Extension
 
-To run the app from source as a browser extension, just download / clone this repository. All you need from the repository is the 'app' folder. You can then install it to your browser. In chrome for example you can navigate to the exensions page in chrome (Three dots in top right => More tools => Extensions). Then drag and drop the app folder onto that page to install it.
+To run the app from source as a browser extension, just download / clone this repository. All you need from the repository is the 'app' folder. You can then install it to your browser. In Chrome, for example, you can navigate to the exensions page (Three dots in top right => More tools => Extensions). Then drag and drop the app folder onto that page to install it.
 
 #### Electron
 
