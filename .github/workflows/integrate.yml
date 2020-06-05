@@ -14,5 +14,5 @@ jobs:
         with:
           node-version: 12
       - run: npm ci
-      - run: npm run lint
+      - run: npm run test
       - run: npm run build
