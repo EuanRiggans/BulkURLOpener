@@ -1,4 +1,4 @@
-name: build-test
+name: run-tests
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
     braches: [master]
 
 jobs:
-  build-test:
+  run-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
