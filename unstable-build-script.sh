@@ -1,8 +1,13 @@
 #!/bin/bash
 
-# Requirements: zip, npm, web-ext, sha256sum, Electron Builder, wine
+# Requirements: Electron Builder, npm, sha256sum, web-ext, wine, zip
 
 # Checking requirements are met.
+
+if ! [ -x "$(command -v electron-builder)" ]; then
+  echo 'Error: electron-builder is not installed.' >&2
+  exit 1
+fi
 
 if ! [ -x "$(command -v npm)" ]; then
   echo 'Error: npm is not installed.' >&2
@@ -24,16 +29,11 @@ if ! [ -x "$(command -v zip)" ]; then
   exit 1
 fi
 
-if ! [ -x "$(command -v electron-builder)" ]; then
-  echo 'Error: electron-builder is not installed.' >&2
-  exit 1
-fi
-
 # Setting zip path
 
 zip=/usr/bin/zip
 
-# Getting version
+# Getting version from package.json
 
 VERSION='';
 re="\"(version)\": \"([^\"]*)\"";
@@ -76,7 +76,7 @@ rm *.blockmap
 rm *.yaml
 rm *.yml
 
-# Generating checksums
+# Generating checksums & outputting result to text file
 
 echo Generating checksums...
 sha256sum * > bulkurlopener-$VERSION-checksum.txt
