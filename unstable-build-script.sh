@@ -24,14 +24,15 @@ if ! [ -x "$(command -v web-ext)" ]; then
   exit 1
 fi
 
+if ! [ -x "$(command -v wine)" ]; then
+  echo 'Error: wine is not installed.' >&2
+  exit 1
+fi
+
 if ! [ -x "$(command -v zip)" ]; then
   echo 'Error: zip is not installed.' >&2
   exit 1
 fi
-
-# Setting zip path
-
-zip=/usr/bin/zip
 
 # Getting version from package.json
 
