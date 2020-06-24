@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="https://static.euanriggans.com/apps/bulkurlopener/images/440x280.png">
+    <img src="https://static.euanriggans.com/file/static-euanriggans-com/apps/bulkurlopener/images/440x280.png">
 </p>
 
 ## Install / Download Links
