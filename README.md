@@ -36,6 +36,7 @@ electron .
 ## To Do List
 
 - Completely remove dependency on Jquery.
+- Switch to using Bootstrap 5 once in stable release.
 - Improve regex extraction of URLS.
 - Refactor some of the old code which is quite clunky.
 - Improve design of settings page.
