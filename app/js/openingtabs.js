@@ -1,16 +1,23 @@
 let continueLoading = true;
 
+/**
+ * When the toggle opening button is clicked, toggle the opening status, and adjust the user interface to reflect
+ * the changes.
+ *
+ * The button text is adjusted and the spinning status of the loading icon is toggled.
+ */
+document.getElementById('toggleOpening').addEventListener('click', () => {
+    continueLoading = !continueLoading;
+    if (continueLoading) {
+        document.getElementById('loadingSpinner').classList.add('fa-spin');
+        document.getElementById('toggleOpening').innerText = "Pause Opening"
+    } else {
+        document.getElementById('loadingSpinner').classList.remove('fa-spin');
+        document.getElementById('toggleOpening').innerText = "Resume Opening"
+    }
+});
+
 (() => {
-    document.getElementById('toggleOpening').addEventListener('click', () => {
-        continueLoading = !continueLoading;
-        if (continueLoading) {
-            document.getElementById('loadingSpinner').classList.add('fa-spin');
-            document.getElementById('toggleOpening').innerText = "Pause Opening"
-        } else {
-            document.getElementById('loadingSpinner').classList.remove('fa-spin');
-            document.getElementById('toggleOpening').innerText = "Resume Opening"
-        }
-    });
     startOpening();
 })();
 
