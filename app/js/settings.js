@@ -205,7 +205,10 @@ function initSettingsSave() {
     const activeNewTabsElement = document.getElementById('activeNewTabs');
     const autoLoadIntoTextareaElement = document.getElementById('autoLoadIntoTextArea');
     const delayTabLoadingElement = document.getElementById('delayUntilFocus');
-    const tabCreationDelay = parseInt(tabCreationDelayElement.value);
+    let tabCreationDelay = parseInt(tabCreationDelayElement.value);
+    if (tabCreationDelayElement.value % 1 !== 0) {
+        tabCreationDelay = parseFloat(tabCreationDelayElement.value);
+    }
     let nightMode = 0;
     let autoOpenLists = 0;
     let activeNewTabs = 0;
