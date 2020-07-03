@@ -56,5 +56,6 @@ function importData() {
             localStorage.setItem(list.list_id, JSON.stringify(list));
         }
         localStorage.setItem("settings", JSON.stringify(userSettings));
+        alert("Successfully imported settings.")
     }
 }
