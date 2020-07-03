@@ -1,4 +1,12 @@
-$(document).ready(function () {
+let continueLoading = true;
+
+document.getElementById('toggleOpening').addEventListener('click', toggleLoadingStatus);
+
+(() => {
+    startOpening();
+})();
+
+function startOpening() {
     let tabCreationDelay = getSetting("tab_creation_delay");
     tabCreationDelay = tabCreationDelay * 1000;
     const tempArray = loadList("linksToOpen");
@@ -9,10 +17,33 @@ $(document).ready(function () {
     }
     linksIterator(0, linksToOpen, tabCreationDelay);
     removeLinksToOpenList();
-});
+}
+
+/**
+ * When the toggle opening button is clicked, toggle the opening status, and adjust the user interface to reflect
+ * the changes.
+ *
+ * The button text is adjusted and the spinning status of the loading icon is toggled.
+ */
+function toggleLoadingStatus() {
+    continueLoading = !continueLoading;
+    if (continueLoading) {
+        document.getElementById('loadingSpinner').classList.remove('fa-pause');
+        document.getElementById('loadingSpinner').classList.add('fa-spin');
+        document.getElementById('toggleOpening').innerText = "Pause Opening"
+    } else {
+        document.getElementById('loadingSpinner').classList.remove('fa-spin');
+        document.getElementById('loadingSpinner').classList.add('fa-pause');
+        document.getElementById('toggleOpening').innerText = "Resume Opening"
+    }
+}
 
 function linksIterator(i, strings, tabCreationDelay) {
     strings[i] = strings[i].trim();
+    if (!continueLoading) {
+        setTimeout(linksIterator, tabCreationDelay, i, strings, tabCreationDelay);
+        return;
+    }
     if (!(strings[i] === '') && !(strings[i] === "linksToOpen")) {
         let url = strings[i];
         linksIteratorProcessURL(url);
