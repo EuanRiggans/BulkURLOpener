@@ -28,5 +28,12 @@
     "32": "icon/32.png",
     "64": "icon/64.png",
     "128": "icon/128.png"
+  },
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+U"
+      }
+    }
   }
 }
