@@ -1,3 +1,9 @@
+## 1.9.0
+
+- Added ability for the user to pause and resume the opening of tabs when using tab creation delay.
+- User can now specify the tab creation delay to decimal points, rather than just whole numbers as previously.
+- Added a hotkey to open the popup (Ctrl + Shift + U)
+
 ## 1.8.3
 
 - Fixed wording on buttons on extension popup to make them clearer and less confusing.
