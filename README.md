@@ -37,6 +37,7 @@ electron .
 
 - Completely remove dependency on Jquery.
 - Switch to using Bootstrap 5 once in stable release.
+- Add button in settings for desktop users to check if there is a new version available for download.
 - Improve regex extraction of URLS.
 - Refactor some of the old code which is quite clunky.
 - Improve design of settings page.
