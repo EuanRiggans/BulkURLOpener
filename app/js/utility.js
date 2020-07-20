@@ -199,12 +199,16 @@ function encodeSearchQuery(string) {
  * @param {*} string
  */
 function extractURLFromString(string) {
-    const urlRegex = /(https?:\/\/[^ ]*)/;
+    const primaryURLRegex = /(https?:\/\/[\w-]+\.[a-z0-9\/:%_+.,#?!@&=-~]+)/;
+    const secondaryURLRegex = /(https?:\/\/[^ ]*)/;
     let url;
-    if (string.match(urlRegex)) {
-        url = string.match(urlRegex)[1];
+    if (string.match(primaryURLRegex)) {
+        url = string.match(primaryURLRegex)[1];
     } else {
         url = "noextractionsuccess";
+    }
+    if (string.match(secondaryURLRegex) && url === "noextractionsuccess") {
+        url = string.match(secondaryURLRegex)[1];
     }
     return url;
 }
