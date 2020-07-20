@@ -204,11 +204,10 @@ function extractURLFromString(string) {
     let url;
     if (string.match(primaryURLRegex)) {
         url = string.match(primaryURLRegex)[1];
+    } else if (string.match(secondaryURLRegex) && url === "noextractionsuccess") {
+        url = string.match(secondaryURLRegex)[1];
     } else {
         url = "noextractionsuccess";
-    }
-    if (string.match(secondaryURLRegex) && url === "noextractionsuccess") {
-        url = string.match(secondaryURLRegex)[1];
     }
     return url;
 }
