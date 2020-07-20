@@ -49,18 +49,6 @@ function linksIterator(i, strings, tabCreationDelay) {
         linksIteratorProcessURL(url);
         i++;
         if (i - 1 < strings.length) {
-            if (strings[i] == null || strings[i].trim() === '') {
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('completed').style.display = 'block';
-                if (checkHostType() === "firefox") {
-                    alert("Unable to close window due to Firefox security policy. Please close this window manually.");
-                    // window.close();
-                } else if (checkHostType() === "chrome") {
-                    window.close();
-                } else if (checkHostType() === "electron") {
-                    window.location.replace("popup.html");
-                }
-            }
             setTimeout(linksIterator, tabCreationDelay, i, strings, tabCreationDelay);
         }
     } else {
@@ -76,6 +64,7 @@ function linksIterator(i, strings, tabCreationDelay) {
             } else if (checkHostType() === "electron") {
                 window.location.replace("popup.html");
             }
+            return;
         }
         if (i < strings.length) {
             linksIterator(i, strings, tabCreationDelay);
