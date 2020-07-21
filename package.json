@@ -28,7 +28,7 @@
   "author": "Euan Riggans",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^9.1.0",
+    "electron": "^9.1.1",
     "mocha": "^8.0.1",
     "spectron": "^11.1.0"
   },
