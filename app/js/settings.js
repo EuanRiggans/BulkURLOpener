@@ -49,65 +49,57 @@
             } else {
                 tabCreationDelayElement.value = userSettings.tab_creation_delay;
             }
-            if (userSettings.custom_theme === "fluentDesignBootstrap") {
-                if (userSettings.night_mode === 1) {
-                    buildFluentBootstrapCheckbox("nightMode", "Enable night theme", true, nightModeGroup);
-                } else {
-                    buildFluentBootstrapCheckbox("nightMode", "Enable night theme", false, nightModeGroup);
-                }
-
-                if (userSettings.auto_open_lists === 1) {
-                    buildFluentBootstrapCheckbox("autoOpenLists", "Automatically open lists", true, autoOpenListsGroup);
-                } else {
-                    buildFluentBootstrapCheckbox("autoOpenLists", "Automatically open lists", false, autoOpenListsGroup);
-                }
-
-                if (userSettings.new_tabs_active === 1) {
-                    buildFluentBootstrapCheckbox("activeNewTabs", "Set new tabs as Active", true, activeNewTabsGroup);
-                } else {
-                    buildFluentBootstrapCheckbox("activeNewTabs", "Set new tabs as Active", false, activeNewTabsGroup);
-                }
-
-                if (userSettings.auto_load_into_textarea === 1) {
-                    buildFluentBootstrapCheckbox("autoLoadIntoTextArea", "When a list is selected, automatically open it into the text box", true, autoLoadIntoTextAreaGroup);
-                } else {
-                    buildFluentBootstrapCheckbox("autoLoadIntoTextArea", "When a list is selected, automatically open it into the text box", false, autoLoadIntoTextAreaGroup);
-                }
-
-                if (userSettings.load_on_focus === 1) {
-                    buildFluentBootstrapCheckbox("delayUntilFocus", "Delay loading tab until tab is selected", true, loadTabOnFocusGroup);
-                } else {
-                    buildFluentBootstrapCheckbox("delayUntilFocus", "Delay loading tab until tab is selected", false, loadTabOnFocusGroup);
-                }
-            } else {
-                if (userSettings.night_mode === 1) {
-                    buildBootstrapCheckbox("nightMode", "Enable night theme", true, nightModeGroup);
-                } else {
-                    buildBootstrapCheckbox("nightMode", "Enable night theme", false, nightModeGroup);
-                }
-
-                if (userSettings.auto_open_lists === 1) {
-                    buildBootstrapCheckbox("autoOpenLists", "Automatically open lists", true, autoOpenListsGroup);
-                } else {
-                    buildBootstrapCheckbox("autoOpenLists", "Automatically open lists", false, autoOpenListsGroup);
-                }
-
-                if (userSettings.new_tabs_active === 1) {
-                    buildBootstrapCheckbox("activeNewTabs", "Set new tabs as Active", true, activeNewTabsGroup);
-                } else {
-                    buildBootstrapCheckbox("activeNewTabs", "Set new tabs as Active", false, activeNewTabsGroup);
-                }
-
-                if (userSettings.auto_load_into_textarea === 1) {
-                    buildBootstrapCheckbox("autoLoadIntoTextArea", "When a list is selected, automatically open it into the text box", true, autoLoadIntoTextAreaGroup);
-                } else {
-                    buildBootstrapCheckbox("autoLoadIntoTextArea", "When a list is selected, automatically open it into the text box", false, autoLoadIntoTextAreaGroup);
-                }
-
-                if (userSettings.load_on_focus === 1) {
-                    buildBootstrapCheckbox("delayUntilFocus", "Delay loading tab until tab is selected", true, loadTabOnFocusGroup);
-                } else {
-                    buildBootstrapCheckbox("delayUntilFocus", "Delay loading tab until tab is selected", false, loadTabOnFocusGroup);
+            const checkboxesToBuild = {
+                settings: {
+                    user_theme: userSettings.custom_theme,
+                },
+                night_mode: {
+                    checkbox_id: "nightMode",
+                    label_text: "Enable night theme",
+                    check_status: userSettings.night_mode === 1,
+                    append_to: nightModeGroup
+                },
+                auto_open_lists: {
+                    checkbox_id: "autoOpenLists",
+                    label_text: "Automatically open lists",
+                    check_status: userSettings.auto_open_lists === 1,
+                    append_to: autoOpenListsGroup
+                },
+                new_tabs_active: {
+                    checkbox_id: "activeNewTabs",
+                    label_text: "Set new tabs as Active",
+                    check_status: userSettings.new_tabs_active === 1,
+                    append_to: activeNewTabsGroup
+                },
+                auto_load_into_textarea: {
+                    checkbox_id: "autoLoadIntoTextArea",
+                    label_text: "When a list is selected, automatically open it into the text box",
+                    check_status: userSettings.auto_load_into_textarea === 1,
+                    append_to: autoLoadIntoTextAreaGroup
+                },
+                load_on_focus: {
+                    checkbox_id: "delayUntilFocus",
+                    label_text: "Delay loading tab until tab is selected",
+                    check_status: userSettings.load_on_focus === 1,
+                    append_to: loadTabOnFocusGroup
+                },
+            }
+            for (let todoCheckbox in checkboxesToBuild) {
+                if (todoCheckbox !== "settings") {
+                    if (checkboxesToBuild.settings.user_theme === "defaultBoostrap") {
+                        buildBootstrapCheckbox(
+                            checkboxesToBuild[todoCheckbox].checkbox_id,
+                            checkboxesToBuild[todoCheckbox].label_text,
+                            checkboxesToBuild[todoCheckbox].check_status,
+                            checkboxesToBuild[todoCheckbox].append_to
+                        );
+                    } else if (checkboxesToBuild.settings.user_theme === "fluentDesignBootstrap") {
+                        buildFluentBootstrapCheckbox(checkboxesToBuild[todoCheckbox].checkbox_id,
+                            checkboxesToBuild[todoCheckbox].label_text,
+                            checkboxesToBuild[todoCheckbox].check_status,
+                            checkboxesToBuild[todoCheckbox].append_to
+                        );
+                    }
                 }
             }
             if (userSettings.default_list_open !== -1) {
