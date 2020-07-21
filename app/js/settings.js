@@ -51,83 +51,63 @@
             }
             if (userSettings.custom_theme === "fluentDesignBootstrap") {
                 if (userSettings.night_mode === 1) {
-                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"nightMode\" checked><label class=\"form-check-label\" for=\"nightMode\">&nbsp; Enable night theme</label></div>";
-                    appendHtml(nightModeGroup, html);
+                    buildFluentBootstrapCheckbox("nightMode", "Enable night theme", true, nightModeGroup);
                 } else {
-                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"nightMode\"><label class=\"form-check-label\" for=\"nightMode\">&nbsp; Enable night theme</label></div>";
-                    appendHtml(nightModeGroup, html);
+                    buildFluentBootstrapCheckbox("nightMode", "Enable night theme", false, nightModeGroup);
                 }
 
                 if (userSettings.auto_open_lists === 1) {
-                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"autoOpenLists\" checked><label class=\"form-check-label\" for=\"autoOpenLists\">&nbsp; Automatically open lists<a id=\"autoOpenListsTooltip\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"When you select a link list from the dropdown, it will be automatically opened.\">(?)</a></label></div>";
-                    appendHtml(autoOpenListsGroup, html);
+                    buildFluentBootstrapCheckbox("autoOpenLists", "Automatically open lists", true, autoOpenListsGroup);
                 } else {
-                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"autoOpenLists\"><label class=\"form-check-label\" for=\"autoOpenLists\">&nbsp; Automatically open lists<a id=\"autoOpenListsTooltip\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"When you select a link list from the dropdown, it will be automatically opened.\">(?)</a></label></div>";
-                    appendHtml(autoOpenListsGroup, html);
+                    buildFluentBootstrapCheckbox("autoOpenLists", "Automatically open lists", false, autoOpenListsGroup);
                 }
 
                 if (userSettings.new_tabs_active === 1) {
-                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"activeNewTabs\" checked><label class=\"form-check-label\" for=\"activeNewTabs\">&nbsp; Set new tabs as Active</label></div>";
-                    appendHtml(activeNewTabsGroup, html);
+                    buildFluentBootstrapCheckbox("activeNewTabs", "Set new tabs as Active", true, activeNewTabsGroup);
                 } else {
-                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"activeNewTabs\"><label class=\"form-check-label\" for=\"activeNewTabs\">&nbsp; Set new tabs as Active</label></div>";
-                    appendHtml(activeNewTabsGroup, html);
+                    buildFluentBootstrapCheckbox("activeNewTabs", "Set new tabs as Active", false, activeNewTabsGroup);
                 }
 
                 if (userSettings.auto_load_into_textarea === 1) {
-                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"autoLoadIntoTextArea\" checked><label class=\"form-check-label\" for=\"autoLoadIntoTextArea\">&nbsp; When a list is selected, automatically open it into the text box</label></div>";
-                    appendHtml(autoLoadIntoTextAreaGroup, html);
+                    buildFluentBootstrapCheckbox("autoLoadIntoTextArea", "When a list is selected, automatically open it into the text box", true, autoLoadIntoTextAreaGroup);
                 } else {
-                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"autoLoadIntoTextArea\"><label class=\"form-check-label\" for=\"autoLoadIntoTextArea\">&nbsp; When a list is selected, automatically open it into the text box</label></div>";
-                    appendHtml(autoLoadIntoTextAreaGroup, html);
+                    buildFluentBootstrapCheckbox("autoLoadIntoTextArea", "When a list is selected, automatically open it into the text box", false, autoLoadIntoTextAreaGroup);
                 }
 
                 if (userSettings.load_on_focus === 1) {
-                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"delayUntilFocus\" checked><label class=\"form-check-label\" for=\"delayUntilFocus\">&nbsp; Delay loading tab until tab is selected</label></div>";
-                    appendHtml(loadTabOnFocusGroup, html);
+                    buildFluentBootstrapCheckbox("delayUntilFocus", "Delay loading tab until tab is selected", true, loadTabOnFocusGroup);
                 } else {
-                    let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"delayUntilFocus\"><label class=\"form-check-label\" for=\"delayUntilFocus\">&nbsp; Delay loading tab until tab is selected</label></div>";
-                    appendHtml(loadTabOnFocusGroup, html);
+                    buildFluentBootstrapCheckbox("delayUntilFocus", "Delay loading tab until tab is selected", false, loadTabOnFocusGroup);
                 }
             } else {
                 if (userSettings.night_mode === 1) {
-                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"nightMode\" checked>&nbsp; Enable night theme</label></div>";
-                    appendHtml(nightModeGroup, html);
+                    buildBootstrapCheckbox("nightMode", "Enable night theme", true, nightModeGroup);
                 } else {
-                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"nightMode\">&nbsp; Enable night theme</label></div>";
-                    appendHtml(nightModeGroup, html);
+                    buildBootstrapCheckbox("nightMode", "Enable night theme", false, nightModeGroup);
                 }
 
                 if (userSettings.auto_open_lists === 1) {
-                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"autoOpenLists\" checked>&nbsp; Automatically open lists <a id=\"autoOpenListsTooltip\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"When you select a link list from the dropdown, it will be automatically opened.\">(?)</a></label></div>";
-                    appendHtml(autoOpenListsGroup, html);
+                    buildBootstrapCheckbox("autoOpenLists", "Automatically open lists", true, autoOpenListsGroup);
                 } else {
-                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"autoOpenLists\">&nbsp; Automatically open lists <a id=\"autoOpenListsTooltip\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"When you select a link list from the dropdown, it will be automatically opened.\">(?)</a></label></div>";
-                    appendHtml(autoOpenListsGroup, html);
+                    buildBootstrapCheckbox("autoOpenLists", "Automatically open lists", false, autoOpenListsGroup);
                 }
 
                 if (userSettings.new_tabs_active === 1) {
-                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"activeNewTabs\" checked>&nbsp; Set new tabs as Active</label></div>";
-                    appendHtml(activeNewTabsGroup, html);
+                    buildBootstrapCheckbox("activeNewTabs", "Set new tabs as Active", true, activeNewTabsGroup);
                 } else {
-                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"activeNewTabs\">&nbsp; Set new tabs as Active</label></div>";
-                    appendHtml(activeNewTabsGroup, html);
+                    buildBootstrapCheckbox("activeNewTabs", "Set new tabs as Active", false, activeNewTabsGroup);
                 }
 
                 if (userSettings.auto_load_into_textarea === 1) {
-                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"autoLoadIntoTextArea\" checked>&nbsp; When a list is selected, automatically open it into the text box</label></div>";
-                    appendHtml(autoLoadIntoTextAreaGroup, html);
+                    buildBootstrapCheckbox("autoLoadIntoTextArea", "When a list is selected, automatically open it into the text box", true, autoLoadIntoTextAreaGroup);
                 } else {
-                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"autoLoadIntoTextArea\">&nbsp; When a list is selected, automatically open it into the text box</label></div>";
-                    appendHtml(autoLoadIntoTextAreaGroup, html);
+                    buildBootstrapCheckbox("autoLoadIntoTextArea", "When a list is selected, automatically open it into the text box", false, autoLoadIntoTextAreaGroup);
                 }
 
                 if (userSettings.load_on_focus === 1) {
-                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"delayUntilFocus\" checked>&nbsp; Delay tab loading until tab is selected</label></div>";
-                    appendHtml(loadTabOnFocusGroup, html);
+                    buildBootstrapCheckbox("delayUntilFocus", "Delay loading tab until tab is selected", true, loadTabOnFocusGroup);
                 } else {
-                    let html = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"delayUntilFocus\">&nbsp; Delay tab loading until tab is selected</label></div>";
-                    appendHtml(loadTabOnFocusGroup, html);
+                    buildBootstrapCheckbox("delayUntilFocus", "Delay loading tab until tab is selected", false, loadTabOnFocusGroup);
                 }
             }
             if (userSettings.default_list_open !== -1) {
@@ -136,14 +116,11 @@
         }
     }
     if (!settingsObjPresent) {
-        const nightModeHTML = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"nightMode\">&nbsp; Enable night theme</label></div>";
-        appendHtml(nightModeGroup, nightModeHTML);
-        const autoOpenListsHTML = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"autoOpenLists\">&nbsp; Automatically open lists <a id=\"autoOpenListsTooltip\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"When you select a link list from the dropdown, it will be automatically opened.\">(?)</a></label></div>";
-        appendHtml(autoOpenListsGroup, autoOpenListsHTML);
-        const activeNewTabsHTML = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"activeNewTabs\">&nbsp; Set new tabs as Active</label></div>";
-        appendHtml(activeNewTabsGroup, activeNewTabsHTML);
-        const autoLoadIntoTextAreaHTML = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"autoLoadIntoTextArea\">&nbsp; When a list is selected, automatically open it into the text box</label></div>";
-        appendHtml(autoLoadIntoTextAreaGroup, autoLoadIntoTextAreaHTML);
+        buildBootstrapCheckbox("nightMode", "Enable night theme", false, nightModeGroup);
+        buildBootstrapCheckbox("autoOpenLists", "Automatically open lists", false, autoOpenListsGroup);
+        buildBootstrapCheckbox("activeNewTabs", "Set new tabs as Active", false, activeNewTabsGroup);
+        buildBootstrapCheckbox("autoLoadIntoTextArea", "When a list is selected, automatically open it into the text box", false, autoLoadIntoTextAreaGroup);
+        buildBootstrapCheckbox("delayUntilFocus", "Delay loading tab until tab is selected", false, loadTabOnFocusGroup);
     }
     for (let i = 0; i < localStorage.length; i++) {
         const tempStorageArray = loadList(localStorage.key(i));
@@ -277,6 +254,26 @@ function initSettingsSave() {
     userSettings.open_on_launch = openListOnStartup;
     userSettings.load_on_focus = delayTabLoading;
     saveSettings(userSettings);
+}
+
+function buildFluentBootstrapCheckbox(checkboxID, labelText, checkedStatus, appendTo) {
+    let checkboxHTML;
+    if (checkedStatus) {
+        checkboxHTML = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"" + checkboxID + "\" checked><label class=\"form-check-label\" for=\"" + checkboxID + "\">&nbsp; " + labelText + "</label></div>"
+    } else {
+        checkboxHTML = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"" + checkboxID + "\"><label class=\"form-check-label\" for=\"" + checkboxID + "\">&nbsp; " + labelText + "</label></div>"
+    }
+    appendHtml(appendTo, checkboxHTML);
+}
+
+function buildBootstrapCheckbox(checkboxID, labelText, checkedStatus, appendTo) {
+    let checkboxHTML;
+    if (checkedStatus) {
+        checkboxHTML = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"" + checkboxID + "\" checked>&nbsp; " + labelText + "</label></div>";
+    } else {
+        checkboxHTML = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"" + checkboxID + "\">&nbsp; " + labelText + "</label></div>";
+    }
+    appendHtml(appendTo, checkboxHTML);
 }
 
 function openImport() {
