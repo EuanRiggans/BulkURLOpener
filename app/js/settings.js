@@ -1,23 +1,15 @@
+/*
+        Event Listeners
+ */
+
+document.getElementById("saveSettings").addEventListener('click', initSettingsSave);
+
+document.getElementById('openImport').addEventListener('click', openImport);
+
+document.getElementById('openExport').addEventListener('click', openExport);
+
 (() => {
     createSettings();
-    document.getElementById("saveSettings").addEventListener('click', (e) => {
-        initSettingsSave();
-    });
-
-    document.getElementById('openImport').addEventListener('click', (e) => {
-        openImport();
-    });
-
-    document.getElementById('openExport').addEventListener('click', (e) => {
-        openExport();
-    });
-
-    document.getElementById('contextMenuEnabled')
-    addEventListener('change', e => {
-        if (e.target.checked) {
-            alert("Please note: When enabling context menus, you may need to restart your web browser for the context menus to work correctly.");
-        }
-    });
 
     document.getElementById("closeModal").addEventListener('click', (e) => {
         if (checkHostType() === "firefox") {
@@ -170,12 +162,20 @@
         }
     });
 
+    document.getElementById('contextMenuEnabled').addEventListener('change', e => {
+        const isChecked = document.getElementById("contextMenuEnabled").checked;
+        if (isChecked) {
+            alert("Please note: When enabling context menus, you may need to restart your web browser for the context menus to work correctly.");
+        }
+    });
+
     if (checkHostType() === "electron") {
         document.getElementById('loadOnBrowserStart').style.display = "none";
         document.getElementById('loadTabOnFocusGroup').style.display = "none";
         document.getElementById('loadOnBrowserStartGroupHR').style.display = "none";
         document.getElementById('loadTabOnFocusGroupHR').style.display = "none";
         document.getElementById('contextMenusGroup').style.display = "none";
+        document.getElementById('contextMenusHR').style.display = "none";
     }
 })();
 
