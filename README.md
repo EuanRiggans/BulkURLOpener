@@ -32,6 +32,7 @@ electron .
 - Close buttons not working. This is because Firefox does not allow a window to be closed by a script, if that window was opened by a script.
 - 'Opening Tabs' window does not close. This is caused by the same issue as mentioned above.
 - Addon does not open file: or about: urls. (See issue [#2](https://github.com/EuanRiggans/BulkURLOpener/issues/2))
+- Context menus working initially on Firefox. Solution: If your context menus are not working on Firefox, then please restart your browser as this is an known issue. 
 
 ## To Do List
 
