@@ -12,6 +12,13 @@
         openExport();
     });
 
+    document.getElementById('contextMenuEnabled')
+    addEventListener('change', e => {
+        if (e.target.checked) {
+            alert("Please note: When enabling context menus, you may need to restart your web browser for the context menus to work correctly.");
+        }
+    });
+
     document.getElementById("closeModal").addEventListener('click', (e) => {
         if (checkHostType() === "firefox") {
             alert("Unable to close window due to Firefox security policy. Please close this window manually.");
@@ -245,7 +252,7 @@ function initSettingsSave() {
         button_look: "alwaysOutline",
         open_on_launch: "no_list",
         load_on_focus: 0,
-        context_menu_enabled: 1,
+        context_menu_enabled: 0,
     };
     userSettings.tab_creation_delay = tabCreationDelay;
     userSettings.night_mode = nightMode;

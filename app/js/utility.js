@@ -565,7 +565,7 @@ function createSettings() {
             button_look: "alwaysOutline",
             open_on_launch: "no_list",
             load_on_focus: 0,
-            context_menu_enabled: 1
+            context_menu_enabled: 0
         };
         localStorage.setItem("settings", JSON.stringify(newSettings));
     }
