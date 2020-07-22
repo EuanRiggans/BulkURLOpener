@@ -29,6 +29,7 @@
     const activeNewTabsGroup = document.getElementById('activeNewTabsGroup');
     const autoLoadIntoTextAreaGroup = document.getElementById('autoLoadIntoTextAreaGroup');
     const loadTabOnFocusGroup = document.getElementById('loadTabOnFocusGroup');
+    const contextMenuEnabledGroup = document.getElementById('contextMenusGroup');
     let selectedListID = -1;
     let selectedTheme = "defaultBootstrap";
     let currentlyOpenedTabsSetting = "allOpenedTabs";
@@ -83,6 +84,12 @@
                     check_status: userSettings.load_on_focus === 1,
                     append_to: loadTabOnFocusGroup
                 },
+                context_menu_enabled: {
+                    checkbox_id: "contextMenuEnabled",
+                    label_text: "Enable context menus (Right click menus)",
+                    check_status: userSettings.context_menu_enabled === 1,
+                    append_to: contextMenuEnabledGroup
+                }
             }
             for (let todoCheckbox in checkboxesToBuild) {
                 if (todoCheckbox !== "settings") {
@@ -113,6 +120,7 @@
         buildBootstrapCheckbox("activeNewTabs", "Set new tabs as Active", false, activeNewTabsGroup);
         buildBootstrapCheckbox("autoLoadIntoTextArea", "When a list is selected, automatically open it into the text box", false, autoLoadIntoTextAreaGroup);
         buildBootstrapCheckbox("delayUntilFocus", "Delay loading tab until tab is selected", false, loadTabOnFocusGroup);
+        buildBootstrapCheckbox("contextMenuEnabled", "Enable context menus (Right click menus)", false, contextMenuEnabledGroup);
     }
     for (let i = 0; i < localStorage.length; i++) {
         const tempStorageArray = loadList(localStorage.key(i));
@@ -160,6 +168,7 @@
         document.getElementById('loadTabOnFocusGroup').style.display = "none";
         document.getElementById('loadOnBrowserStartGroupHR').style.display = "none";
         document.getElementById('loadTabOnFocusGroupHR').style.display = "none";
+        document.getElementById('contextMenusGroup').style.display = "none";
     }
 })();
 
@@ -174,6 +183,7 @@ function initSettingsSave() {
     const activeNewTabsElement = document.getElementById('activeNewTabs');
     const autoLoadIntoTextareaElement = document.getElementById('autoLoadIntoTextArea');
     const delayTabLoadingElement = document.getElementById('delayUntilFocus');
+    const contextMenuEnabledElement = document.getElementById('contextMenuEnabled');
     let tabCreationDelay = parseInt(tabCreationDelayElement.value);
     if (tabCreationDelayElement.value % 1 !== 0) {
         tabCreationDelay = parseFloat(tabCreationDelayElement.value);
@@ -183,6 +193,7 @@ function initSettingsSave() {
     let activeNewTabs = 0;
     let autoLoadIntoTextArea = 0;
     let delayTabLoading = 0;
+    let contextMenusEnabled = 0;
     const defaultList = getSelectedListID();
     const theme = getSelectedTheme();
     const currentlyOpenedTabsSetting = getCurrentlyOpenedTabsSetting();
@@ -204,6 +215,9 @@ function initSettingsSave() {
     }
     if (delayTabLoadingElement.checked) {
         delayTabLoading = 1;
+    }
+    if (contextMenuEnabledElement.checked) {
+        contextMenusEnabled = 1;
     }
     if (!(isNumber(tabCreationDelay)) || tabCreationDelay < 0) {
         alert("Your tab creation delay must be zero or a positive number!");
@@ -231,6 +245,7 @@ function initSettingsSave() {
         button_look: "alwaysOutline",
         open_on_launch: "no_list",
         load_on_focus: 0,
+        context_menu_enabled: 1,
     };
     userSettings.tab_creation_delay = tabCreationDelay;
     userSettings.night_mode = nightMode;
@@ -245,6 +260,14 @@ function initSettingsSave() {
     userSettings.button_look = buttonLookSetting;
     userSettings.open_on_launch = openListOnStartup;
     userSettings.load_on_focus = delayTabLoading;
+    userSettings.context_menu_enabled = contextMenusEnabled;
+
+    if (userSettings.context_menu_enabled === 0) {
+        removeContextMenus();
+    } else {
+        addContextMenus();
+    }
+
     saveSettings(userSettings);
 }
 

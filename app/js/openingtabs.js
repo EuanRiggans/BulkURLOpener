@@ -39,12 +39,14 @@ function toggleLoadingStatus() {
 }
 
 function linksIterator(i, strings, tabCreationDelay) {
-    strings[i] = strings[i].trim();
+    if (strings[i] !== undefined) {
+        strings[i] = strings[i].trim();
+    }
     if (!continueLoading) {
         setTimeout(linksIterator, tabCreationDelay, i, strings, tabCreationDelay);
         return;
     }
-    if (!(strings[i] === '') && !(strings[i] === "linksToOpen")) {
+    if (!(strings[i] === '') && !(strings[i] === "linksToOpen") && !(strings[i] === undefined)) {
         let url = strings[i];
         linksIteratorProcessURL(url);
         i++;
