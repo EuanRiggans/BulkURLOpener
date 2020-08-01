@@ -173,6 +173,8 @@ function getSetting(setting) {
                     return userSettings.load_on_focus;
                 case "context_menu_enabled":
                     return userSettings.context_menu_enabled;
+                case "open_urls_in_reverse_order":
+                    return userSettings.open_urls_in_reverse_order;
                 default:
                     break;
             }
@@ -545,7 +547,8 @@ function createSettings() {
                 button_look: "alwaysOutline",
                 open_on_launch: "no_list",
                 load_on_focus: 0,
-                context_menu_enabled: 0
+                context_menu_enabled: 0,
+                open_urls_in_reverse_order: 0
             };
             localStorage.setItem("settings", JSON.stringify(newSettings));
             return;
@@ -565,7 +568,8 @@ function createSettings() {
             button_look: "alwaysOutline",
             open_on_launch: "no_list",
             load_on_focus: 0,
-            context_menu_enabled: 0
+            context_menu_enabled: 0,
+            open_urls_in_reverse_order: 0
         };
         localStorage.setItem("settings", JSON.stringify(newSettings));
     }
@@ -593,6 +597,9 @@ function backgroundOpenListByID(id) {
         } catch (e) {
 
         }
+    }
+    if (getSetting("open_urls_in_reverse_order") === 1) {
+        linksToOpen = linksToOpen.reverse();
     }
     backgroundOpenList(linksToOpen);
 }

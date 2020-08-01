@@ -29,6 +29,7 @@ document.getElementById('openExport').addEventListener('click', openExport);
     const autoLoadIntoTextAreaGroup = document.getElementById('autoLoadIntoTextAreaGroup');
     const loadTabOnFocusGroup = document.getElementById('loadTabOnFocusGroup');
     const contextMenuEnabledGroup = document.getElementById('contextMenusGroup');
+    const openInReverseGroup = document.getElementById('openInReverseGroup');
     let selectedListID = -1;
     let selectedTheme = "defaultBootstrap";
     let currentlyOpenedTabsSetting = "allOpenedTabs";
@@ -88,6 +89,12 @@ document.getElementById('openExport').addEventListener('click', openExport);
                     label_text: "Enable context menus (Right click menus)",
                     check_status: userSettings.context_menu_enabled === 1,
                     append_to: contextMenuEnabledGroup
+                },
+                open_urls_in_reverse_order: {
+                    checkbox_id: "openInReverse",
+                    label_text: "Open urls in reverse order",
+                    check_status: userSettings.open_urls_in_reverse_order === 1,
+                    append_to: openInReverseGroup
                 }
             }
             for (let todoCheckbox in checkboxesToBuild) {
@@ -120,6 +127,7 @@ document.getElementById('openExport').addEventListener('click', openExport);
         buildBootstrapCheckbox("autoLoadIntoTextArea", "When a list is selected, automatically open it into the text box", false, autoLoadIntoTextAreaGroup);
         buildBootstrapCheckbox("delayUntilFocus", "Delay loading tab until tab is selected", false, loadTabOnFocusGroup);
         buildBootstrapCheckbox("contextMenuEnabled", "Enable context menus (Right click menus)", false, contextMenuEnabledGroup);
+        buildBootstrapCheckbox("openInReverse", "Open urls in reverse order", false, openInReverseGroup);
     }
     for (let i = 0; i < localStorage.length; i++) {
         const tempStorageArray = loadList(localStorage.key(i));
@@ -191,6 +199,7 @@ function initSettingsSave() {
     const autoLoadIntoTextareaElement = document.getElementById('autoLoadIntoTextArea');
     const delayTabLoadingElement = document.getElementById('delayUntilFocus');
     const contextMenuEnabledElement = document.getElementById('contextMenuEnabled');
+    const openInReverseElement = document.getElementById('openInReverse');
     let tabCreationDelay = parseInt(tabCreationDelayElement.value);
     if (tabCreationDelayElement.value % 1 !== 0) {
         tabCreationDelay = parseFloat(tabCreationDelayElement.value);
@@ -201,6 +210,7 @@ function initSettingsSave() {
     let autoLoadIntoTextArea = 0;
     let delayTabLoading = 0;
     let contextMenusEnabled = 0;
+    let openInReverse = 0;
     const defaultList = getSelectedListID();
     const theme = getSelectedTheme();
     const currentlyOpenedTabsSetting = getCurrentlyOpenedTabsSetting();
@@ -225,6 +235,9 @@ function initSettingsSave() {
     }
     if (contextMenuEnabledElement.checked) {
         contextMenusEnabled = 1;
+    }
+    if (openInReverseElement.checked) {
+        openInReverse = 1;
     }
     if (!(isNumber(tabCreationDelay)) || tabCreationDelay < 0) {
         alert("Your tab creation delay must be zero or a positive number!");
@@ -253,6 +266,7 @@ function initSettingsSave() {
         open_on_launch: "no_list",
         load_on_focus: 0,
         context_menu_enabled: 0,
+        open_urls_in_reverse_order: 0,
     };
     userSettings.tab_creation_delay = tabCreationDelay;
     userSettings.night_mode = nightMode;
@@ -268,6 +282,7 @@ function initSettingsSave() {
     userSettings.open_on_launch = openListOnStartup;
     userSettings.load_on_focus = delayTabLoading;
     userSettings.context_menu_enabled = contextMenusEnabled;
+    userSettings.open_urls_in_reverse_order = openInReverse;
 
     if (userSettings.context_menu_enabled === 0) {
         removeContextMenus();
