@@ -166,7 +166,10 @@ function clearLinksList() {
  * @param list  The list of urls to open
  */
 function openList(list) {
-    const strings = list.split(/\r\n|\r|\n/);
+    let strings = list.split(/\r\n|\r|\n/);
+    if (getSetting("open_urls_in_reverse_order") === 1) {
+        strings = strings.reverse();
+    }
     let tabCreationDelay = getSetting("tab_creation_delay");
     if (!(tabCreationDelay > 0) || !(strings.length > 1)) {
         for (let i = 0; i < strings.length; i++) {
