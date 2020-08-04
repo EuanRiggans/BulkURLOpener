@@ -1,8 +1,56 @@
+/* Default event listeners */
+
 document.getElementById("list").addEventListener("input", saveUserInput);
+
+document.getElementById("openButton").addEventListener('click', () => {
+    openTextAreaList();
+});
+
+document.getElementById("copyCurrentOpen").addEventListener('click', () => {
+    getCurrentTabs();
+});
+
+document.getElementById("clearList").addEventListener('click', () => {
+    clearLinksList();
+});
+
+document.getElementById("createNewList").addEventListener('click', () => {
+    openSaveNewListDialog();
+});
+
+document.getElementById("openList").addEventListener('click', () => {
+    openSelectedList();
+});
+
+document.getElementById("editList").addEventListener('click', () => {
+    editSelectedList();
+});
+
+document.getElementById("deleteList").addEventListener('click', () => {
+    deleteList();
+});
+
+document.getElementById("openSettings").addEventListener('click', () => {
+    openSettingsDialog();
+});
+
+document.getElementById("openHelp").addEventListener('click', () => {
+    openHelpDialog();
+});
+
+document.getElementById('savedLists').addEventListener('change', () => {
+    if (getSetting('auto_load_into_textarea') === 1) {
+        openSelectedList();
+    }
+});
+
+/* End of default event listeners */
 
 (() => {
     upgradeToJSONFormatting();
+
     createSettings();
+
     if (getSetting('auto_open_lists') === 1) {
         if (getSetting('custom_theme') === "fluentDesignBootstrap") {
             let html = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"overrideAutoOpen\"><label class=\"form-check-label\" for=\"overrideAutoOpen\">&nbsp;Override Auto Open</label></div>"
@@ -22,6 +70,7 @@ document.getElementById("list").addEventListener("input", saveUserInput);
             }
         });
     }
+
     if (getSetting("default_list_open") === -1 || getSetting("default_list_open") === undefined) {
         if (!(checkHostType() === "electron")) {
             getCurrentTabs();
@@ -31,6 +80,7 @@ document.getElementById("list").addEventListener("input", saveUserInput);
     } else {
         openListByID(getSetting("default_list_open"));
     }
+
     for (let i = 0; i < localStorage.length; i++) {
         const tempStorageArray = loadList(localStorage.key(i));
         try {
@@ -44,12 +94,6 @@ document.getElementById("list").addEventListener("input", saveUserInput);
         }
     }
 
-    document.getElementById('savedLists').addEventListener('change', () => {
-        if (getSetting('auto_load_into_textarea') === 1) {
-            openSelectedList();
-        }
-    });
-
     if (getParameterByName("popup", window.location) === "true") {
         document.getElementById("openInPopup").remove();
     } else {
@@ -57,41 +101,6 @@ document.getElementById("list").addEventListener("input", saveUserInput);
             popupMain();
         });
     }
-    document.getElementById("openButton").addEventListener('click', () => {
-        openTextAreaList();
-    });
-
-    document.getElementById("copyCurrentOpen").addEventListener('click', () => {
-        getCurrentTabs();
-    });
-
-    document.getElementById("clearList").addEventListener('click', () => {
-        clearLinksList();
-    });
-
-    document.getElementById("createNewList").addEventListener('click', () => {
-        openSaveNewListDialog();
-    });
-
-    document.getElementById("openList").addEventListener('click', () => {
-        openSelectedList();
-    });
-
-    document.getElementById("editList").addEventListener('click', () => {
-        editSelectedList();
-    });
-
-    document.getElementById("deleteList").addEventListener('click', () => {
-        deleteList();
-    });
-
-    document.getElementById("openSettings").addEventListener('click', () => {
-        openSettingsDialog();
-    });
-
-    document.getElementById("openHelp").addEventListener('click', () => {
-        openHelpDialog();
-    });
 
     if (checkHostType() === "electron") {
         document.getElementById("openInPopup").remove();
