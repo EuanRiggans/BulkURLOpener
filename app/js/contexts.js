@@ -8,6 +8,7 @@
     if (settingsObjPresent) {
         const contextMenuEnabled = getSetting("context_menu_enabled");
         if (contextMenuEnabled === 1) {
+            removeContextMenus();
             addContextMenus();
         } else {
             removeContextMenus();
@@ -15,25 +16,29 @@
     }
 })();
 
+/**
+ * General contexts click handler
+ * @param info
+ * @param tab
+ */
 function contextClickHandler(info, tab) {
-    switch (info.parentMenuItemId) {
-        case "open-list":
-            if (info.menuItemId !== "placeholder-no-lists") {
-                console.log(getCurrentVersion())
-                backgroundOpenListByID(info.menuItemId.substring(0, info.menuItemId.indexOf(":")))
-            }
-            break;
-        default:
-            if (info.menuItemId === "refresh-lists") {
-                removeContextMenus();
-                addContextMenus();
-            } else {
-                alert("There was a problem opening that list, try clicking 'Refresh Lists'")
-            }
-            break;
+    if (info.menuItemId === "refresh-lists") {
+        removeContextMenus();
+        addContextMenus();
     }
 }
 
+/**
+ * Handles clicks for the open list context sub-menu
+ * @param obj
+ */
+function contextMenuListOpenHandler(obj) {
+    backgroundOpenListByID(obj.menuItemId.substring(0, obj.menuItemId.indexOf(":")))
+}
+
+/**
+ * Adds context menus to the browser using either the chrome or browser APIs depending on the host type.
+ */
 function addContextMenus() {
     if (checkHostType() === "chrome") {
         chrome.permissions.contains({
@@ -57,6 +62,7 @@ function addContextMenus() {
                                 id: parsedList.list_id + ":" + parsedList.list_name,
                                 title: parsedList.list_name,
                                 parentId: "open-list",
+                                onclick: contextMenuListOpenHandler.bind(),
                                 contexts: ["all"]
                             });
                         }
@@ -78,7 +84,6 @@ function addContextMenus() {
                     contexts: ["all"]
                 });
                 chrome.contextMenus.onClicked.addListener(function (info, tab) {
-                    console.log(info)
                     contextClickHandler(info, tab);
                 });
             }
@@ -105,7 +110,7 @@ function addContextMenus() {
                                 id: parsedList.list_id + ":" + parsedList.list_name,
                                 title: parsedList.list_name,
                                 parentId: "open-list",
-                                onclick: console.log("x"),
+                                onclick: contextMenuListOpenHandler.bind(),
                                 contexts: ["all"]
                             });
                         }
@@ -134,6 +139,9 @@ function addContextMenus() {
     }
 }
 
+/**
+ * Removes the context menus from the browser
+ */
 function removeContextMenus() {
     if (checkHostType() === "chrome") {
         chrome.contextMenus.removeAll();
