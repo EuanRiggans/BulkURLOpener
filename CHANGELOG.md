@@ -1,3 +1,10 @@
+## 1.10.0 (Unreleased)
+
+- Added context menus. Currently, only context menus are for opening lists that the user has saved.
+- Added setting to open lists in reverse order.
+- Added new option for the 'Default list to display' setting:
+    - 'Previous urls': whatever you previous had in the 'URLs' text box will be displayed the next time you open the app / popup.
+- Improved the REGEX for extracting urls from strings.
 ## 1.9.0
 
 - Added ability for the user to pause and resume the opening of tabs when using tab creation delay.
