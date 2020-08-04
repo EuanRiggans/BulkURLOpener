@@ -1,26 +1,26 @@
-/*
-        Event Listeners
- */
+/* Event Listeners */
 
-document.getElementById("saveSettings").addEventListener('click', initSettingsSave);
+document.getElementById("saveSettings").addEventListener("click", initSettingsSave);
 
-document.getElementById('openImport').addEventListener('click', openImport);
+document.getElementById("openImport").addEventListener("click", openImport);
 
-document.getElementById('openExport').addEventListener('click', openExport);
+document.getElementById("openExport").addEventListener("click", openExport);
+
+document.getElementById("closeModal").addEventListener('click', (e) => {
+    if (checkHostType() === "firefox") {
+        alert("Unable to close window due to Firefox security policy. Please close this window manually.");
+        // window.close();
+    } else if (checkHostType() === "chrome") {
+        window.close();
+    } else if (checkHostType() === "electron") {
+        window.location.replace("popup.html");
+    }
+});
+
+/* End of event listeners */
 
 (() => {
     createSettings();
-
-    document.getElementById("closeModal").addEventListener('click', (e) => {
-        if (checkHostType() === "firefox") {
-            alert("Unable to close window due to Firefox security policy. Please close this window manually.");
-            // window.close();
-        } else if (checkHostType() === "chrome") {
-            window.close();
-        } else if (checkHostType() === "electron") {
-            window.location.replace("popup.html");
-        }
-    });
 
     const tabCreationDelayElement = document.getElementById('tabCreationDelay');
     const nightModeGroup = document.getElementById('nightModeGroup');
@@ -170,13 +170,6 @@ document.getElementById('openExport').addEventListener('click', openExport);
         }
     });
 
-    document.getElementById('contextMenuEnabled').addEventListener('change', e => {
-        const isChecked = document.getElementById("contextMenuEnabled").checked;
-        if (isChecked) {
-            alert("Please note: When enabling context menus, you may need to restart your web browser for the context menus to work correctly.");
-        }
-    });
-
     if (checkHostType() === "electron") {
         document.getElementById('loadOnBrowserStart').style.display = "none";
         document.getElementById('loadTabOnFocusGroup').style.display = "none";
@@ -284,10 +277,12 @@ function initSettingsSave() {
     userSettings.context_menu_enabled = contextMenusEnabled;
     userSettings.open_urls_in_reverse_order = openInReverse;
 
-    if (userSettings.context_menu_enabled === 0) {
-        removeContextMenus();
-    } else {
-        addContextMenus();
+    if (userSettings.context_menu_enabled !== getSetting("context_menu_enabled")) {
+        if (userSettings.context_menu_enabled === 0) {
+            alert("You have disabled context menus, you will need to restart your browser for this change to come into effect.")
+        } else {
+            alert("You have enabled context menus, you will need to restart your browser for this change to come into effect.")
+        }
     }
 
     saveSettings(userSettings);

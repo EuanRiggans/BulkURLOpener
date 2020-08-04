@@ -1,3 +1,5 @@
+document.getElementById("list").addEventListener("input", saveUserInput);
+
 (() => {
     upgradeToJSONFormatting();
     createSettings();
@@ -24,6 +26,8 @@
         if (!(checkHostType() === "electron")) {
             getCurrentTabs();
         }
+    } else if (getSetting("default_list_open") === -2 && previousInputExists()) {
+        getPreviousTabsFromLocalStorage();
     } else {
         openListByID(getSetting("default_list_open"));
     }
@@ -151,6 +155,19 @@ function getCurrentTabs() {
     } else {
         alert("Could not detect which browser you are using.")
     }
+}
+
+/**
+ * Sets the list text area to contain the urls from that were saved into local storage. Used for the 'Previous urls'
+ * setting.
+ */
+function getPreviousTabsFromLocalStorage() {
+    const listTextArea = document.getElementById("list");
+    const previousURLS = JSON.parse(localStorage.getItem("previous_list_input"));
+    for (let i = 0; i < previousURLS.length; ++i) {
+        listTextArea.value += previousURLS[i] + "\n";
+    }
+    listTextArea.select();
 }
 
 /**
@@ -340,42 +357,6 @@ function openHelpDialog() {
 }
 
 /**
- * Opens the dialog to import user data from JSON format
- */
-function openImportDialog() {
-    if (checkHostType() === "firefox") {
-        browser.tabs.create({
-            active: true,
-            'url': browser.extension.getURL('import.html')
-        });
-    } else if (checkHostType() === "chrome") {
-        chrome.tabs.create({
-            'url': chrome.extension.getURL('import.html')
-        });
-    } else if (checkHostType() === "electron") {
-        window.location.replace('import.html');
-    }
-}
-
-/**
- * Opens the dialog to export user data as JSON
- */
-function openExportDialog() {
-    if (checkHostType() === "firefox") {
-        browser.tabs.create({
-            active: true,
-            'url': browser.extension.getURL('export.html')
-        });
-    } else if (checkHostType() === "chrome") {
-        chrome.tabs.create({
-            'url': chrome.extension.getURL('export.html')
-        });
-    } else if (checkHostType() === "electron") {
-        window.location.replace('export.html');
-    }
-}
-
-/**
  * Deletes a list
  */
 function deleteList() {
@@ -450,6 +431,22 @@ function popupMain() {
             height: 610,
         });
     }
+}
+
+/**
+ * Saves the input in the 'list' text area into browser storage so that it can be re-used if the
+ * 'Default list to display' setting is set to 'Previous urls'
+ */
+function saveUserInput() {
+    localStorage.setItem("previous_list_input", JSON.stringify(document.getElementById("list").value.split(/\r\n|\r|\n/)));
+}
+
+/**
+ * Checks if there is a key of 'previous_list_input' in the local storage to be retrieved for the 'Previous urls'
+ * setting
+ */
+function previousInputExists() {
+    return localStorage.getItem("previous_list_input") !== null;
 }
 
 /**
