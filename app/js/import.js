@@ -1,3 +1,10 @@
+/**
+ * import.js
+ *
+ * Will take the users inputted JSON object and then import all of the settings and lists into this devices local
+ * storage.
+ */
+
 (() => {
     document.getElementById("closeModal").addEventListener('click', (e) => {
         if (checkHostType() === "firefox") {

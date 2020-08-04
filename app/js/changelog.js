@@ -1,3 +1,9 @@
+/**
+ * changelog.js
+ *
+ * Code for the changelog.html page.
+ */
+
 (() => {
     document.getElementById("changelog-footer").innerText = getFooterText();
 

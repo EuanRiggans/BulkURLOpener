@@ -1,3 +1,9 @@
+/**
+ * settings.js
+ *
+ * Handles the loading and saving of the users settings.
+ */
+
 /* Event Listeners */
 
 document.getElementById("saveSettings").addEventListener("click", initSettingsSave);

@@ -1,3 +1,9 @@
+/**
+ * contexts.js
+ *
+ * Handles the creation and deletion of context menus. As well as handling the click events for the context menus.
+ */
+
 (() => {
     let settingsObjPresent = false;
     for (let i = 0; i < localStorage.length; i++) {

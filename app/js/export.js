@@ -1,3 +1,10 @@
+/**
+ * export.js
+ *
+ * Takes all of the users settings and lists and creates a JSON object which can then be used to import all of the users
+ * settings and lists on a different browser or device.
+ */
+
 (() => {
     document.getElementById("closeModal").addEventListener('click', (e) => {
         if (checkHostType() === "firefox") {

@@ -1,3 +1,9 @@
+/**
+ * editlist.js
+ *
+ * Handles the saving of edited lists to localstorage
+ */
+
 (() => {
     $listNameSelector = $('#listName');
     if (!(document.location.search.length) || getParameterByName('ID') == null || getParameterByName('name') == null) {

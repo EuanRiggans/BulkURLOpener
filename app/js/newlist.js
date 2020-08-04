@@ -1,6 +1,12 @@
+/**
+ * newlist.js
+ *
+ * Saves users new lists to local storage.
+ */
+
 (() => {
     const listNameElement = document.getElementById('listName');
-    for (let i = 0; i < localStorage.length; i++){
+    for (let i = 0; i < localStorage.length; i++) {
         if (localStorage.key(i) === "temp") {
             const listTextArea = document.getElementById("list");
             document.getElementById('list').value = "";
@@ -37,8 +43,8 @@
         newList.list_id = listID;
         newList.list_name = listNameElement.value;
         const lines = document.getElementById("list").value.split('\n');
-        for(let i = 0; i < lines.length; i++) {
-            if(!(lines[i]) == "\n") {
+        for (let i = 0; i < lines.length; i++) {
+            if (!(lines[i]) == "\n") {
                 console.log(lines[i]);
                 newList.list_links.push(lines[i]);
             }

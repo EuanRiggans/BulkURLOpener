@@ -1,3 +1,10 @@
+/**
+ * utility.js
+ *
+ * All of the utility functions that are used throughout the app. And any functions that are reused across multiple
+ * javascript files.
+ */
+
 (() => {
         if (getSetting("button_look") === "alwaysFilled") {
             switchOutlineButtons();

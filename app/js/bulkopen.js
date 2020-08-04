@@ -1,3 +1,9 @@
+/**
+ * bulkopen.js
+ *
+ * Code for the main popup.html
+ */
+
 /* Default event listeners */
 
 document.getElementById("list").addEventListener("input", saveUserInput);

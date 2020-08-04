@@ -1,3 +1,9 @@
+/**
+ * help.js
+ *
+ * Code for the help.html page.
+ */
+
 (() => {
     document.getElementById("help-footer").innerText = getFooterText();
 

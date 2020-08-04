@@ -1,3 +1,9 @@
+/**
+ * openingtabs.js
+ *
+ *  Handles the delayed opening tabs. Will open new tabs at the interval provided by the user.
+ */
+
 let continueLoading = true;
 
 document.getElementById('toggleOpening').addEventListener('click', toggleLoadingStatus);

@@ -1,4 +1,11 @@
 /**
+ * custom-styles.js
+ *
+ * Will apply any custom styles that the user has enabled in the settings. Such as night mode or
+ * fluent design bootstrap.
+ */
+
+/**
  * Gets the users currently selected custom theme
  * @returns {string}    The users custom theme
  */
