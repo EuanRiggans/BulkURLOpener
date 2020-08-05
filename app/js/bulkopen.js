@@ -502,28 +502,6 @@ function clearLinksTextArea() {
     document.getElementById("list").value = "";
 }
 
-/**
- * Automatically converted lists from pre 1.1.0 into the new list format. Now for all versions 1.1.4 > lists are stored using json, so this list has been deprecated
- * @deprecated
- */
-function convertOldURLLists() {
-    for (let i = 0; i < localStorage.length; i++) {
-        const tempArray = loadList(localStorage.key(i));
-        const newListStorageArray = [];
-        if (tempArray[0] === localStorage.key(i) && !(localStorage.key(i) === "settings") && !(localStorage.key(i) === "maxID")) {
-            console.log("Need to convert: " + tempArray);
-            localStorage.removeItem(localStorage.key(i));
-            newListStorageArray.push("listStorage");
-            newListStorageArray.push(getNextAvailableID());
-            for (let x = 1; x < tempArray.length; x++) {
-                newListStorageArray.push(tempArray[x]);
-            }
-            const listID = getNextAvailableID();
-            localStorage.setItem(listID, newListStorageArray);
-        }
-    }
-}
-
 String.prototype.trim = function () {
     return this.replace(/^\s+|\s+$/g, '');
 };
