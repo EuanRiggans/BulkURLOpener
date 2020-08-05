@@ -4,6 +4,8 @@
  * Handles the saving of edited lists to localstorage
  */
 
+const listNameElement = document.getElementById('listName');
+
 /* Event Listeners */
 
 document.getElementById('closeModal').addEventListener('click', () => {
@@ -18,6 +20,7 @@ document.getElementById('closeModal').addEventListener('click', () => {
 });
 document.getElementById('saveList').addEventListener('click', () => {
     const listID = document.getElementById('listID').value;
+    const listName = listNameElement.value;
     removeList(listID, true);
     const newList = {
         object_description: "list_storage",
@@ -30,7 +33,7 @@ document.getElementById('saveList').addEventListener('click', () => {
     } catch (e) {
 
     }
-    newList.list_name = $listNameSelector.val();
+    newList.list_name = listName;
     const lines = document.getElementById("list").value.split('\n');
     for (let i = 0; i < lines.length; i++) {
         if (!(lines[i]) == "\n") {
@@ -41,7 +44,7 @@ document.getElementById('saveList').addEventListener('click', () => {
     if (lines.length <= 1) {
         alert("No URLs given for the list!");
         return;
-    } else if ($listNameSelector.val().trim() === "") {
+    } else if (listName === "") {
         alert("You need to give a name for your list!");
         return;
     }
@@ -51,7 +54,6 @@ document.getElementById('saveList').addEventListener('click', () => {
 /* End Of Event Listeners */
 
 (() => {
-    $listNameSelector = $('#listName');
     if (!(document.location.search.length) || getParameterByName('ID') == null || getParameterByName('name') == null) {
         alert("No list data present.");
         if (checkHostType() === "firefox") {
