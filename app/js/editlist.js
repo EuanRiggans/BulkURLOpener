@@ -4,8 +4,6 @@
  * Handles the saving of edited lists to localstorage
  */
 
-const listNameElement = document.getElementById('listName');
-
 /* Event Listeners */
 
 document.getElementById('closeModal').addEventListener('click', () => {
@@ -20,7 +18,7 @@ document.getElementById('closeModal').addEventListener('click', () => {
 });
 document.getElementById('saveList').addEventListener('click', () => {
     const listID = document.getElementById('listID').value;
-    const listName = listNameElement.value;
+    const listName = document.getElementById('listName').value;
     removeList(listID, true);
     const newList = {
         object_description: "list_storage",
@@ -83,5 +81,5 @@ document.getElementById('saveList').addEventListener('click', () => {
 
         }
     }
-    document.getElementById('listName').focus();
+    document.getElementById('list').focus();
 })();
