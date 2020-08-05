@@ -4,19 +4,17 @@
  * Code for the help.html page.
  */
 
-(() => {
-    document.getElementById("help-footer").innerText = getFooterText();
+/* Event Listeners */
 
-    document.getElementById('openGithub').addEventListener('click', () => {
-        openGithub();
-    });
-    document.getElementById('openGithubBugs').addEventListener('click', () => {
-        openIssues();
-    });
-    document.getElementById('openGithubSuggestions').addEventListener('click', () => {
-        openIssues();
-    });
-})();
+document.getElementById('openGithub').addEventListener('click', () => {
+    openGithub();
+});
+document.getElementById('openGithubBugs').addEventListener('click', () => {
+    openIssues();
+});
+document.getElementById('openGithubSuggestions').addEventListener('click', () => {
+    openIssues();
+});
 
 document.getElementById('closeModal').addEventListener('click', () => {
     if (checkHostType() === "firefox") {
@@ -43,6 +41,12 @@ document.getElementById('openChangelog').addEventListener('click', () => {
         window.location.replace("changelog.html");
     }
 });
+
+/* End Of Event Listeners */
+
+(() => {
+    document.getElementById("help-footer").innerText = getFooterText();
+})();
 
 function openGithub() {
     const githubURL = "https://euan.link/github";

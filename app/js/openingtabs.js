@@ -6,7 +6,11 @@
 
 let continueLoading = true;
 
+/* Event Listeners */
+
 document.getElementById('toggleOpening').addEventListener('click', toggleLoadingStatus);
+
+/* End Of Event Listeners */
 
 (() => {
     startOpening();

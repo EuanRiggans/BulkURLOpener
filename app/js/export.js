@@ -5,18 +5,22 @@
  * settings and lists on a different browser or device.
  */
 
-(() => {
-    document.getElementById("closeModal").addEventListener('click', (e) => {
-        if (checkHostType() === "firefox") {
-            alert("Unable to close window due to Firefox security policy. Please close this window manually.");
-            // window.close();
-        } else if (checkHostType() === "chrome") {
-            window.close();
-        } else if (checkHostType() === "electron") {
-            window.location.replace("popup.html");
-        }
-    });
+/* Event Listeners */
 
+document.getElementById("closeModal").addEventListener('click', (e) => {
+    if (checkHostType() === "firefox") {
+        alert("Unable to close window due to Firefox security policy. Please close this window manually.");
+        // window.close();
+    } else if (checkHostType() === "chrome") {
+        window.close();
+    } else if (checkHostType() === "electron") {
+        window.location.replace("popup.html");
+    }
+});
+
+/* End Of Event Listeners */
+
+(() => {
     buildExportData();
 })();
 

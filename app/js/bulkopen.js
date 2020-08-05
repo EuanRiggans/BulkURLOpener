@@ -50,7 +50,7 @@ document.getElementById('savedLists').addEventListener('change', () => {
     }
 });
 
-/* End of default event listeners */
+/* End Of Event Listeners */
 
 (() => {
     upgradeToJSONFormatting();

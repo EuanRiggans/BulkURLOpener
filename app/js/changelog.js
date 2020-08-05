@@ -4,28 +4,26 @@
  * Code for the changelog.html page.
  */
 
-(() => {
-    document.getElementById("changelog-footer").innerText = getFooterText();
+/* Event Listeners */
 
-    document.getElementById('view-source').addEventListener('click', () => {
-        const sourceURL = "https://github.com/EuanRiggans/BulkURLOpener";
-        if (checkHostType() === "electron") {
-            const {
-                shell
-            } = require('electron');
-            shell.openExternal(sourceURL);
-        } else if (checkHostType() === "firefox") {
-            browser.tabs.create({
-                active: true,
-                'url': sourceURL
-            });
-        } else if (checkHostType() === "chrome") {
-            chrome.tabs.create({
-                'url': sourceURL
-            });
-        }
-    });
-})();
+document.getElementById('view-source').addEventListener('click', () => {
+    const sourceURL = "https://github.com/EuanRiggans/BulkURLOpener";
+    if (checkHostType() === "electron") {
+        const {
+            shell
+        } = require('electron');
+        shell.openExternal(sourceURL);
+    } else if (checkHostType() === "firefox") {
+        browser.tabs.create({
+            active: true,
+            'url': sourceURL
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.create({
+            'url': sourceURL
+        });
+    }
+});
 
 document.getElementById('closeModal').addEventListener('click', () => {
     if (checkHostType() === "firefox") {
@@ -37,3 +35,10 @@ document.getElementById('closeModal').addEventListener('click', () => {
         window.location.replace("help.html");
     }
 });
+
+
+/* End Of Event Listeners */
+
+(() => {
+    document.getElementById("changelog-footer").innerText = getFooterText();
+})();

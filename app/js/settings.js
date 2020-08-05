@@ -23,7 +23,7 @@ document.getElementById("closeModal").addEventListener('click', (e) => {
     }
 });
 
-/* End of event listeners */
+/* End Of Event Listeners */
 
 (() => {
     createSettings();

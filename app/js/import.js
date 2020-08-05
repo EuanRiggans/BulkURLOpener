@@ -5,22 +5,24 @@
  * storage.
  */
 
-(() => {
-    document.getElementById("closeModal").addEventListener('click', (e) => {
-        if (checkHostType() === "firefox") {
-            alert("Unable to close window due to Firefox security policy. Please close this window manually.");
-            // window.close();
-        } else if (checkHostType() === "chrome") {
-            window.close();
-        } else if (checkHostType() === "electron") {
-            window.location.replace("popup.html");
-        }
-    });
+/* Event Listeners */
 
-    document.getElementById("importData").addEventListener('click', () => {
-        importData();
-    });
-})();
+document.getElementById("closeModal").addEventListener('click', (e) => {
+    if (checkHostType() === "firefox") {
+        alert("Unable to close window due to Firefox security policy. Please close this window manually.");
+        // window.close();
+    } else if (checkHostType() === "chrome") {
+        window.close();
+    } else if (checkHostType() === "electron") {
+        window.location.replace("popup.html");
+    }
+});
+
+document.getElementById("importData").addEventListener('click', () => {
+    importData();
+});
+
+/* End Of Event Listeners */
 
 function importData() {
     const exportTextArea = document.getElementById("importTextArea");
