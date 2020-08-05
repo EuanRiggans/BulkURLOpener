@@ -1,4 +1,4 @@
-## 1.10.0 (Unreleased)
+## New Unreleased Changes
 
 - Added context menus. Currently, only context menus are for opening lists that the user has saved.
 - Added setting to open lists in reverse order.
