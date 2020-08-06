@@ -4,7 +4,7 @@
   "author": "Euan Riggans",
   "manifest_version": 2,
   "version": "1.9.0",
-  "description": "A browser addon / extension that provides the user with lots of features to handle lists of urls.",
+  "description": "Browser addon to open multiple urls with one click. With many more tools to help you manage urls.",
   "permissions": [
     "tabs",
     "contextMenus"
