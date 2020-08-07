@@ -64,6 +64,10 @@ function checkValidArgs(args) {
             if (validArgs.includes(args[arg])) {
                 receivedArgs.push(args[arg]);
                 valid = true;
+            } else if (validArgs.includes(args[arg].substr(0, args[arg].indexOf('=')))) {
+                // Splitting the argument. Index 0 contains the argument, Index 1 contains the value provided with the argument
+                receivedArgs.push([args[arg].substr(0, args[arg].indexOf('=')), args[arg].substr(args[arg].indexOf('=') + 1, args[arg].length)]);
+                valid = true;
             }
         }
     }
@@ -76,7 +80,8 @@ function checkValidArgs(args) {
 function processArgs() {
     for (let arg in receivedArgs) {
         if (receivedArgs.hasOwnProperty(arg)) {
-            switch (getArgumentDefinitionFromArgument(receivedArgs[arg])) {
+            const argument = getArgumentDefinitionFromArgument(receivedArgs[arg]);
+            switch (argument[0]) {
                 case 'version':
                     console.log(version);
                     break;
@@ -95,15 +100,27 @@ function processArgs() {
 /**
  * Gets the argument name from the argument provided. For example, if provided with '-v' will return 'version'
  * @param argument              The argument
- * @returns {string|undefined}  Argument name. Undefined if not found.
+ * @returns {array|undefined}  Argument name. Undefined if not found.
  */
 function getArgumentDefinitionFromArgument(argument) {
-    for (let arg in argDefinitions) {
-        if (argDefinitions.hasOwnProperty(arg)) {
-            if (argDefinitions[arg].short === argument || argDefinitions[arg].long === argument) {
-                return arg;
+    if (!(argument.length > 1)) {
+        for (let arg in argDefinitions) {
+            if (argDefinitions.hasOwnProperty(arg)) {
+                if (argDefinitions[arg].short === argument || argDefinitions[arg].long === argument) {
+                    return [arg];
+                }
+            }
+        }
+    } else {
+        for (let arg in argDefinitions) {
+            if (argDefinitions.hasOwnProperty(arg)) {
+                if (argDefinitions[arg].short === argument[0] || argDefinitions[arg].long === argument[0]) {
+                    argument = argument.slice(1);
+                    return [arg, argument];
+                }
             }
         }
     }
+
     return undefined;
 }
