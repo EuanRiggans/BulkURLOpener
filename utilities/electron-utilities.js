@@ -34,6 +34,10 @@ let version = null;
 // Array of the arguments (if any) provided by the user
 let receivedArgs = [];
 
+/**
+ * App version setter
+ * @param appVersion    The current version of the app
+ */
 function setVersion(appVersion) {
     version = appVersion;
 }
