@@ -315,7 +315,11 @@ function removeList(id, noAlert) {
             if (parsedList.list_id === parseInt(id)) {
                 localStorage.removeItem(localStorage.key(i));
                 document.getElementById(id).remove();
-                $('select option[id="' + id + '"]').remove();
+                const listSelect = document.getElementById("savedLists");
+                for (let i = 0; i < listSelect.length; i++) {
+                    if (listSelect.options[i].id === id)
+                        listSelect.remove(i);
+                }
                 if (!(noAlert)) {
                     alert("List successfully deleted");
                 }
