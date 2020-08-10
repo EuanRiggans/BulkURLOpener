@@ -32,7 +32,7 @@ document.getElementById('closeModal').addEventListener('click', () => {
     } else if (checkHostType() === "chrome") {
         window.close();
     } else if (checkHostType() === "electron") {
-        window.location.replace("help.html");
+        window.location.replace("faq.html");
     }
 });
 

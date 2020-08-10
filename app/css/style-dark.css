@@ -26,6 +26,11 @@ body {
     background-color: #333333;
 }
 
+.card {
+    color: #fff;
+    background-color: #404040;
+}
+
 .modal-dialog {
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
