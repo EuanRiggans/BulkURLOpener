@@ -65,6 +65,11 @@ function prependHttpIfNotExist(url) {
 
 function linksIteratorProcessURL(url, last = false, delayedLoading = false) {
     let ignoreURL = false;
+
+    if (extractURLFromString(prependHttpIfNotExist(url)) !== "noextractionsuccess") {
+        url = prependHttpIfNotExist(url);
+    }
+
     if (!isProbablyUrl(url) && getSetting('non_url_handler') === "searchForString") {
         url = encodeSearchQuery(url);
     } else if (!isProbablyUrl(url) && getSetting('non_url_handler') === "ignoreString") {
@@ -77,6 +82,7 @@ function linksIteratorProcessURL(url, last = false, delayedLoading = false) {
             ignoreURL = true;
         }
     }
+    alert(url);
     if (!ignoreURL) {
         if (getSetting("load_on_focus") === 1) {
             if (checkHostType() === "firefox") {
