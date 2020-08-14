@@ -82,7 +82,6 @@ function linksIteratorProcessURL(url, last = false, delayedLoading = false) {
             ignoreURL = true;
         }
     }
-    alert(url);
     if (!ignoreURL) {
         if (getSetting("load_on_focus") === 1) {
             if (checkHostType() === "firefox") {
