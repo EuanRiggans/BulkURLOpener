@@ -96,5 +96,21 @@ function openGithubIssues() {
 }
 
 function checkForUpdates() {
-    alert("@todo Add this feature")
+    const versionURL = 'https://version.bulkurlopener.com/';
+    fetch(versionURL)
+        .then(res => res.json())
+        .then((out) => {
+            if (out.version === getCurrentVersion()) {
+                alert("You're using the newest version!")
+            } else {
+                alert(
+                    "You're not on the latest version. Please update to: " + out.version + ". Visit the Github " +
+                    "(https://github.com/EuanRiggans/BulkURLOpener) or visit the location where you installed the app" +
+                    " to find out how to update."
+                );
+            }
+        })
+        .catch(err => {
+            throw err
+        });
 }
