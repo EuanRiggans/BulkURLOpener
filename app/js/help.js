@@ -96,13 +96,18 @@ function openGithubIssues() {
 }
 
 function checkForUpdates() {
+    // Setting the version API endpoint
     const versionURL = 'https://version.bulkurlopener.com/';
+    // Fetching the JSON from endpoint
     fetch(versionURL)
         .then(res => res.json())
         .then((out) => {
+            // Checking if the users version is equal to the version number from API.
             if (out.version === getCurrentVersion()) {
+                // User is on latest version
                 alert("You're using the newest version!")
             } else {
+                // User is not on latest version
                 alert(
                     "You're not on the latest version. Please update to: " + out.version + ". Visit the Github " +
                     "(https://github.com/EuanRiggans/BulkURLOpener) or visit the location where you installed the app" +
