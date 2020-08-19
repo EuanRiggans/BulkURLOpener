@@ -8,7 +8,7 @@
 (() => {
         if (document.getElementById('goHome')) {
             if (checkHostType() !== "electron") {
-                // document.getElementById('goHome').remove();
+                document.getElementById('goHome').remove();
             }
         }
         if (getSetting("button_look") === "alwaysFilled") {
