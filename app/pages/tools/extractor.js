@@ -4,6 +4,9 @@ document.getElementById("extractFrom").addEventListener("input", attemptURLExtra
 
 document.getElementById("manualExtractButton").addEventListener("click", attemptURLExtraction);
 
+
+if (document.getElementById("goHome")) document.getElementById("goHome").addEventListener('click', goHome)
+
 /* End Of Event Listeners */
 
 function attemptURLExtraction() {
@@ -20,4 +23,8 @@ function attemptURLExtraction() {
     for (const link of extracted) {
         document.getElementById("extractTo").value += link + "\n";
     }
+}
+
+function goHome() {
+    window.location.replace("../../popup.html")
 }

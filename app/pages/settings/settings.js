@@ -19,7 +19,7 @@ document.getElementById("closeModal").addEventListener('click', (e) => {
     } else if (checkHostType() === "chrome") {
         window.close();
     } else if (checkHostType() === "electron") {
-        window.location.replace("popup.html");
+        window.location.replace("../../popup.html");
     }
 });
 
@@ -318,14 +318,14 @@ function openImport() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            'url': browser.extension.getURL('import.html')
+            'url': browser.extension.getURL('/pages/data-control/import.html')
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            'url': chrome.extension.getURL('import.html')
+            'url': chrome.extension.getURL('/pages/data-control/import.html')
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace("import.html");
+        window.location.replace("../data-control/import.html");
     }
 }
 
@@ -333,14 +333,14 @@ function openExport() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            'url': browser.extension.getURL('export.html')
+            'url': browser.extension.getURL('/pages/data-control/export.html')
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            'url': chrome.extension.getURL('export.html')
+            'url': chrome.extension.getURL('/pages/data-control/export.html')
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace("export.html");
+        window.location.replace("../data-control/export.html");
     }
 }
 

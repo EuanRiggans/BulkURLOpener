@@ -1,7 +1,7 @@
 /**
  * faq.js
  *
- * Code for the faq.html page.
+ * Code for the index.html page.
  */
 
 /* Event Listeners */
@@ -23,7 +23,7 @@ document.getElementById('closeModal').addEventListener('click', () => {
     } else if (checkHostType() === "chrome") {
         window.close();
     } else if (checkHostType() === "electron") {
-        window.location.replace("popup.html");
+        window.location.replace("../help/index.html");
     }
 });
 
@@ -31,14 +31,14 @@ document.getElementById('openChangelog').addEventListener('click', () => {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            'url': browser.extension.getURL('changelog.html')
+            'url': browser.extension.getURL('/pages/changelog/index.html')
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            'url': chrome.extension.getURL('changelog.html')
+            'url': chrome.extension.getURL('/pages/changelog/index.html')
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace("changelog.html");
+        window.location.replace("./pages/changelog/index.html");
     }
 });
 

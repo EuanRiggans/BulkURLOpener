@@ -6,13 +6,11 @@
 
 /* Event Listeners */
 
-document.getElementById('openExtractor').addEventListener('click', () => {
+document.getElementById("openExtractor").addEventListener('click', () => {
     openExtractor();
 });
 
-document.getElementById('goHome').addEventListener('click', () => {
-    goHome();
-});
+if (document.getElementById("goHome")) document.getElementById("goHome").addEventListener('click', goHome)
 
 /* End Of Event Listeners */
 
@@ -29,4 +27,8 @@ function openExtractor() {
     } else if (checkHostType() === "electron") {
         window.location.replace('./extractor.html');
     }
+}
+
+function goHome() {
+    window.location.replace("../../popup.html");
 }

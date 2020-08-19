@@ -22,7 +22,7 @@
     "default_popup": "popup.html"
   },
   "options_ui": {
-    "page": "settings.html",
+    "page": "/pages/settings/index.html",
     "open_in_tab": true
   },
   "icons": {

@@ -1,7 +1,7 @@
 /**
  * changelog.js
  *
- * Code for the changelog.html page.
+ * Code for the index.html page.
  */
 
 /* Event Listeners */
@@ -32,13 +32,18 @@ document.getElementById('closeModal').addEventListener('click', () => {
     } else if (checkHostType() === "chrome") {
         window.close();
     } else if (checkHostType() === "electron") {
-        window.location.replace("faq.html");
+        goHome()
     }
 });
 
+if (document.getElementById("goHome")) document.getElementById("goHome").addEventListener('click', goHome);
 
 /* End Of Event Listeners */
 
 (() => {
     document.getElementById("changelog-footer").innerText = getFooterText();
 })();
+
+function goHome() {
+    window.location.replace("../../popup.html");
+}

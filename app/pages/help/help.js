@@ -1,7 +1,7 @@
 /**
  * help.js
  *
- * Code for the help.html page.
+ * Code for the index.html page.
  */
 
 /* Event Listeners */
@@ -25,20 +25,22 @@ document.getElementById('checkForUpdates').addEventListener('click', () => {
     checkForUpdates();
 });
 
+if (document.getElementById("goHome")) document.getElementById("goHome").addEventListener('click', goHome)
+
 /* End Of Event Listeners */
 
 function openFAQ() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            'url': browser.extension.getURL('faq.html')
+            'url': browser.extension.getURL('/pages/faq/index.html')
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            'url': chrome.extension.getURL('faq.html')
+            'url': chrome.extension.getURL('/pages/faq/index.html')
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace('faq.html');
+        window.location.replace('../faq/index.html');
     }
 }
 
@@ -61,14 +63,14 @@ function openChangelog() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            'url': browser.extension.getURL('changelog.html')
+            'url': browser.extension.getURL('/pages/changelog/index.html')
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            'url': chrome.extension.getURL('changelog.html')
+            'url': chrome.extension.getURL('/pages/changelog/index.html')
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace('changelog.html');
+        window.location.replace('../changelog/index.html');
     }
 }
 
@@ -133,4 +135,8 @@ function checkForUpdates() {
         .catch(err => {
             throw err
         });
+}
+
+function goHome() {
+    window.location.replace("../../popup.html");
 }

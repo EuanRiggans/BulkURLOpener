@@ -14,7 +14,7 @@ document.getElementById("closeModal").addEventListener('click', (e) => {
     } else if (checkHostType() === "chrome") {
         window.close();
     } else if (checkHostType() === "electron") {
-        window.location.replace("popup.html");
+        window.location.replace("../settings/index.html");
     }
 });
 

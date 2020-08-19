@@ -275,14 +275,14 @@ function openSaveNewListDialog() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            'url': browser.extension.getURL('newlist.html')
+            'url': browser.extension.getURL('/pages/lists/new.html')
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            'url': chrome.extension.getURL('newlist.html')
+            'url': chrome.extension.getURL('/pages/lists/new.html')
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace('newlist.html');
+        window.location.replace('./pages/lists/new.html');
     }
 }
 
@@ -342,14 +342,14 @@ function openSettingsDialog() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            'url': browser.extension.getURL('settings.html')
+            'url': browser.extension.getURL('/pages/settings/index.html')
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            'url': chrome.extension.getURL('settings.html')
+            'url': chrome.extension.getURL('/pages/settings/index.html')
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace('settings.html');
+        window.location.replace('./pages/settings/index.html');
     }
 }
 
@@ -360,14 +360,14 @@ function openHelpDialog() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            'url': browser.extension.getURL('help.html')
+            'url': browser.extension.getURL('/pages/help/index.html')
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            'url': chrome.extension.getURL('help.html')
+            'url': chrome.extension.getURL('/pages/help/index.html')
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace('help.html');
+        window.location.replace('./pages/help/index.html');
     }
 }
 
@@ -400,14 +400,14 @@ function editSelectedList() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            'url': browser.extension.getURL('editlist.html?id=' + getSelectedListID() + "&name=" + getSelectedList())
+            'url': browser.extension.getURL('/pages/lists/edit.html?id=' + getSelectedListID() + "&name=" + getSelectedList())
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            'url': chrome.extension.getURL('editlist.html?id=' + getSelectedListID() + "&name=" + getSelectedList())
+            'url': chrome.extension.getURL('/pages/lists/edit.html?id=' + getSelectedListID() + "&name=" + getSelectedList())
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace('editlist.html?id=' + getSelectedListID() + "&name=" + getSelectedList());
+        window.location.replace('./pages/lists/edit.html?id=' + getSelectedListID() + "&name=" + getSelectedList());
     }
 }
 

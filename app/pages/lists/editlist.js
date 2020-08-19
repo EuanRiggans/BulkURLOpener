@@ -13,7 +13,7 @@ document.getElementById('closeModal').addEventListener('click', () => {
     } else if (checkHostType() === "chrome") {
         window.close();
     } else if (checkHostType() === "electron") {
-        window.location.replace("popup.html");
+        window.location.replace("../../popup.html");
     }
 });
 document.getElementById('saveList').addEventListener('click', () => {

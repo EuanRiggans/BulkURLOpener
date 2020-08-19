@@ -546,13 +546,6 @@ function appendHtml(el, str) {
 }
 
 /**
- * Function to return user to the homepage
- */
-function goHome() {
-    window.location.replace('/popup.html');
-}
-
-/**
  *  Creates the settings json for the user if the do not have settings
  */
 function createSettings() {
