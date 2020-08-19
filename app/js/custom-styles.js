@@ -38,7 +38,7 @@ function getCustomTheme() {
             case "fluentDesignBootstrap":
                 const head = document.getElementsByTagName('head')[0];
                 const nightModeStylesheet = document.createElement('link');
-                nightModeStylesheet.href = "css/fluent.css";
+                nightModeStylesheet.href = "/css/fluent.css";
                 nightModeStylesheet.rel = "stylesheet";
                 head.appendChild(nightModeStylesheet);
                 break;
@@ -49,7 +49,7 @@ function getCustomTheme() {
     if (isNightModeEnabled()) {
         const head = document.getElementsByTagName('head')[0];
         const nightModeStylesheet = document.createElement('link');
-        nightModeStylesheet.href = "css/style-dark.css";
+        nightModeStylesheet.href = "/css/style-dark.css";
         nightModeStylesheet.rel = "stylesheet";
         nightModeStylesheet.id = "styles-dark";
         head.appendChild(nightModeStylesheet);

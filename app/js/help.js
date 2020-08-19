@@ -12,8 +12,8 @@ document.getElementById('openFAQ').addEventListener('click', () => {
 document.getElementById('openGithubBug').addEventListener('click', () => {
     openGithubIssues();
 });
-document.getElementById('openGithubFeature').addEventListener('click', () => {
-    openGithubIssues();
+document.getElementById('openTools').addEventListener('click', () => {
+    openTools();
 });
 document.getElementById('openSourceCode').addEventListener('click', () => {
     openGithub();
@@ -39,6 +39,21 @@ function openFAQ() {
         });
     } else if (checkHostType() === "electron") {
         window.location.replace('faq.html');
+    }
+}
+
+function openTools() {
+    if (checkHostType() === "firefox") {
+        browser.tabs.create({
+            active: true,
+            'url': browser.extension.getURL('/pages/tools/index.html')
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.create({
+            'url': chrome.extension.getURL('/pages/tools/index.html')
+        });
+    } else if (checkHostType() === "electron") {
+        window.location.replace('/pages/tools/index.html');
     }
 }
 

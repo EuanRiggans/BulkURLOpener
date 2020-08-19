@@ -6,6 +6,11 @@
  */
 
 (() => {
+        if (document.getElementById('goHome')) {
+            if (checkHostType() !== "electron") {
+                // document.getElementById('goHome').remove();
+            }
+        }
         if (getSetting("button_look") === "alwaysFilled") {
             switchOutlineButtons();
         } else if (getSetting("button_look") === "filledNight") {
@@ -538,6 +543,13 @@ function appendHtml(el, str) {
     while (div.children.length > 0) {
         el.appendChild(div.children[0]);
     }
+}
+
+/**
+ * Function to return user to the homepage
+ */
+function goHome() {
+    window.location.replace('/popup.html');
 }
 
 /**

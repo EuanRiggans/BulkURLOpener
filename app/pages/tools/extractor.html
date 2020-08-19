@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Bulk URL Opener Extractor Tool</title>
+    <link href="../../css/bootstrap.min.css" id="bootstrap" rel="stylesheet">
+    <link href="../../css/font-awesome.min.css" id="font-awesome" rel="stylesheet">
+    <link href="../../css/style.css" id="styles" rel="stylesheet">
+    <link href="../../css/modalstyles.css" rel="stylesheet">
+    <link href="../../css/help.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="container mt-5">
+    <h1 class="text-center pb-5">
+        <a class="no-highlight" data-placement="top" data-toggle="tooltip" href="#" title="Go Home">
+            <i aria-hidden="true" class="fa fa-home" id="goHome"></i>
+        </a>
+        Bulk URL Opener - Extractor Tool
+    </h1>
+    <div class="container-fluid">
+        <label for="extractFrom">URLs to extract from:</label>
+        <textarea autofocus="autofocus" class="form-control mb-5" id="extractFrom" rows="7"></textarea>
+        <label for="extractTo">Extraction Results:</label>
+        <textarea class="form-control" id="extractTo" rows="7"></textarea>
+        <button class="btn-lg btn-primary btn-block" id="manualExtractButton">Extract</button>
+    </div>
+</div>
+</body>
+<script>
+    if (typeof module === 'object') {
+        window.module = module;
+        module = undefined;
+    }
+</script>
+<script src="../../js/jquery-3.3.1.min.js" type="text/javascript"></script>
+<script src="../../js/bootstrap.min.js" type="text/javascript"></script>
+<script src="../../js/utility.js" type="text/javascript"></script>
+<script src="extractor.js" type="text/javascript"></script>
+<script id="tempStylesheetLoader" src="../../js/custom-styles.js" type="text/javascript"></script>
+<script>
+    if (window.module) module = window.module;
+</script>
+
+</html>

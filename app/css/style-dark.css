@@ -17,7 +17,9 @@ body,
 #nonURLHandlerSetting,
 #selectedSearchEngineSetting,
 #buttonLookSetting,
-#loadListOnStartup {
+#loadListOnStartup,
+#extractFrom,
+#extractTo {
     color: #fff;
     background-color: #404040;
 }
@@ -83,5 +85,9 @@ input[type=number]:focus {
 }
 
 #openHelp {
+    color: #fff;
+}
+
+#goHome {
     color: #fff;
 }
