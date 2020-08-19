@@ -27,6 +27,6 @@ function openExtractor() {
             'url': chrome.extension.getURL('/pages/tools/extractor.html')
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace('/pages/tools/extractor.html');
+        window.location.replace('./extractor.html');
     }
 }

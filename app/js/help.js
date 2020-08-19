@@ -53,7 +53,7 @@ function openTools() {
             'url': chrome.extension.getURL('/pages/tools/index.html')
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace('/pages/tools/index.html');
+        window.location.replace('./pages/tools/index.html');
     }
 }
 
