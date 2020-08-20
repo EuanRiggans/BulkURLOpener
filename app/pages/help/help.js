@@ -10,19 +10,24 @@ document.getElementById('openFAQ').addEventListener('click', () => {
     openFAQ();
 });
 document.getElementById('openGithubBug').addEventListener('click', () => {
-    openGithubIssues();
+    openExternalURL("https://euan.link/buo-issues");
 });
 document.getElementById('openTools').addEventListener('click', () => {
     openTools();
 });
 document.getElementById('openSourceCode').addEventListener('click', () => {
-    openGithub();
+    openExternalURL("https://euan.link/buo-github")
 });
+
 document.getElementById('openChangelog').addEventListener('click', () => {
     openChangelog();
 });
 document.getElementById('checkForUpdates').addEventListener('click', () => {
     checkForUpdates();
+});
+
+document.getElementById('openExtendedInterface').addEventListener('click', () => {
+    openExtendedInterface();
 });
 
 if (document.getElementById("goHome")) document.getElementById("goHome").addEventListener('click', goHome)
@@ -74,41 +79,18 @@ function openChangelog() {
     }
 }
 
-function openGithub() {
-    const githubURL = "https://euan.link/buo-github";
-    if (checkHostType() === "electron") {
-        const {
-            shell
-        } = require('electron');
-        shell.openExternal(githubURL);
-    } else if (checkHostType() === "firefox") {
+function openExtendedInterface() {
+    if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            'url': githubURL
+            'url': browser.extension.getURL('/pages/extended/index.html')
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            'url': githubURL
+            'url': chrome.extension.getURL('/pages/extended/index.html')
         });
-    }
-}
-
-function openGithubIssues() {
-    const githubURL = "https://euan.link/buo-issues";
-    if (checkHostType() === "electron") {
-        const {
-            shell
-        } = require('electron');
-        shell.openExternal(githubURL);
-    } else if (checkHostType() === "firefox") {
-        browser.tabs.create({
-            active: true,
-            'url': githubURL
-        });
-    } else if (checkHostType() === "chrome") {
-        chrome.tabs.create({
-            'url': githubURL
-        });
+    } else if (checkHostType() === "electron") {
+        window.location.replace('../extended/index.html');
     }
 }
 

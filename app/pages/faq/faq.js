@@ -7,13 +7,13 @@
 /* Event Listeners */
 
 document.getElementById('openGithub').addEventListener('click', () => {
-    openGithub();
+    openExternalURL("https://euan.link/buo-github");
 });
 document.getElementById('openGithubBugs').addEventListener('click', () => {
-    openIssues();
+    openExternalURL("https://euan.link/buo-issues");
 });
 document.getElementById('openGithubSuggestions').addEventListener('click', () => {
-    openIssues();
+    openExternalURL("https://euan.link/buo-issues");
 });
 
 document.getElementById('closeModal').addEventListener('click', () => {
@@ -47,41 +47,3 @@ document.getElementById('openChangelog').addEventListener('click', () => {
 (() => {
     document.getElementById("help-footer").innerText = getFooterText();
 })();
-
-function openGithub() {
-    const githubURL = "https://euan.link/buo-github";
-    if (checkHostType() === "electron") {
-        const {
-            shell
-        } = require('electron');
-        shell.openExternal(githubURL);
-    } else if (checkHostType() === "firefox") {
-        browser.tabs.create({
-            active: true,
-            'url': githubURL
-        });
-    } else if (checkHostType() === "chrome") {
-        chrome.tabs.create({
-            'url': githubURL
-        });
-    }
-}
-
-function openIssues() {
-    const issuesURL = "https://euan.link/buo-issues";
-    if (checkHostType() === "electron") {
-        const {
-            shell
-        } = require('electron');
-        shell.openExternal("https://euan.link/buo-issues");
-    } else if (checkHostType() === "firefox") {
-        browser.tabs.create({
-            active: true,
-            'url': issuesURL
-        });
-    } else if (checkHostType() === "chrome") {
-        chrome.tabs.create({
-            'url': issuesURL
-        });
-    }
-}

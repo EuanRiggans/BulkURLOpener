@@ -545,6 +545,24 @@ function appendHtml(el, str) {
     }
 }
 
+function openExternalURL(URLToOpen) {
+    if (checkHostType() === "electron") {
+        const {
+            shell
+        } = require('electron');
+        shell.openExternal(URLToOpen);
+    } else if (checkHostType() === "firefox") {
+        browser.tabs.create({
+            active: true,
+            'url': URLToOpen
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.create({
+            'url': URLToOpen
+        });
+    }
+}
+
 /**
  *  Creates the settings json for the user if the do not have settings
  */

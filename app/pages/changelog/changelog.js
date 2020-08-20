@@ -7,22 +7,7 @@
 /* Event Listeners */
 
 document.getElementById('view-source').addEventListener('click', () => {
-    const sourceURL = "https://github.com/EuanRiggans/BulkURLOpener";
-    if (checkHostType() === "electron") {
-        const {
-            shell
-        } = require('electron');
-        shell.openExternal(sourceURL);
-    } else if (checkHostType() === "firefox") {
-        browser.tabs.create({
-            active: true,
-            'url': sourceURL
-        });
-    } else if (checkHostType() === "chrome") {
-        chrome.tabs.create({
-            'url': sourceURL
-        });
-    }
+    openExternalURL("https://euan.link/buo-github");
 });
 
 document.getElementById('closeModal').addEventListener('click', () => {
@@ -37,22 +22,7 @@ document.getElementById('closeModal').addEventListener('click', () => {
 });
 
 document.getElementById("openGithubChangelog").addEventListener("click", () => {
-    const githubURL = "https://euan.link/buo-github-changelog";
-    if (checkHostType() === "electron") {
-        const {
-            shell
-        } = require('electron');
-        shell.openExternal(githubURL);
-    } else if (checkHostType() === "firefox") {
-        browser.tabs.create({
-            active: true,
-            'url': githubURL
-        });
-    } else if (checkHostType() === "chrome") {
-        chrome.tabs.create({
-            'url': githubURL
-        });
-    }
+    openExternalURL("https://euan.link/buo-github-changelog");
 })
 
 if (document.getElementById("goHome")) document.getElementById("goHome").addEventListener('click', goHome);
