@@ -5,6 +5,8 @@
 - Added new option for the 'Default list to display' setting:
     - 'Previous urls': whatever you previous had in the 'URLs' text box will be displayed the next time you open the app / popup.
 - Improved the REGEX for extracting urls from strings.
+- Redesigned help page
+- Added 'Tools' page, currently only includes a url extractor tool
 ## 1.9.0
 
 - Added ability for the user to pause and resume the opening of tabs when using tab creation delay.
