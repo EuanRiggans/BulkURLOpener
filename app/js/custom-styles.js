@@ -38,7 +38,15 @@ function getCustomTheme() {
             case "fluentDesignBootstrap":
                 const head = document.getElementsByTagName('head')[0];
                 const nightModeStylesheet = document.createElement('link');
-                nightModeStylesheet.href = "/css/fluent.css";
+                if (checkHostType() !== "electron") {
+                    nightModeStylesheet.href = "/css/fluent.css";
+                } else {
+                    if (getCurrentFileName() === "popup.html" || getCurrentFileName() === "delayedloading.html" || getCurrentFileName() === "openingtabs.html") {
+                        nightModeStylesheet.href = "./css/fluent.css";
+                    } else {
+                        nightModeStylesheet.href = "../../css/fluent.css";
+                    }
+                }
                 nightModeStylesheet.rel = "stylesheet";
                 head.appendChild(nightModeStylesheet);
                 break;
@@ -49,10 +57,23 @@ function getCustomTheme() {
     if (isNightModeEnabled()) {
         const head = document.getElementsByTagName('head')[0];
         const nightModeStylesheet = document.createElement('link');
-        nightModeStylesheet.href = "/css/style-dark.css";
+        if (checkHostType() !== "electron") {
+            nightModeStylesheet.href = "/css/style-dark.css";
+        } else {
+            if (getCurrentFileName() === "popup.html" || getCurrentFileName() === "delayedloading.html" || getCurrentFileName() === "openingtabs.html") {
+                nightModeStylesheet.href = "./css/style-dark.css";
+            } else {
+                nightModeStylesheet.href = "../../css/style-dark.css";
+            }
+        }
         nightModeStylesheet.rel = "stylesheet";
         nightModeStylesheet.id = "styles-dark";
         head.appendChild(nightModeStylesheet);
     }
     document.getElementById('tempStylesheetLoader').remove();
 })();
+
+function getCurrentFileName() {
+    const path = window.location.pathname;
+    return path.split("/").pop();
+}
