@@ -7,6 +7,7 @@
 - Improved the REGEX for extracting urls from strings.
 - Redesigned help page
 - Added 'Tools' page, currently only includes a url extractor tool
+- Added new extended interface, with some more options. Such as the ability for a user to rewrite a list using the links in the textarea.
 ## 1.9.0
 
 - Added ability for the user to pause and resume the opening of tabs when using tab creation delay.
