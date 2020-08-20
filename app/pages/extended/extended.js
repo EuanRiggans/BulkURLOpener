@@ -37,6 +37,10 @@ document.getElementById("editList").addEventListener('click', () => {
     editSelectedList();
 });
 
+document.getElementById("rewriteList").addEventListener('click', () => {
+    rewriteList();
+});
+
 document.getElementById("deleteList").addEventListener('click', () => {
     deleteList();
 });
@@ -402,6 +406,35 @@ function openHelpDialog() {
         });
     } else if (checkHostType() === "electron") {
         window.location.replace('../help/index.html');
+    }
+}
+
+function rewriteList() {
+    if (confirm("The chosen list will be overwritten with the links currently in the 'URLS' text box. Use this with caution!")) {
+        const listId = getSelectedListID();
+        const listName = getSelectedList();
+        removeList(listId, true);
+        const newList = {
+            object_description: "list_storage",
+            list_id: null,
+            list_name: null,
+            list_links: []
+        };
+        try {
+            newList.list_id = parseInt(listId);
+        } catch (e) {
+
+        }
+        newList.list_name = listName;
+        const lines = document.getElementById("listTextArea").value.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+            if (!(lines[i]) == "\n") {
+                console.log(lines[i]);
+                newList.list_links.push(lines[i]);
+            }
+        }
+        saveList(getSelectedListID(), newList, false)
+        alert("List rewritten, please refresh the page to see the changes take effect.")
     }
 }
 

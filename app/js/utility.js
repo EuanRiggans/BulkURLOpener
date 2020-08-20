@@ -255,17 +255,19 @@ function getCurrentVersion() {
  * @param Id                The id of the list
  * @param newListObject     The object containing the data for the list
  */
-function saveList(Id, newListObject) {
+function saveList(Id, newListObject, close = true) {
     localStorage.setItem(Id, JSON.stringify(newListObject));
     localStorage.setItem("maxID", Id);
     alert("List saved successfully!");
-    if (checkHostType() === "firefox") {
-        // alert("Unable to close window due to Firefox security policy. Please close this window manually.");
-        // window.close();
-    } else if (checkHostType() === "chrome") {
-        window.close();
-    } else if (checkHostType() === "electron") {
-        window.location.replace("popup.html");
+    if (close) {
+        if (checkHostType() === "firefox") {
+            // alert("Unable to close window due to Firefox security policy. Please close this window manually.");
+            // window.close();
+        } else if (checkHostType() === "chrome") {
+            window.close();
+        } else if (checkHostType() === "electron") {
+            window.location.replace("popup.html");
+        }
     }
 }
 
