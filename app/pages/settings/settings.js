@@ -23,6 +23,25 @@ document.getElementById("closeModal").addEventListener('click', (e) => {
     }
 });
 
+document.getElementById("openSettingsHelp").addEventListener("click", () => {
+    const githubURL = "https://euan.link/buo-settings-wiki";
+    if (checkHostType() === "electron") {
+        const {
+            shell
+        } = require('electron');
+        shell.openExternal(githubURL);
+    } else if (checkHostType() === "firefox") {
+        browser.tabs.create({
+            active: true,
+            'url': githubURL
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.create({
+            'url': githubURL
+        });
+    }
+});
+
 /* End Of Event Listeners */
 
 (() => {
