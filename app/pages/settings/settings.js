@@ -298,26 +298,6 @@ function initSettingsSave() {
     saveSettings(userSettings);
 }
 
-function buildFluentBootstrapCheckbox(checkboxID, labelText, checkedStatus, appendTo) {
-    let checkboxHTML;
-    if (checkedStatus) {
-        checkboxHTML = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"" + checkboxID + "\" checked><label class=\"form-check-label\" for=\"" + checkboxID + "\">&nbsp; " + labelText + "</label></div>"
-    } else {
-        checkboxHTML = "<div class=\"form-check pl-0 checkbox\"><input class=\"form-check-input\" type=\"checkbox\" value=\"\" id=\"" + checkboxID + "\"><label class=\"form-check-label\" for=\"" + checkboxID + "\">&nbsp; " + labelText + "</label></div>"
-    }
-    appendHtml(appendTo, checkboxHTML);
-}
-
-function buildBootstrapCheckbox(checkboxID, labelText, checkedStatus, appendTo) {
-    let checkboxHTML;
-    if (checkedStatus) {
-        checkboxHTML = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"" + checkboxID + "\" checked>&nbsp; " + labelText + "</label></div>";
-    } else {
-        checkboxHTML = "<div class=\"checkbox\"><label><input type=\"checkbox\" id=\"" + checkboxID + "\">&nbsp; " + labelText + "</label></div>";
-    }
-    appendHtml(appendTo, checkboxHTML);
-}
-
 function openImport() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({

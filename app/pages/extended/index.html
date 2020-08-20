@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link href="../../css/bootstrap.min.css" id="bootstrap" rel="stylesheet">
+    <link href="../../css/font-awesome.min.css" id="font-awesome" rel="stylesheet">
+    <link href="../../css/style.css" id="styles" rel="stylesheet">
+    <meta charset="utf-8"/>
+    <title>Bulk URL Opener</title>
+</head>
+
+<body class="popup-body" id="body">
+<div class="header">
+    <h1 class="header title">Bulk URL Opener
+        <small id="version"></small>
+    </h1>
+    <div class="header help">
+        <a class="no-highlight" data-placement="top" data-toggle="tooltip" href="#" title="Open help">
+            <i aria-hidden="true" class="fa fa-question-circle" id="openHelp"></i>
+        </a>
+    </div>
+    <div class="header settings">
+        <a class="no-highlight" data-placement="top" data-toggle="tooltip" href="#" title="Open settings">
+            <i aria-hidden="true" class="fa fa-cog" id="openSettings"></i>
+        </a>
+    </div>
+</div>
+<div class="container-fluid">
+    <div class="form-group" id="urlsForm">
+        <label for="listTextArea">URLs:</label>
+        <textarea autofocus="autofocus" class="form-control" id="listTextArea" rows="6"></textarea>
+    </div>
+    <button class="btn btn-outline-primary" id="openButton" type="button"><span>Open Links</span></button>
+    <button class="btn btn-outline-primary" id="copyCurrentOpen" type="button"><span>Get list of currently open
+            tabs</span>
+    </button>
+    <button class="btn btn-outline-warning" id="clearList" type="button"><span>Clear current links</span></button>
+    <br/><br/><br/><br/>
+    <div class="card-deck mb-5">
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Lists</h3>
+                <select class="form-control" id="savedLists">
+                    <option disabled id="-1" selected value="">Your saved lists</option>
+                </select>
+                <button class="btn btn-outline-success" id="loadList" type="button"><span>Load
+                    list</span></button>
+                <button class="btn btn-outline-primary" id="openList" type="button"><span>Open
+                    list</span></button>
+                <button class="btn btn-outline-primary" id="createNewList" type="button"><span>New list</span>
+                </button>
+                <button class="btn btn-outline-info" id="editList" type="button"><span>Edit list</span></button>
+                <button class="btn btn-outline-danger" id="deleteList" type="button"><span>Delete list</span>
+                </button>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column" id="controls">
+                <h3 class="card-title mb-4">Opening Settings (These are not saved)</h3>
+                <div class="input-group mb-2">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="delay-addon">Tab creation delay (Seconds):</span>
+                    </div>
+                    <input aria-describedby="delay-addon"
+                           class="form-control"
+                           id="tabCreationDelay"
+                           placeholder="Delay in seconds"
+                           step=".1"
+                           type="number"
+                    >
+                </div>
+                <div class="mb-2" id="openInReverseGroup">
+                    <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    if (typeof module === 'object') {
+        window.module = module;
+        module = undefined;
+    }
+</script>
+<script src="../../js/bootstrap.min.js" type="text/javascript"></script>
+<script src="../../js/jquery-3.3.1.min.js" type="text/javascript"></script>
+<script src="../../js/utility.js" type="text/javascript"></script>
+<script src="./extended.js" type="text/javascript"></script>
+<script id="tempStylesheetLoader" src="../../js/custom-styles.js" type="text/javascript"></script>
+<script>
+    if (window.module) module = window.module;
+</script>
+
+</html>

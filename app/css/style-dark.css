@@ -19,7 +19,8 @@ body,
 #buttonLookSetting,
 #loadListOnStartup,
 #extractFrom,
-#extractTo {
+#extractTo,
+#listTextArea {
     color: #fff;
     background-color: #404040;
 }
