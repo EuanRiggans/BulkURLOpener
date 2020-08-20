@@ -36,6 +36,25 @@ document.getElementById('closeModal').addEventListener('click', () => {
     }
 });
 
+document.getElementById("openGithubChangelog").addEventListener("click", () => {
+    const githubURL = "https://euan.link/buo-github-changelog";
+    if (checkHostType() === "electron") {
+        const {
+            shell
+        } = require('electron');
+        shell.openExternal(githubURL);
+    } else if (checkHostType() === "firefox") {
+        browser.tabs.create({
+            active: true,
+            'url': githubURL
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.create({
+            'url': githubURL
+        });
+    }
+})
+
 if (document.getElementById("goHome")) document.getElementById("goHome").addEventListener('click', goHome);
 
 /* End Of Event Listeners */
