@@ -285,7 +285,7 @@ function saveSettings(userSettings) {
     } else if (checkHostType() === "chrome") {
         window.close();
     } else if (checkHostType() === "electron") {
-        window.location.replace("popup.html");
+        window.location.replace("../../popup.html");
     }
 }
 
