@@ -1,12 +1,22 @@
 /**
- * extended.js
+ * main-interface.js
  *
- * Code for the extended version of popup.html
+ * Code for the main popup.html
  */
+
+let calledFrom = undefined;
+
+let quickSettings = {
+    open_urls_in_reverse_order: 0,
+};
 
 /* Default event listeners */
 
-document.getElementById("listTextArea").addEventListener("input", saveUserInput);
+// Save input on popup.html
+if (document.getElementById("list")) document.getElementById("list").addEventListener("input", saveUserInput);
+
+// Save input on extended interface
+if (document.getElementById("listTextArea")) document.getElementById("listTextArea").addEventListener("input", saveUserInput);
 
 document.getElementById("openButton").addEventListener('click', () => {
     openTextAreaList();
@@ -25,20 +35,18 @@ document.getElementById("createNewList").addEventListener('click', () => {
 });
 
 document.getElementById("openList").addEventListener('click', () => {
-    openSelectedList();
-    openTextAreaList();
+    if (getCurrentFileName() !== "popup.html") {
+        openSelectedList();
+        openTextAreaList();
+    } else {
+        openSelectedList();
+    }
 });
 
-document.getElementById("loadList").addEventListener('click', () => {
-    openSelectedList();
-});
+if (document.getElementById("loadList")) document.getElementById("loadList").addEventListener('click', openSelectedList);
 
 document.getElementById("editList").addEventListener('click', () => {
     editSelectedList();
-});
-
-document.getElementById("rewriteList").addEventListener('click', () => {
-    rewriteList();
 });
 
 document.getElementById("deleteList").addEventListener('click', () => {
@@ -59,13 +67,21 @@ document.getElementById('savedLists').addEventListener('change', () => {
     }
 });
 
+if (document.getElementById("rewriteList")) document.getElementById("rewriteList").addEventListener('click', rewriteList);
+
 /* End Of Event Listeners */
 
-let quickSettings = {
-    open_urls_in_reverse_order: 0,
-};
-
 (() => {
+
+    // Checking which version of main interface is using this script
+    if (getCurrentFileName() !== "popup.html") {
+        calledFrom = "extended";
+    } else {
+        calledFrom = "popup";
+    }
+
+    upgradeToJSONFormatting();
+
     createSettings();
 
     if (getSetting('auto_open_lists') === 1) {
@@ -111,42 +127,55 @@ let quickSettings = {
         }
     }
 
+    if (calledFrom === "popup") {
+        if (getParameterByName("popup", window.location) === "true") {
+            document.getElementById("openInPopup").remove();
+        } else {
+            document.getElementById("openInPopup").addEventListener('click', () => {
+                popupMain();
+            });
+        }
+    }
+
     if (checkHostType() === "electron") {
+        document.getElementById("openInPopup").remove();
         document.getElementById("copyCurrentOpen").remove();
     }
 
-    const loadTabOnFocusGroup = document.getElementById('loadTabOnFocusGroup');
-    const openInReverseGroup = document.getElementById('openInReverseGroup');
+    if (calledFrom === "extended") {
+        const loadTabOnFocusGroup = document.getElementById('loadTabOnFocusGroup');
+        const openInReverseGroup = document.getElementById('openInReverseGroup');
 
-    document.getElementById("tabCreationDelay").value = getSetting("tab_creation_delay");
+        document.getElementById("tabCreationDelay").value = getSetting("tab_creation_delay");
 
-    const checkboxesToBuild = {
-        settings: {
-            user_theme: getSetting("custom_theme"),
-        },
-        open_urls_in_reverse_order: {
-            checkbox_id: "openInReverse",
-            label_text: "Open urls in reverse order",
-            check_status: getSetting("open_urls_in_reverse_order") === 1,
-            append_to: openInReverseGroup
+        const checkboxesToBuild = {
+            settings: {
+                user_theme: getSetting("custom_theme"),
+            },
+            open_urls_in_reverse_order: {
+                checkbox_id: "openInReverse",
+                label_text: "Open urls in reverse order",
+                check_status: getSetting("open_urls_in_reverse_order") === 1,
+                append_to: openInReverseGroup
+            }
         }
-    }
-    quickSettings.open_urls_in_reverse_order = checkboxesToBuild.open_urls_in_reverse_order.check_status;
-    for (let todoCheckbox in checkboxesToBuild) {
-        if (todoCheckbox !== "settings") {
-            if (checkboxesToBuild.settings.user_theme === "defaultBoostrap") {
-                buildBootstrapCheckbox(
-                    checkboxesToBuild[todoCheckbox].checkbox_id,
-                    checkboxesToBuild[todoCheckbox].label_text,
-                    checkboxesToBuild[todoCheckbox].check_status,
-                    checkboxesToBuild[todoCheckbox].append_to
-                );
-            } else if (checkboxesToBuild.settings.user_theme === "fluentDesignBootstrap") {
-                buildFluentBootstrapCheckbox(checkboxesToBuild[todoCheckbox].checkbox_id,
-                    checkboxesToBuild[todoCheckbox].label_text,
-                    checkboxesToBuild[todoCheckbox].check_status,
-                    checkboxesToBuild[todoCheckbox].append_to
-                );
+        quickSettings.open_urls_in_reverse_order = checkboxesToBuild.open_urls_in_reverse_order.check_status;
+        for (let todoCheckbox in checkboxesToBuild) {
+            if (todoCheckbox !== "settings") {
+                if (checkboxesToBuild.settings.user_theme === "defaultBoostrap") {
+                    buildBootstrapCheckbox(
+                        checkboxesToBuild[todoCheckbox].checkbox_id,
+                        checkboxesToBuild[todoCheckbox].label_text,
+                        checkboxesToBuild[todoCheckbox].check_status,
+                        checkboxesToBuild[todoCheckbox].append_to
+                    );
+                } else if (checkboxesToBuild.settings.user_theme === "fluentDesignBootstrap") {
+                    buildFluentBootstrapCheckbox(checkboxesToBuild[todoCheckbox].checkbox_id,
+                        checkboxesToBuild[todoCheckbox].label_text,
+                        checkboxesToBuild[todoCheckbox].check_status,
+                        checkboxesToBuild[todoCheckbox].append_to
+                    );
+                }
             }
         }
     }
@@ -158,7 +187,7 @@ let quickSettings = {
  *  Will open all of the urls in the textarea
  */
 function openTextAreaList() {
-    openList(document.getElementById("listTextArea").value);
+    openList(getTextAreaReference().value);
 }
 
 /**
@@ -180,7 +209,7 @@ function getCurrentTabs() {
             if (!tabsArray.length) {
                 return;
             }
-            const listTextArea = document.getElementById("listTextArea");
+            const listTextArea = getTextAreaReference();
             clearLinksList();
             for (let i = 0; i < tabs.length; ++i) {
                 listTextArea.value += tabsArray[i] + "\n";
@@ -198,7 +227,7 @@ function getCurrentTabs() {
             if (!tabsArray.length) {
                 return;
             }
-            const listTextArea = document.getElementById("listTextArea");
+            const listTextArea = getTextAreaReference();
             clearLinksList();
             for (let i = 0; i < tabs.length; ++i) {
                 listTextArea.value += tabsArray[i] + "\n";
@@ -215,7 +244,7 @@ function getCurrentTabs() {
  * setting.
  */
 function getPreviousTabsFromLocalStorage() {
-    const listTextArea = document.getElementById("listTextArea");
+    const listTextArea = getTextAreaReference();
     const previousURLS = JSON.parse(localStorage.getItem("previous_list_input"));
     for (let i = 0; i < previousURLS.length; ++i) {
         listTextArea.value += previousURLS[i] + "\n";
@@ -227,8 +256,7 @@ function getPreviousTabsFromLocalStorage() {
  * Clears all of the urls from the textarea
  */
 function clearLinksList() {
-    const listTextArea = document.getElementById("listTextArea");
-    listTextArea.value = "";
+    getTextAreaReference().value = "";
 }
 
 /**
@@ -237,10 +265,15 @@ function clearLinksList() {
  */
 function openList(list) {
     let strings = list.split(/\r\n|\r|\n/);
-    if (quickSettings.open_urls_in_reverse_order === 1) {
+    if (getSetting("open_urls_in_reverse_order") === 1) {
         strings = strings.reverse();
     }
-    let tabCreationDelay = document.getElementById("tabCreationDelay").value;
+    let tabCreationDelay = 0;
+    if (calledFrom === "extended") {
+        tabCreationDelay = document.getElementById("tabCreationDelay").value;
+    } else {
+        tabCreationDelay = getSetting("tab_creation_delay");
+    }
     if (!(tabCreationDelay > 0) || !(strings.length > 1)) {
         for (let i = 0; i < strings.length; i++) {
             if (strings[i].trim() === '') {
@@ -269,7 +302,11 @@ function openList(list) {
                 'url': chrome.extension.getURL('openingtabs.html')
             });
         } else if (checkHostType() === "electron") {
-            window.location.replace('../../openingtabs.html');
+            if (calledFrom === "extended") {
+                window.location.replace('../../openingtabs.html');
+            } else {
+                window.location.replace('openingtabs.html');
+            }
         }
     }
 }
@@ -298,7 +335,7 @@ function linksIterator(i, strings, tabCreationDelay) {
  * Opens the page to create a new list of urls
  */
 function openSaveNewListDialog() {
-    const lines = document.getElementById("listTextArea").value.split('\n');
+    const lines = getTextAreaReference().value.split('\n');
     const tempList = {
         object_description: "temp_storage",
         list_links: []
@@ -320,7 +357,11 @@ function openSaveNewListDialog() {
             'url': chrome.extension.getURL('/pages/lists/new.html')
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace('../lists/new.html');
+        if (calledFrom === "extended") {
+            window.location.replace('../lists/new.html');
+        } else {
+            window.location.replace('./pages/lists/new.html');
+        }
     }
 }
 
@@ -337,7 +378,7 @@ function openSelectedList() {
         try {
             const parsedList = JSON.parse(tempArray);
             if (parsedList.list_id === parseInt(getSelectedListID())) {
-                const listTextArea = document.getElementById("listTextArea");
+                const listTextArea = getTextAreaReference();
                 clearLinksTextArea();
                 for (const link of parsedList.list_links) {
                     listTextArea.value += link + "\n";
@@ -360,7 +401,7 @@ function openListByID(id) {
         try {
             const parsedList = JSON.parse(tempArray);
             if (parsedList.list_id === parseInt(id)) {
-                const listTextArea = document.getElementById("listTextArea");
+                const listTextArea = getTextAreaReference();
                 clearLinksTextArea();
                 for (const link of parsedList.list_links) {
                     listTextArea.value += link + "\n";
@@ -387,7 +428,11 @@ function openSettingsDialog() {
             'url': chrome.extension.getURL('/pages/settings/index.html')
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace('../settings/index.html');
+        if (calledFrom === "extended") {
+            window.location.replace('../settings/index.html');
+        } else {
+            window.location.replace('./pages/settings/index.html');
+        }
     }
 }
 
@@ -405,10 +450,17 @@ function openHelpDialog() {
             'url': chrome.extension.getURL('/pages/help/index.html')
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace('../help/index.html');
+        if (calledFrom === "extended") {
+            window.location.replace('../help/index.html');
+        } else {
+            window.location.replace('./pages/help/index.html');
+        }
     }
 }
 
+/**
+ * Overwrites the selected list with the urls currently in the textarea
+ */
 function rewriteList() {
     if (confirm("The chosen list will be overwritten with the links currently in the 'URLS' text box. Use this with caution!")) {
         const listId = getSelectedListID();
@@ -426,7 +478,7 @@ function rewriteList() {
 
         }
         newList.list_name = listName;
-        const lines = document.getElementById("listTextArea").value.split('\n');
+        const lines = getTextAreaReference().value.split('\n');
         for (let i = 0; i < lines.length; i++) {
             if (!(lines[i]) == "\n") {
                 console.log(lines[i]);
@@ -474,7 +526,11 @@ function editSelectedList() {
             'url': chrome.extension.getURL('/pages/lists/edit.html?id=' + getSelectedListID() + "&name=" + getSelectedList())
         });
     } else if (checkHostType() === "electron") {
-        window.location.replace('../lists/edit.html?id=' + getSelectedListID() + "&name=" + getSelectedList());
+        if (calledFrom === "extended") {
+            window.location.replace('../lists/edit.html?id=' + getSelectedListID() + "&name=" + getSelectedList());
+        } else {
+            window.location.replace('./pages/lists/edit.html?id=' + getSelectedListID() + "&name=" + getSelectedList());
+        }
     }
 }
 
@@ -495,11 +551,32 @@ function getSelectedListID() {
 }
 
 /**
+ * Creates the extension in a popup window
+ */
+function popupMain() {
+    if (checkHostType() === "firefox") {
+        browser.windows.create({
+            url: "popup.html?popup=true",
+            type: "popup",
+            width: 755,
+            height: 610,
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.windows.create({
+            url: "popup.html?popup=true",
+            type: "popup",
+            width: 755,
+            height: 610,
+        });
+    }
+}
+
+/**
  * Saves the input in the 'list' text area into browser storage so that it can be re-used if the
  * 'Default list to display' setting is set to 'Previous urls'
  */
 function saveUserInput() {
-    localStorage.setItem("previous_list_input", JSON.stringify(document.getElementById("listTextArea").value.split(/\r\n|\r|\n/)));
+    localStorage.setItem("previous_list_input", JSON.stringify(getTextAreaReference().value.split(/\r\n|\r|\n/)));
 }
 
 /**
@@ -511,10 +588,49 @@ function previousInputExists() {
 }
 
 /**
+ * Upgrades users from the old array based storage to the new JSON based storage
+ */
+function upgradeToJSONFormatting() {
+    for (let i = 0; i < localStorage.length; i++) {
+        const tempArray = loadList(localStorage.key(i));
+        if (tempArray[0] === "listStorage") {
+            const newList = {
+                object_description: "list_storage",
+                list_id: parseInt(tempArray[1]),
+                list_name: tempArray[2],
+                list_links: []
+            };
+            for (let i = 3; i < tempArray.length; i++) {
+                newList.list_links.push(tempArray[i]);
+            }
+            localStorage.setItem(tempArray[1], JSON.stringify(newList));
+        } else if (tempArray[0] === "settings") {
+            const newSettings = {
+                object_description: "user_settings",
+                tab_creation_delay: parseInt(tempArray[1]),
+                night_mode: 0,
+                auto_open_lists: 0,
+                default_list_open: -1,
+                custom_theme: "defaultBoostrap"
+            };
+            localStorage.setItem("settings", JSON.stringify(newSettings));
+        }
+    }
+}
+
+/**
  * Clears all data from the text area
  */
 function clearLinksTextArea() {
-    document.getElementById("listTextArea").value = "";
+    getTextAreaReference().value = "";
+}
+
+function getTextAreaReference() {
+    if (calledFrom === "extended") {
+        return document.getElementById("listTextArea");
+    } else {
+        return document.getElementById("list");
+    }
 }
 
 String.prototype.trim = function () {

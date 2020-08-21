@@ -72,8 +72,3 @@ function getCustomTheme() {
     }
     document.getElementById('tempStylesheetLoader').remove();
 })();
-
-function getCurrentFileName() {
-    const path = window.location.pathname;
-    return path.split("/").pop();
-}

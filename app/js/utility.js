@@ -724,3 +724,8 @@ function buildBootstrapCheckbox(checkboxID, labelText, checkedStatus, appendTo) 
     }
     appendHtml(appendTo, checkboxHTML);
 }
+
+function getCurrentFileName() {
+    const path = window.location.pathname;
+    return path.split("/").pop();
+}
