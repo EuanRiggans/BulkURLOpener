@@ -26,10 +26,6 @@ document.getElementById('checkForUpdates').addEventListener('click', () => {
     checkForUpdates();
 });
 
-document.getElementById('openExtendedInterface').addEventListener('click', () => {
-    openExtendedInterface();
-});
-
 if (document.getElementById("goHome")) document.getElementById("goHome").addEventListener('click', goHome)
 
 /* End Of Event Listeners */
@@ -76,21 +72,6 @@ function openChangelog() {
         });
     } else if (checkHostType() === "electron") {
         window.location.replace('../changelog/index.html');
-    }
-}
-
-function openExtendedInterface() {
-    if (checkHostType() === "firefox") {
-        browser.tabs.create({
-            active: true,
-            'url': browser.extension.getURL('/pages/extended/index.html')
-        });
-    } else if (checkHostType() === "chrome") {
-        chrome.tabs.create({
-            'url': chrome.extension.getURL('/pages/extended/index.html')
-        });
-    } else if (checkHostType() === "electron") {
-        window.location.replace('../extended/index.html');
     }
 }
 
