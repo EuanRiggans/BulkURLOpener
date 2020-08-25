@@ -5,6 +5,7 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
+    "lint": "eslint \"**/*.js\" --ignore-pattern node_modules/",
     "test": "mocha",
     "make:all": "npm run make:linux:x64 && npm run make:mac:zip && npm run make:win",
     "make:win": "electron-builder build --win",
@@ -28,11 +29,15 @@
   "author": "Euan Riggans",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^10.0.0",
+    "eslint": "^7.7.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
     "mocha": "^8.1.1",
     "spectron": "^11.1.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "electron": "^10.0.0"
+  },
   "build": {
     "appId": "com.bulkurlopener",
     "productName": "bulkurlopener",

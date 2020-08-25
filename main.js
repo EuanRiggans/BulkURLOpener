@@ -1,7 +1,16 @@
+/**
+ * @todo Add new item on settings page:
+ *  Settings => Debug info
+ *  Output debug info: user settings, app version, browser, browser version.
+ *  Then require this info on Github issues
+ * @todo Convert settings page to new card based layout.
+ * @todo https://github.com/EuanRiggans/BulkURLOpener/issues/2#issuecomment-670633472
+ */
+
 const {
-    app,
-    BrowserWindow
-} = require('electron');
+	app,
+	BrowserWindow,
+} = require("electron");
 
 const utilities = require("./utilities/electron-utilities");
 
@@ -10,58 +19,60 @@ const utilities = require("./utilities/electron-utilities");
 let win;
 
 function createWindow() {
-    win = new BrowserWindow({
-        width: 1000,
-        height: 640,
-        webPreferences: {
-            nodeIntegration: true
-        },
-        icon: './app/icon/128.png'
-    });
-    win.autoHideMenuBar = true;
-    win.removeMenu()
-    win.loadFile('./app/popup.html');
+	win = new BrowserWindow({
+		width: 1000,
+		height: 640,
+		webPreferences: {
+			nodeIntegration: true,
+		},
+		icon: "./app/icon/128.png",
+	});
+	win.autoHideMenuBar = true;
+	win.removeMenu();
+	win.loadFile("./app/popup.html");
 
-    // Open the DevTools. Automated test to make sure this is closed(?)
-    // win.webContents.openDevTools()
+	// Open the DevTools. Automated test to make sure this is closed(?)
+	// win.webContents.openDevTools()
 
-    win.on('closed', () => {
-        /**
-         * Dereference the window object, usually you would store windows in an array if your app supports multi
-         * windows, this is the time when you should delete the corresponding element.
-         */
-        win = null
-    })
+	win.on("closed", () => {
+		/**
+		 * Dereference the window object,
+		 * usually you would store windows in an array if your app supports multi
+		 * windows, this is the time when you should delete the corresponding element.
+		 */
+		win = null;
+	});
 }
 
 /**
- * This method will be called when Electron has finished initialization and is ready to create browser windows.
+ * This method will be called when Electron has finished
+ * initialization and is ready to create browser windows.
  * Some APIs can only be used after this event occurs.
  */
-app.on('ready', () => {
-    let isCalledViaCLI = utilities.checkIfCalledViaCLI(process.argv);
-    if (isCalledViaCLI) {
-        utilities.setVersion(app.getVersion());
-        win = new BrowserWindow({show: false, width: 0, height: 0});
-        win.hide();
-        utilities.processArgs();
-        win.close();
-    } else {
-        createWindow();
-    }
+app.on("ready", () => {
+	const isCalledViaCLI = utilities.checkIfCalledViaCLI(process.argv);
+	if (isCalledViaCLI) {
+		utilities.setVersion(app.getVersion());
+		win = new BrowserWindow({show: false, width: 0, height: 0});
+		win.hide();
+		utilities.processArgs();
+		win.close();
+	} else {
+		createWindow();
+	}
 });
 
 /**
  * Quit when all windows are closed.
  */
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit()
-    }
+app.on("window-all-closed", () => {
+	if (process.platform !== "darwin") {
+		app.quit();
+	}
 });
 
-app.on('activate', () => {
-    if (win === null) {
-        createWindow()
-    }
+app.on("activate", () => {
+	if (win === null) {
+		createWindow();
+	}
 });

@@ -20,9 +20,14 @@ body,
 #loadListOnStartup,
 #extractFrom,
 #extractTo,
-#listTextArea {
+#listTextArea,
+#electron-nav-breadcrumb {
     color: #fff;
     background-color: #404040;
+}
+
+.breadcrumb-item-text {
+    color: #fff !important;
 }
 
 body {
