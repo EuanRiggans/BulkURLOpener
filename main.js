@@ -1,12 +1,3 @@
-/**
- * @todo Add new item on settings page:
- *  Settings => Debug info
- *  Output debug info: user settings, app version, browser, browser version.
- *  Then require this info on Github issues
- * @todo Convert settings page to new card based layout.
- * @todo https://github.com/EuanRiggans/BulkURLOpener/issues/2#issuecomment-670633472
- */
-
 const {
     app,
     BrowserWindow,
