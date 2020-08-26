@@ -36,6 +36,7 @@ electron .
 
 ## To Do List
 
+- Switch from localstorage to the storage api
+- Improve design of settings page.
 - Switch to using Bootstrap 5 once in stable release.
 - Refactor some of the old code which is quite clunky.
-- Improve design of settings page.
