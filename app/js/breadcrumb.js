@@ -1,15 +1,15 @@
 if (document.getElementById("goHome")) {
-	document.getElementById("goHome").addEventListener("click", () => {
-		if (checkHostType() === "electron") {
-			window.location.replace("../../popup.html");
-		}
-	});
+    document.getElementById("goHome").addEventListener("click", () => {
+        if (checkHostType() === "electron") {
+            window.location.replace("../../popup.html");
+        }
+    });
 }
 
 if (document.getElementById("goHelp")) {
-	document.getElementById("goHelp").addEventListener("click", () => {
-		if (checkHostType() === "electron") {
-			window.location.replace("../help/index.html");
-		}
-	});
+    document.getElementById("goHelp").addEventListener("click", () => {
+        if (checkHostType() === "electron") {
+            window.location.replace("../help/index.html");
+        }
+    });
 }

@@ -7,12 +7,12 @@
 /* Event Listeners */
 
 window.addEventListener("focus", () => {
-	window.location.replace(document.getElementById("loadURL").innerText);
+    window.location.replace(document.getElementById("loadURL").innerText);
 });
 
 /* End Of Event Listeners */
 
 (() => {
-	document.getElementById("loadURL").innerText = decodeURIComponent(getParameterByName("url"));
-	document.getElementById("page-title").innerText = decodeURIComponent(getParameterByName("url"));
+    document.getElementById("loadURL").innerText = decodeURIComponent(getParameterByName("url"));
+    document.getElementById("page-title").innerText = decodeURIComponent(getParameterByName("url"));
 })();

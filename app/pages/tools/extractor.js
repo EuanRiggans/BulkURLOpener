@@ -9,21 +9,21 @@ if (document.getElementById("goHome")) document.getElementById("goHome").addEven
 /* End Of Event Listeners */
 
 function attemptURLExtraction() {
-	const strings = document.getElementById("extractFrom").value.split(/\r\n|\r|\n/);
-	const extracted = [];
-	for (const line of strings) {
-		const extraction = extractURLFromString(line);
-		if (extraction !== "noextractionsuccess") {
-			extracted.push(extraction);
-		}
-	}
-	console.log(extracted);
-	document.getElementById("extractTo").value = "";
-	for (const link of extracted) {
-		document.getElementById("extractTo").value += `${link}\n`;
-	}
+    const strings = document.getElementById("extractFrom").value.split(/\r\n|\r|\n/);
+    const extracted = [];
+    for (const line of strings) {
+        const extraction = extractURLFromString(line);
+        if (extraction !== "noextractionsuccess") {
+            extracted.push(extraction);
+        }
+    }
+    console.log(extracted);
+    document.getElementById("extractTo").value = "";
+    for (const link of extracted) {
+        document.getElementById("extractTo").value += `${link}\n`;
+    }
 }
 
 function goHome() {
-	window.location.replace("../../popup.html");
+    window.location.replace("../../popup.html");
 }
