@@ -30,6 +30,13 @@ if (document.getElementById("goHome")) document.getElementById("goHome").addEven
 
 /* End Of Event Listeners */
 
+(() => {
+    // Remove browser sync options for electron users
+    if (checkHostType() === "electron") {
+        document.getElementById("browserSync").remove();
+    }
+})();
+
 function openFAQ() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
@@ -90,8 +97,8 @@ function checkForUpdates() {
                 // User is not on latest version
                 alert(
                     `You're not on the latest version. Please update to: ${out.version}. Visit the Github `
-					+ "(https://github.com/EuanRiggans/BulkURLOpener) or visit the location where you installed the app"
-					+ " to find out how to update.",
+                    + "(https://github.com/EuanRiggans/BulkURLOpener) or visit the location where you installed the app"
+                    + " to find out how to update.",
                 );
             }
         })
