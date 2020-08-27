@@ -21,7 +21,9 @@ body,
 #extractFrom,
 #extractTo,
 #listTextArea,
-#electron-nav-breadcrumb {
+#electron-nav-breadcrumb,
+#reverseFrom,
+#reverseTo {
     color: #fff;
     background-color: #404040;
 }

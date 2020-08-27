@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    <title>Bulk URL Opener Tools</title>
+    <title>Bulk URL Opener List Reverse</title>
     <link href="../../css/bootstrap.min.css" id="bootstrap" rel="stylesheet">
     <link href="../../css/font-awesome.min.css" id="font-awesome" rel="stylesheet">
     <link href="../../css/style.css" id="styles" rel="stylesheet">
@@ -16,27 +16,19 @@
         <ol class="breadcrumb" id="electron-nav-breadcrumb">
             <li class="breadcrumb-item"><a class="breadcrumb-item-text" href="#" id="goHome">Url opener</a></li>
             <li class="breadcrumb-item"><a class="breadcrumb-item-text" href="#" id="goHelp">Help</a></li>
-            <li aria-current="page" class="breadcrumb-item breadcrumb-item-text active">Tools</li>
+            <li class="breadcrumb-item"><a class="breadcrumb-item-text" href="#" id="goTools">Tools</a></li>
+            <li aria-current="page" class="breadcrumb-item breadcrumb-item-text active">Reverse</li>
         </ol>
     </nav>
     <h1 class="text-center pb-5">
-        Bulk URL Opener - Tools
+        Bulk URL Opener - Reverse List Tool
     </h1>
-    <div class="card-deck mb-5">
-        <div class="card">
-            <div class="card-body d-flex flex-column">
-                <h3 class="card-title">URL Extractor</h3>
-                <p class="card-text">Extract urls from text.</p>
-                <a class="btn btn-primary btn-block mt-auto" href="#" id="openExtractor">Open extractor tool!</a>
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body d-flex flex-column">
-                <h3 class="card-title">List Reverse</h3>
-                <p class="card-text">Reverse order of the urls in a list.</p>
-                <a class="btn btn-primary btn-block mt-auto" href="#" id="openReverse">Open reverse tool!</a>
-            </div>
-        </div>
+    <div class="container-fluid">
+        <label for="reverseFrom">List:</label>
+        <textarea autofocus="autofocus" class="form-control mb-5" id="reverseFrom" rows="7"></textarea>
+        <label for="reverseTo">Reversed List:</label>
+        <textarea class="form-control" id="reverseTo" rows="7"></textarea>
+        <button class="btn-lg btn-primary btn-block" id="manualReverseButton">Reverse</button>
     </div>
 </div>
 </body>
@@ -50,7 +42,7 @@
 <script src="../../js/bootstrap.min.js" type="text/javascript"></script>
 <script src="../../js/utility.js" type="text/javascript"></script>
 <script src="../../js/breadcrumb.js" type="text/javascript"></script>
-<script src="tools.js" type="text/javascript"></script>
+<script src="reverse.js" type="text/javascript"></script>
 <script id="tempStylesheetLoader" src="../../js/custom-styles.js" type="text/javascript"></script>
 <script>
     if (window.module) module = window.module;
