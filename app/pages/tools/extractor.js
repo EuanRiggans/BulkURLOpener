@@ -4,8 +4,6 @@ document.getElementById("extractFrom").addEventListener("input", attemptURLExtra
 
 document.getElementById("manualExtractButton").addEventListener("click", attemptURLExtraction);
 
-if (document.getElementById("goHome")) document.getElementById("goHome").addEventListener("click", goHome);
-
 /* End Of Event Listeners */
 
 function attemptURLExtraction() {
