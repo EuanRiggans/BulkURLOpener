@@ -12,10 +12,13 @@
 
 <body>
 <div class="container mt-5">
+    <nav aria-label="breadcrumb" class="mb-5">
+        <ol class="breadcrumb" id="electron-nav-breadcrumb">
+            <li class="breadcrumb-item"><a class="breadcrumb-item-text" href="#" id="goHome">Url opener</a></li>
+            <li aria-current="page" class="breadcrumb-item breadcrumb-item-text active">Help</li>
+        </ol>
+    </nav>
     <h1 class="text-center pb-5">
-        <a class="no-highlight" data-placement="top" data-toggle="tooltip" href="#" title="Go Home">
-            <i aria-hidden="true" class="fa fa-home" id="goHome"></i>
-        </a>
         Bulk URL Opener - Help Documentation
     </h1>
     <div class="card-deck mb-5">
@@ -78,6 +81,7 @@
 <script src="../../js/jquery-3.3.1.min.js" type="text/javascript"></script>
 <script src="../../js/bootstrap.min.js" type="text/javascript"></script>
 <script src="../../js/utility.js" type="text/javascript"></script>
+<script src="../../js/breadcrumb.js" type="text/javascript"></script>
 <script src="help.js" type="text/javascript"></script>
 <script id="tempStylesheetLoader" src="../../js/custom-styles.js" type="text/javascript"></script>
 <script>

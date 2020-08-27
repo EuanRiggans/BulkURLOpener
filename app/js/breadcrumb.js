@@ -13,3 +13,11 @@ if (document.getElementById("goHelp")) {
         }
     });
 }
+
+if (document.getElementById("goTools")) {
+    document.getElementById("goTools").addEventListener("click", () => {
+        if (checkHostType() === "electron") {
+            window.location.replace("./index.html");
+        }
+    });
+}

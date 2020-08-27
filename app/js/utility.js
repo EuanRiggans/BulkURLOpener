@@ -6,11 +6,6 @@
  */
 
 (() => {
-    if (document.getElementById("goHome")) {
-        if (checkHostType() !== "electron") {
-            document.getElementById("goHome").remove();
-        }
-    }
     if (document.getElementById("electron-nav-breadcrumb")) {
         if (checkHostType() !== "electron") {
             document.getElementById("electron-nav-breadcrumb").remove();
