@@ -6,6 +6,7 @@
   "scripts": {
     "start": "electron .",
     "lint": "eslint \"**/*.js\" --ignore-pattern node_modules/",
+    "lint:fix": "eslint \"**/*.js\" --ignore-pattern node_modules/ --fix",
     "test": "mocha",
     "make:all": "npm run make:linux:x64 && npm run make:mac:zip && npm run make:win",
     "make:win": "electron-builder build --win",
