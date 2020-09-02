@@ -37,7 +37,7 @@
     "spectron": "^11.1.0"
   },
   "dependencies": {
-    "electron": "^10.1.0"
+    "electron": "^10.1.1"
   },
   "build": {
     "appId": "com.bulkurlopener",
