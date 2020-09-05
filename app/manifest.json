@@ -7,6 +7,7 @@
   "description": "Browser addon to open multiple urls with one click. With many more tools to help you manage urls.",
   "permissions": [
     "tabs",
+    "storage",
     "contextMenus"
   ],
   "background": {
