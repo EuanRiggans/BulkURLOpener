@@ -28,53 +28,11 @@ document.getElementById("checkForUpdates").addEventListener("click", () => {
 });
 
 document.getElementById("syncToBrowser").addEventListener("click", () => {
-    let exportData = {
-        maxID: 0,
-        lists: [],
-        settings: {},
-    };
-    for (let i = 0; i < localStorage.length; i++) {
-        const tempStorage = loadList(localStorage.key(i));
-        const parsedJSON = JSON.parse(tempStorage);
-        if (localStorage.key(i) === "settings") {
-            exportData.settings = parsedJSON;
-        } else if (parsedJSON.object_description === "list_storage") {
-            exportData.lists.push(parsedJSON);
-        } else if (localStorage.getItem("maxID") !== "NaN") {
-            exportData.maxID = localStorage.getItem("maxID");
-        }
-    }
-    exportData = JSON.stringify(exportData);
-    chrome.storage.sync.set({"user_settings": exportData}, () => {
-        alert("Successfully saved data to browser storage.");
-    });
+    syncToBrowser();
 });
 
 document.getElementById("syncFromBrowser").addEventListener("click", () => {
-    chrome.storage.sync.get(function (result) {
-        let syncedData;
-        try {
-            syncedData = JSON.parse(result.user_settings);
-        } catch (e) {
-            console.log(e);
-            alert("Failed to get data from browser storage. You may not have anything data stored.");
-            return;
-        }
-        let userSetting = syncedData.settings;
-        let userLists = syncedData.lists;
-        let modalBody = document.getElementById("syncFromModalBody");
-        appendHtml(modalBody, "<h4>Lists:</h4>");
-        for (let list in userLists) {
-            if (list !== "object_description") {
-                appendHtml(modalBody, buildListSyncDisplay(userLists[list].list_name));
-                for (let listURL of userLists[list].list_links) {
-                    document.getElementById(userLists[list].list_name).value += `${listURL}\n`;
-                }
-            }
-        }
-        // @todo Switch for pure js rather than jquery
-        $("#syncFromModal").modal("show");
-    });
+    syncFromBrowser();
 });
 
 document.getElementById("acceptSyncedChanges").addEventListener("click", () => {
@@ -162,6 +120,56 @@ function checkForUpdates() {
         .catch((err) => {
             throw err;
         });
+}
+
+function syncToBrowser() {
+    let exportData = {
+        maxID: 0,
+        lists: [],
+        settings: {},
+    };
+    for (let i = 0; i < localStorage.length; i++) {
+        const tempStorage = loadList(localStorage.key(i));
+        const parsedJSON = JSON.parse(tempStorage);
+        if (localStorage.key(i) === "settings") {
+            exportData.settings = parsedJSON;
+        } else if (parsedJSON.object_description === "list_storage") {
+            exportData.lists.push(parsedJSON);
+        } else if (localStorage.getItem("maxID") !== "NaN") {
+            exportData.maxID = localStorage.getItem("maxID");
+        }
+    }
+    exportData = JSON.stringify(exportData);
+    chrome.storage.sync.set({"user_settings": exportData}, () => {
+        alert("Successfully saved data to browser storage.");
+    });
+}
+
+function syncFromBrowser() {
+    chrome.storage.sync.get(function (result) {
+        let syncedData;
+        try {
+            syncedData = JSON.parse(result.user_settings);
+        } catch (e) {
+            console.log(e);
+            alert("Failed to get data from browser storage. You may not have anything data stored.");
+            return;
+        }
+        let userSetting = syncedData.settings;
+        let userLists = syncedData.lists;
+        let modalBody = document.getElementById("syncFromModalBody");
+        appendHtml(modalBody, "<h4>Lists:</h4>");
+        for (let list in userLists) {
+            if (list !== "object_description") {
+                appendHtml(modalBody, buildListSyncDisplay(userLists[list].list_name));
+                for (let listURL of userLists[list].list_links) {
+                    document.getElementById(userLists[list].list_name).value += `${listURL}\n`;
+                }
+            }
+        }
+        // @todo Switch for pure js rather than jquery
+        $("#syncFromModal").modal("show");
+    });
 }
 
 function overwriteCurrentWithBrowserStorage() {
