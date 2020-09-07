@@ -60,44 +60,26 @@ document.getElementById("syncFromBrowser").addEventListener("click", () => {
             alert("Failed to get data from browser storage. You may not have anything data stored.");
             return;
         }
-        // @todo Add visualisation for the user, show them what data is coming from the sync, so they can decide.
-        if (confirm(
-            "This will overwrite all of your current settings (Lists, settings etc) with the data synced to " +
-            "our browsers storage. Are you sure you wish to continue?"
-        )) {
-            let skipLists = false;
-            let skipSettings = false;
-            if (syncedData.maxID === undefined || syncedData.lists === undefined) {
-                skipLists = true;
-                if (!confirm("Your imported data is missing lists or lists max ID. Do you wish to continue with importing this data?")) {
-                    return;
+        let userSetting = syncedData.settings;
+        let userLists = syncedData.lists;
+        // @todo Switch for pure js rather than jquery
+        let modalBody = document.getElementById("syncFromModalBody");
+        appendHtml(modalBody, "<h4>Lists:</h4>");
+        for (let list in userLists) {
+            if (list !== "object_description") {
+                appendHtml(modalBody, buildListSyncDisplay(userLists[list].list_name));
+                for (let listURL of userLists[list].list_links) {
+                    document.getElementById(userLists[list].list_name).value += `${listURL}\n`;
                 }
             }
-            if (syncedData.settings === undefined) {
-                skipSettings = true;
-                if (!confirm("Your imported data is missing settings. Do you wish to continue with importing this data?")) {
-                    return;
-                }
-            }
-            localStorage.clear();
-            let maxID = 0;
-            let userLists = [];
-            let userSettings;
-            if (!skipLists) {
-                maxID = syncedData.maxID;
-                userLists = syncedData.lists;
-            }
-            if (!skipSettings) {
-                userSettings = syncedData.settings;
-            }
-            localStorage.setItem("maxID", maxID);
-            for (const list of userLists) {
-                localStorage.setItem(list.list_id, JSON.stringify(list));
-            }
-            localStorage.setItem("settings", JSON.stringify(userSettings));
-            alert("Successfully imported settings.");
         }
+        $("#syncFromModal").modal("show");
     });
+});
+
+document.getElementById("acceptSyncedChanges").addEventListener("click", () => {
+    $("#syncFromModal").modal("hide");
+    overwriteCurrentWithBrowserStorage();
 });
 
 if (document.getElementById("goHome")) document.getElementById("goHome").addEventListener("click", goHome);
@@ -179,6 +161,63 @@ function checkForUpdates() {
         .catch((err) => {
             throw err;
         });
+}
+
+function overwriteCurrentWithBrowserStorage() {
+    chrome.storage.sync.get(function (result) {
+        let syncedData;
+        try {
+            syncedData = JSON.parse(result.user_settings);
+        } catch (e) {
+            console.log(e);
+            alert("Failed to get data from browser storage. You may not have anything data stored.");
+            return;
+        }
+        if (confirm(
+            "This will overwrite all of your current settings (Lists, settings etc) with the data synced to " +
+            "our browsers storage. Are you sure you wish to continue?"
+        )) {
+            let skipLists = false;
+            let skipSettings = false;
+            if (syncedData.maxID === undefined || syncedData.lists === undefined) {
+                skipLists = true;
+                if (!confirm("Your imported data is missing lists or lists max ID. Do you wish to continue with importing this data?")) {
+                    return;
+                }
+            }
+            if (syncedData.settings === undefined) {
+                skipSettings = true;
+                if (!confirm("Your imported data is missing settings. Do you wish to continue with importing this data?")) {
+                    return;
+                }
+            }
+            localStorage.clear();
+            let maxID = 0;
+            let userLists = [];
+            let userSettings;
+            if (!skipLists) {
+                maxID = syncedData.maxID;
+                userLists = syncedData.lists;
+            }
+            if (!skipSettings) {
+                userSettings = syncedData.settings;
+            }
+            localStorage.setItem("maxID", maxID);
+            for (const list of userLists) {
+                localStorage.setItem(list.list_id, JSON.stringify(list));
+            }
+            localStorage.setItem("settings", JSON.stringify(userSettings));
+            alert("Successfully imported settings.");
+        }
+    });
+}
+
+function buildListSyncDisplay(listName) {
+    return `<div class="form-group" id="urlsForm"><label for="${listName}">${listName}:</label><textarea class="form-control text-area-import" id="${listName}" rows="4"></textarea></div>`;
+}
+
+function buildSyncSettingDisplay(settingName, settingValue, settingId) {
+    return `<div class="input-group"><div class="input-group-prepend"><span class="input-group-text" id="${settingId}">${settingName}:</span></div><input aria-describedby="${settingId}" class="form-control" value="${settingValue}" disabled></div>`;
 }
 
 function goHome() {

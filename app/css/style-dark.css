@@ -23,7 +23,8 @@ body,
 #listTextArea,
 #electron-nav-breadcrumb,
 #reverseFrom,
-#reverseTo {
+#reverseTo,
+.text-area-import {
     color: #fff;
     background-color: #404040;
 }
