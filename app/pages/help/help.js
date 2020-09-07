@@ -62,7 +62,6 @@ document.getElementById("syncFromBrowser").addEventListener("click", () => {
         }
         let userSetting = syncedData.settings;
         let userLists = syncedData.lists;
-        // @todo Switch for pure js rather than jquery
         let modalBody = document.getElementById("syncFromModalBody");
         appendHtml(modalBody, "<h4>Lists:</h4>");
         for (let list in userLists) {
@@ -73,11 +72,13 @@ document.getElementById("syncFromBrowser").addEventListener("click", () => {
                 }
             }
         }
+        // @todo Switch for pure js rather than jquery
         $("#syncFromModal").modal("show");
     });
 });
 
 document.getElementById("acceptSyncedChanges").addEventListener("click", () => {
+    // @todo Switch for pure js rather than jquery
     $("#syncFromModal").modal("hide");
     overwriteCurrentWithBrowserStorage();
 });
