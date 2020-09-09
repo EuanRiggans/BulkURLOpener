@@ -171,7 +171,7 @@ function syncFromBrowser() {
         appendHtml(modalBody, "<h4>Settings:</h4>");
         for (let setting in userSettings) {
             if (setting !== "object_description") {
-                settingsBuildSwitch();
+                settingsBuildSwitch(modalBody, userLists, userSettings, setting);
             }
         }
         // @todo Switch for pure js rather than jquery
@@ -231,7 +231,7 @@ function overwriteCurrentWithBrowserStorage() {
 /**
  * Outputs all of the users settings when syncing from browser storage
  */
-function settingsBuildSwitch() {
+function settingsBuildSwitch(modalBody, userLists, userSettings, setting) {
     switch (setting) {
     case "tab_creation_delay":
         appendHtml(
@@ -240,22 +240,6 @@ function settingsBuildSwitch() {
                 setting,
                 userSettings[setting] + " seconds"
             )
-        );
-        break;
-    case "night_mode":
-        appendHtml(
-            modalBody,
-            buildSyncSettingDisplay(
-                setting,
-                userSettings[setting] === 1 ? "Enabled" : "Disabled")
-        );
-        break;
-    case "auto_open_lists":
-        appendHtml(
-            modalBody,
-            buildSyncSettingDisplay(
-                setting,
-                userSettings[setting] === 1 ? "Enabled" : "Disabled")
         );
         break;
     case "default_list_open":
@@ -364,31 +348,23 @@ function settingsBuildSwitch() {
             alert("Error while parsing setting: open_on_launch");
         }
         break;
-    case "load_on_focus":
-        appendHtml(
-            modalBody,
-            buildSyncSettingDisplay(
-                setting,
-                userSettings[setting] === 1 ? "Enabled" : "Disabled")
-        );
-        break;
-    case "context_menu_enabled":
-        appendHtml(
-            modalBody,
-            buildSyncSettingDisplay(
-                setting,
-                userSettings[setting] === 1 ? "Enabled" : "Disabled")
-        );
-        break;
-    case "open_urls_in_reverse_order":
-        appendHtml(
-            modalBody,
-            buildSyncSettingDisplay(
-                setting,
-                userSettings[setting] === 1 ? "Enabled" : "Disabled")
-        );
+    default:
+        genericEnabledDisabledSettingBuilder(modalBody, userSettings, setting);
         break;
     }
+}
+
+/**
+ * For settings that are simply output as Enabled or Disabled, rather than having repetition in the code.
+ */
+function genericEnabledDisabledSettingBuilder(modalBody, userSettings, setting) {
+    appendHtml(
+        modalBody,
+        buildSyncSettingDisplay(
+            setting,
+            userSettings[setting] === 1 ? "Enabled" : "Disabled"
+        )
+    );
 }
 
 /**
