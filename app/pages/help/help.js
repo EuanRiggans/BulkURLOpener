@@ -155,9 +155,10 @@ function syncFromBrowser() {
             alert("Failed to get data from browser storage. You may not have anything data stored.");
             return;
         }
-        let userSetting = syncedData.settings;
+        let userSettings = syncedData.settings;
         let userLists = syncedData.lists;
         let modalBody = document.getElementById("syncFromModalBody");
+        modalBody.innerHTML = "";
         appendHtml(modalBody, "<h4>Lists:</h4>");
         for (let list in userLists) {
             if (list !== "object_description") {
@@ -165,6 +166,12 @@ function syncFromBrowser() {
                 for (let listURL of userLists[list].list_links) {
                     document.getElementById(userLists[list].list_name).value += `${listURL}\n`;
                 }
+            }
+        }
+        appendHtml(modalBody, "<h4>Settings:</h4>");
+        for (let setting in userSettings) {
+            if (setting !== "object_description") {
+                settingsBuildSwitch();
             }
         }
         // @todo Switch for pure js rather than jquery
@@ -221,12 +228,190 @@ function overwriteCurrentWithBrowserStorage() {
     });
 }
 
+/**
+ * Outputs all of the users settings when syncing from browser storage
+ */
+function settingsBuildSwitch() {
+    switch (setting) {
+    case "tab_creation_delay":
+        appendHtml(
+            modalBody,
+            buildSyncSettingDisplay(
+                setting,
+                userSettings[setting] + " seconds"
+            )
+        );
+        break;
+    case "night_mode":
+        appendHtml(
+            modalBody,
+            buildSyncSettingDisplay(
+                setting,
+                userSettings[setting] === 1 ? "Enabled" : "Disabled")
+        );
+        break;
+    case "auto_open_lists":
+        appendHtml(
+            modalBody,
+            buildSyncSettingDisplay(
+                setting,
+                userSettings[setting] === 1 ? "Enabled" : "Disabled")
+        );
+        break;
+    case "default_list_open":
+        appendHtml(
+            modalBody,
+            buildSyncSettingDisplay(
+                setting,
+                userSettings[setting] === -1
+                    ? "Current Tabs"
+                    : getListFromIdSync(userLists, userSettings[setting])
+            )
+        );
+        break;
+    case "custom_theme":
+        appendHtml(
+            modalBody,
+            buildSyncSettingDisplay(
+                setting,
+                userSettings[setting] === "defaultBoostrap"
+                    ? "Bootstrap"
+                    : "Fluent Design Bootstrap"
+            )
+        );
+        break;
+    case "currently_opened_tabs_display":
+        appendHtml(
+            modalBody,
+            buildSyncSettingDisplay(
+                setting,
+                userSettings[setting] === "currentWindow"
+                    ? "Current Window"
+                    : "All tabs"
+            )
+        );
+        break;
+    case "non_url_handler":
+        output = "";
+        if (userSettings[setting] === "searchForString") {
+            output = "Search For String";
+        } else if (userSettings[setting] === "ignoreString") {
+            output = "Ignore String";
+        } else if (userSettings[setting] === "attemptToExtractURL") {
+            output = "Attempt To Extract URL";
+        }
+        appendHtml(modalBody, buildSyncSettingDisplay(setting, output));
+        break;
+    case "search_engine":
+        output = "";
+        if (userSettings[setting] === "googleEngine") {
+            output = "Google";
+        } else if (userSettings[setting] === "duckduckgoEngine") {
+            output = "DuckDuckGo";
+        } else if (userSettings[setting] === "bingEngine") {
+            output = "Bing";
+        }
+        appendHtml(modalBody, buildSyncSettingDisplay(setting, output));
+        break;
+    case "new_tabs_active":
+        appendHtml(
+            modalBody,
+            buildSyncSettingDisplay(
+                setting,
+                userSettings[setting] === 1
+                    ? "On"
+                    : "Off"
+            )
+        );
+        break;
+    case "auto_load_into_textarea":
+        appendHtml(
+            modalBody,
+            buildSyncSettingDisplay(
+                setting,
+                userSettings[setting] === 1
+                    ? "On"
+                    : "Off"
+            )
+        );
+        break;
+    case "button_look":
+        output = "";
+        if (userSettings[setting] === "alwaysOutline") {
+            output = "Always Outline";
+        } else if (userSettings[setting] === "alwaysFilled") {
+            output = "Always Filled";
+        } else if (userSettings[setting] === "filledNight") {
+            output = "Filled On Night Theme";
+        } else if (userSettings[setting] === "filledLight") {
+            output = "Filled On Light Theme";
+        }
+        appendHtml(modalBody, buildSyncSettingDisplay(setting, output));
+        break;
+    case "open_on_launch":
+        try {
+            appendHtml(
+                modalBody,
+                buildSyncSettingDisplay(
+                    setting,
+                    userSettings[setting] === "no_list"
+                        ? "No List"
+                        : getListFromIdSync(userLists, parseInt(userSettings[setting]))
+                )
+            );
+        } catch (e) {
+            console.log(e);
+            alert("Error while parsing setting: open_on_launch");
+        }
+        break;
+    case "load_on_focus":
+        appendHtml(
+            modalBody,
+            buildSyncSettingDisplay(
+                setting,
+                userSettings[setting] === 1 ? "Enabled" : "Disabled")
+        );
+        break;
+    case "context_menu_enabled":
+        appendHtml(
+            modalBody,
+            buildSyncSettingDisplay(
+                setting,
+                userSettings[setting] === 1 ? "Enabled" : "Disabled")
+        );
+        break;
+    case "open_urls_in_reverse_order":
+        appendHtml(
+            modalBody,
+            buildSyncSettingDisplay(
+                setting,
+                userSettings[setting] === 1 ? "Enabled" : "Disabled")
+        );
+        break;
+    }
+}
+
+/**
+ * Gets the name of a list that is being synced from browser storage.
+ * @param lists
+ * @param Id
+ * @returns {null}
+ */
+function getListFromIdSync(lists, Id) {
+    for (let list of lists) {
+        if (list.list_id === Id) {
+            return list.list_name;
+        }
+    }
+    return null;
+}
+
 function buildListSyncDisplay(listName) {
     return `<div class="form-group" id="urlsForm"><label for="${listName}">${listName}:</label><textarea class="form-control text-area-import" id="${listName}" rows="4"></textarea></div>`;
 }
 
-function buildSyncSettingDisplay(settingName, settingValue, settingId) {
-    return `<div class="input-group"><div class="input-group-prepend"><span class="input-group-text" id="${settingId}">${settingName}:</span></div><input aria-describedby="${settingId}" class="form-control" value="${settingValue}" disabled></div>`;
+function buildSyncSettingDisplay(settingName, settingValue) {
+    return `<p><b>${settingName}:</b> ${settingValue}</p>`;
 }
 
 function goHome() {
