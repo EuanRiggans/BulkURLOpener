@@ -36,7 +36,8 @@ electron .
 
 ## To Do List
 
-- Switch from localstorage to the storage api
+- Convert settings page to new card based layout
+- Fix defaultBoostrap typo
 - Improve design of settings page.
 - Switch to using Bootstrap 5 once in stable release.
 - Refactor some of the old code which is quite clunky.
