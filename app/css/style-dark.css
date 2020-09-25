@@ -24,7 +24,8 @@ body,
 #electron-nav-breadcrumb,
 #reverseFrom,
 #reverseTo,
-.text-area-import {
+.text-area-import,
+#debugInfoTextArea {
     color: #fff;
     background-color: #404040;
 }

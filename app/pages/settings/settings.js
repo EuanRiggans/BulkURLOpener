@@ -12,6 +12,8 @@ document.getElementById("openImport").addEventListener("click", openImport);
 
 document.getElementById("openExport").addEventListener("click", openExport);
 
+document.getElementById("openDebugInfo").addEventListener("click", openDebug);
+
 document.getElementById("closeModal").addEventListener("click", () => {
     if (checkHostType() === "firefox") {
         alert("Unable to close window due to Firefox security policy. Please close this window manually.");
@@ -321,6 +323,21 @@ function openExport() {
         });
     } else if (checkHostType() === "electron") {
         window.location.replace("../data-control/export.html");
+    }
+}
+
+function openDebug() {
+    if (checkHostType() === "firefox") {
+        browser.tabs.create({
+            active: true,
+            url: browser.extension.getURL("/pages/debug/get-info.html"),
+        });
+    } else if (checkHostType() === "chrome") {
+        chrome.tabs.create({
+            url: chrome.extension.getURL("/pages/debug/get-info.html"),
+        });
+    } else if (checkHostType() === "electron") {
+        window.location.replace("../debug/get-info.html");
     }
 }
 
