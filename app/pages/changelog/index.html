@@ -21,6 +21,16 @@
         </div>
         <div class="modal-body">
             <p>For the most up to date changes, click <a href="#" id="openGithubChangelog">here</a></p>
+            <h5 class="version">1.10.0</h5>
+            <p class="notes">Added context menus. Currently, only context menus are for opening lists that the user has
+                saved.</p>
+            <p class="notes">Added setting to open lists in reverse order.</p>
+            <p class="notes">Added new option for the 'Default list to display' setting:</p>
+            <p class="notes">^'Previous urls': whatever you previous had in the 'URLs' text box will be displayed the
+                next time you open the app / popup.</p>
+            <p class="notes">Improved the REGEX for extracting urls from strings.</p>
+            <p class="notes">Redesigned help page</p>
+            <p class="notes">Added 'Tools' page, currently only includes a url extractor tool</p>
             <h5 class="version">1.9.0</h5>
             <p class="notes">Added ability for the user to pause and resume the opening of tabs when using tab creation
                 delay.</p>
@@ -161,7 +171,7 @@
     </div>
 </div>
 <script>
-    if (typeof module === 'object') {
+    if (typeof module === "object") {
         window.module = module;
         module = undefined;
     }

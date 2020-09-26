@@ -1,4 +1,4 @@
-## New Unreleased Changes
+## 1.10.0
 
 - Added context menus. Currently, only context menus are for opening lists that the user has saved.
 - Added setting to open lists in reverse order.
@@ -7,6 +7,7 @@
 - Improved the REGEX for extracting urls from strings.
 - Redesigned help page
 - Added 'Tools' page, currently only includes a url extractor tool
+
 ## 1.9.0
 
 - Added ability for the user to pause and resume the opening of tabs when using tab creation delay.
