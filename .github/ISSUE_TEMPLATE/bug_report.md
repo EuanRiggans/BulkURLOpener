@@ -32,5 +32,7 @@ If you have any relevant screenshots, please add them.
  - Browser (If applicable) [e.g. chrome, firefox]
  - Version [e.g. 1.7.0]
 
+**Debug Info (If you are on version 1.10.0 or newer, please go to settings => Debug info and copy that data here):**
+
 **Additional context**
 Add any other context about the problem here.
