@@ -7,6 +7,7 @@
 - Improved the REGEX for extracting urls from strings.
 - Redesigned help page
 - Added 'Tools' page, currently only includes a url extractor tool
+- Added ability for user to manualy sync their settings and lists to the browser storage (Found on the 'Help' page on the top right).
 
 ## 1.9.0
 
