@@ -31,7 +31,7 @@
   "license": "ISC",
   "devDependencies": {
     "electron": "^10.1.2",
-    "eslint": "^7.9.0",
+    "eslint": "^7.10.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.22.0",
     "mocha": "^8.1.3",
