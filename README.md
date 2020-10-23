@@ -37,6 +37,7 @@ electron .
 ## To Do List
 
 - Convert settings page to new card based layout
+- Add setting and tool to remove duplicate links from a list
 - Fix defaultBoostrap typo
 - Improve design of settings page.
 - Switch to using Bootstrap 5 once in stable release.
