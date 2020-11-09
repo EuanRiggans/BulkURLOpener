@@ -18,6 +18,8 @@ document.getElementById("openSettingsHelp").addEventListener("click", () => {
     openExternalURL("https://euan.link/buo-settings-wiki");
 });
 
+if (document.getElementById("goHome")) document.getElementById("goHome").addEventListener("click", goHome);
+
 /* End Of Event Listeners */
 
 (() => {
@@ -168,12 +170,9 @@ document.getElementById("openSettingsHelp").addEventListener("click", () => {
     });
 
     if (checkHostType() === "electron") {
-        document.getElementById("loadOnBrowserStart").style.display = "none";
-        document.getElementById("loadTabOnFocusGroup").style.display = "none";
-        document.getElementById("loadOnBrowserStartGroupHR").style.display = "none";
-        document.getElementById("loadTabOnFocusGroupHR").style.display = "none";
-        document.getElementById("contextMenusGroup").style.display = "none";
-        document.getElementById("contextMenusHR").style.display = "none";
+        document.getElementById("loadOnBrowserStart").innerText = "Setting not available on Electron.";
+        document.getElementById("loadTabOnFocusGroup").innerText = "Setting not available on Electron.";
+        document.getElementById("contextMenusGroup").innerText = "Setting not available on Electron.";
     }
 })();
 
@@ -380,4 +379,8 @@ function getButtonLookSetting() {
 
 function getLoadListOnStartupSetting() {
     return document.getElementById("loadListOnStartup").options[document.getElementById("loadListOnStartup").selectedIndex].id;
+}
+
+function goHome() {
+    window.location.replace("../../popup.html");
 }
