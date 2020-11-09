@@ -14,17 +14,6 @@ document.getElementById("openExport").addEventListener("click", openExport);
 
 document.getElementById("openDebugInfo").addEventListener("click", openDebug);
 
-document.getElementById("closeModal").addEventListener("click", () => {
-    if (checkHostType() === "firefox") {
-        alert("Unable to close window due to Firefox security policy. Please close this window manually.");
-    // window.close();
-    } else if (checkHostType() === "chrome") {
-        window.close();
-    } else if (checkHostType() === "electron") {
-        window.location.replace("../../popup.html");
-    }
-});
-
 document.getElementById("openSettingsHelp").addEventListener("click", () => {
     openExternalURL("https://euan.link/buo-settings-wiki");
 });
