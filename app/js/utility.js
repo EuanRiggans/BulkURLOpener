@@ -275,17 +275,19 @@ function saveList(Id, newListObject, close = true) {
  * Saves users settings to local storage
  * @param userSettings  The users settings object
  */
-function saveSettings(userSettings) {
+function saveSettings(userSettings, dontClose) {
     removeList("settings", false);
     localStorage.setItem("settings", JSON.stringify(userSettings));
-    alert("Settings successfully saved!");
-    if (checkHostType() === "firefox") {
-    // alert("Unable to close window due to Firefox security policy. Please close this window manually.");
-    // window.close();
-    } else if (checkHostType() === "chrome") {
-        window.close();
-    } else if (checkHostType() === "electron") {
-        window.location.replace("../../popup.html");
+    if(!dontClose) {
+        alert("Settings successfully saved!");
+        if (checkHostType() === "firefox") {
+            // alert("Unable to close window due to Firefox security policy. Please close this window manually.");
+            // window.close();
+        } else if (checkHostType() === "chrome") {
+            window.close();
+        } else if (checkHostType() === "electron") {
+            window.location.replace("../../popup.html");
+        }
     }
 }
 

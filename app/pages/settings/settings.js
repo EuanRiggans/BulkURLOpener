@@ -24,7 +24,6 @@ if (document.getElementById("goHome")) document.getElementById("goHome").addEven
 
 (() => {
     createSettings();
-
     const tabCreationDelayElement = document.getElementById("tabCreationDelay");
     const nightModeGroup = document.getElementById("nightModeGroup");
     const autoOpenListsGroup = document.getElementById("autoOpenListsGroup");
@@ -174,13 +173,26 @@ if (document.getElementById("goHome")) document.getElementById("goHome").addEven
         document.getElementById("loadTabOnFocusGroup").innerText = "Setting not available on Electron.";
         document.getElementById("contextMenusGroup").innerText = "Setting not available on Electron.";
     }
+
+    const allInputs = document.getElementsByTagName("input");
+    const allSelects = document.getElementsByTagName("select");
+    for (let input of allInputs) {
+        input.addEventListener("change", () => {
+            initSettingsSave(true);
+        });
+    }
+    for (let select of allSelects) {
+        select.addEventListener("change", () => {
+            initSettingsSave(true);
+        });
+    }
 })();
 
 function isNumber(varToTest) {
     return !isNaN(parseFloat(varToTest));
 }
 
-function initSettingsSave() {
+function initSettingsSave(dontClose = false) {
     const tabCreationDelayElement = document.getElementById("tabCreationDelay");
     const nightModeElement = document.getElementById("nightMode");
     const autoOpenListsElement = document.getElementById("autoOpenLists");
@@ -280,8 +292,8 @@ function initSettingsSave() {
             alert("You have enabled context menus, you will need to restart your browser for this change to come into effect.");
         }
     }
-
-    saveSettings(userSettings);
+    saveSettings(userSettings, dontClose);
+    $(".toast").toast("show");
 }
 
 function openImport() {
