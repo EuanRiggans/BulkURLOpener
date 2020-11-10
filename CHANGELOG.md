@@ -1,3 +1,9 @@
+## Unreleased
+
+- Redesigned settings page:
+  - New card based layout.
+  - Settings now auto save.
+
 ## 1.10.0
 
 - Added context menus. Currently, only context menus are for opening lists that the user has saved.

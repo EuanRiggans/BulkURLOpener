@@ -14,26 +14,16 @@ document.getElementById("openExport").addEventListener("click", openExport);
 
 document.getElementById("openDebugInfo").addEventListener("click", openDebug);
 
-document.getElementById("closeModal").addEventListener("click", () => {
-    if (checkHostType() === "firefox") {
-        alert("Unable to close window due to Firefox security policy. Please close this window manually.");
-    // window.close();
-    } else if (checkHostType() === "chrome") {
-        window.close();
-    } else if (checkHostType() === "electron") {
-        window.location.replace("../../popup.html");
-    }
-});
-
 document.getElementById("openSettingsHelp").addEventListener("click", () => {
     openExternalURL("https://euan.link/buo-settings-wiki");
 });
+
+if (document.getElementById("goHome")) document.getElementById("goHome").addEventListener("click", goHome);
 
 /* End Of Event Listeners */
 
 (() => {
     createSettings();
-
     const tabCreationDelayElement = document.getElementById("tabCreationDelay");
     const nightModeGroup = document.getElementById("nightModeGroup");
     const autoOpenListsGroup = document.getElementById("autoOpenListsGroup");
@@ -179,12 +169,22 @@ document.getElementById("openSettingsHelp").addEventListener("click", () => {
     });
 
     if (checkHostType() === "electron") {
-        document.getElementById("loadOnBrowserStart").style.display = "none";
-        document.getElementById("loadTabOnFocusGroup").style.display = "none";
-        document.getElementById("loadOnBrowserStartGroupHR").style.display = "none";
-        document.getElementById("loadTabOnFocusGroupHR").style.display = "none";
-        document.getElementById("contextMenusGroup").style.display = "none";
-        document.getElementById("contextMenusHR").style.display = "none";
+        document.getElementById("loadOnBrowserStart").innerText = "Setting not available on Electron.";
+        document.getElementById("loadTabOnFocusGroup").innerText = "Setting not available on Electron.";
+        document.getElementById("contextMenusGroup").innerText = "Setting not available on Electron.";
+    }
+
+    const allInputs = document.getElementsByTagName("input");
+    const allSelects = document.getElementsByTagName("select");
+    for (let input of allInputs) {
+        input.addEventListener("change", () => {
+            initSettingsSave(true);
+        });
+    }
+    for (let select of allSelects) {
+        select.addEventListener("change", () => {
+            initSettingsSave(true);
+        });
     }
 })();
 
@@ -192,7 +192,7 @@ function isNumber(varToTest) {
     return !isNaN(parseFloat(varToTest));
 }
 
-function initSettingsSave() {
+function initSettingsSave(dontClose = false) {
     const tabCreationDelayElement = document.getElementById("tabCreationDelay");
     const nightModeElement = document.getElementById("nightMode");
     const autoOpenListsElement = document.getElementById("autoOpenLists");
@@ -292,8 +292,8 @@ function initSettingsSave() {
             alert("You have enabled context menus, you will need to restart your browser for this change to come into effect.");
         }
     }
-
-    saveSettings(userSettings);
+    saveSettings(userSettings, dontClose);
+    $(".toast").toast("show");
 }
 
 function openImport() {
@@ -391,4 +391,8 @@ function getButtonLookSetting() {
 
 function getLoadListOnStartupSetting() {
     return document.getElementById("loadListOnStartup").options[document.getElementById("loadListOnStartup").selectedIndex].id;
+}
+
+function goHome() {
+    window.location.replace("../../popup.html");
 }

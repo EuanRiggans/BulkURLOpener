@@ -10,26 +10,39 @@
 </head>
 
 <body>
-<div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h4 class="modal-title">
-                Settings
-                <a data-placement="top" data-toggle="tooltip" href="#" title="Go Home">
-                    <i aria-hidden="true" class="fa fa-question" id="openSettingsHelp"></i>
-                </a>
-            </h4>
-            <button aria-label="Close" class="close" id="closeModal" type="button">
+<div class="container mt-5">
+    <nav aria-label="breadcrumb" class="mb-5">
+        <ol class="breadcrumb" id="electron-nav-breadcrumb">
+            <li class="breadcrumb-item"><a class="breadcrumb-item-text" href="#" id="goHome">Url opener</a></li>
+            <li aria-current="page" class="breadcrumb-item breadcrumb-item-text active">Settings</li>
+        </ol>
+    </nav>
+    <h1 class="text-center pb-5">
+        Bulk URL Opener - Settings
+        <a data-placement="top" data-toggle="tooltip" href="#" title="Go Home">
+            <i aria-hidden="true" class="fa fa-question" id="openSettingsHelp"></i>
+        </a>
+    </h1>
+    <div class="toast" role="alert" aria-live="assertive" data-delay="1000" aria-atomic="true" id="tester123"
+         style="position: fixed; bottom: 0; right: 0; margin-right: 5%; z-index: 999">
+        <div class="toast-header">
+            <strong class="mr-auto" id="toast-title">Notification</strong>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
-
-        <div class="modal-body">
-            <div id="tabCreationDelayGroup">
-                <p class="setting-title">Tab Creation Delay:</p>
+        <div class="toast-body" style="color:black;">
+            Your settings have been saved!
+        </div>
+    </div>
+    <div class="card-deck mb-5">
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Tab Creation Delay</h3>
+                <p>Amount of delay between tabs being opened</p>
                 <div class="input-group">
                     <div class="input-group-prepend">
-                        <span class="input-group-text" id="delay-addon">Tab creation delay (Seconds):</span>
+                        <span class="input-group-text" id="delay-addon">Delay (Seconds):</span>
                     </div>
                     <input aria-describedby="delay-addon"
                            class="form-control"
@@ -40,133 +53,194 @@
                     >
                 </div>
             </div>
-            <hr>
-            <div id="autoOpenListsGroup">
-                <p class="setting-title">Automatically open lists:</p>
-                <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
-            </div>
-            <hr>
-            <div id="defaultListGroup">
-                <p class="setting-title">Default list to display:</p>
-                <label for="defaultList">The list that will be displayed when you open the extension:</label>
-                <select class="form-control" id="defaultList">
-                    <option id="-1" selected value="">Currently opened tabs</option>
-                    <option id="-2" selected value="">Previous urls</option>
-                </select>
-            </div>
-            <hr>
-            <div id="nightModeGroup">
-                <p class="setting-title">Enable night theme:</p>
-                <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
-            </div>
-            <hr>
-            <div id="customThemeGroup">
-                <p class="setting-title">Custom theme:</p>
-                <label for="customTheme">Custom themes to change the look of Bulk URL Opener:</label>
-                <select class="form-control" id="customTheme">
-                    <option id="defaultBoostrap" selected value="">Default Bootstrap</option>
-                    <option id="fluentDesignBootstrap" value="">Fluent Design Bootstrap</option>
-                </select>
-            </div>
-            <hr>
-            <div id="currentlyOpenedTabsSettingGroup">
-                <p class="setting-title">Currently opened tabs display:</p>
-                <label for="currentlyOpenedSetting">Which URLS should be shown as 'currently opened':</label>
-                <select class="form-control" id="currentlyOpenedSetting">
-                    <option id="currentWindow" selected value="">Current window tabs</option>
-                    <option id="allOpenedTabs" value="">All opened tabs</option>
-                </select>
-            </div>
-            <hr>
-            <div id="nonURLHandler">
-                <p class="setting-title">How to handle non-urls:</p>
-                <label for="nonURLHandlerSetting">What should happen if a string is detected as not being a
-                    url:</label>
-                <select class="form-control" id="nonURLHandlerSetting">
-                    <option id="searchForString" selected value="">Open in a search window</option>
-                    <option id="ignoreString" value="">Completely ignore the string</option>
-                    <option id="attemptToExtractURL" value="">Attempt to extract a url from the string</option>
-                </select>
-            </div>
-            <hr>
-            <div id="selectedSearchEngine">
-                <p class="setting-title">Search Engine Selection:</p>
-                <label for="selectedSearchEngineSetting">If a non-url is to be searched for (depending on the above
-                    setting), which search engine should be used:</label>
-                <select class="form-control" id="selectedSearchEngineSetting">
-                    <option id="googleEngine" selected value="">Google</option>
-                    <option id="duckduckgoEngine" value="">DuckDuckGo</option>
-                    <option id="bingEngine" value="">Bing</option>
-                </select>
-            </div>
-            <hr>
-            <div id="activeNewTabsGroup">
-                <p class="setting-title">Open tabs 'Active'</p>
-                <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
-            </div>
-            <hr>
-            <div id="autoLoadIntoTextAreaGroup">
-                <p class="setting-title">Auto Load Into Textbox</p>
-                <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
-            </div>
-            <hr>
-            <div id="buttonLookGroup">
-                <p class="setting-title">Buttons Look:</p>
-                <label for="selectedSearchEngineSetting">Change how the buttons look (Always use filled buttons can help
-                    with readability):</label>
-                <select class="form-control" id="buttonLookSetting">
-                    <option id="alwaysOutline" selected value="">Always Use Outline Buttons</option>
-                    <option id="alwaysFilled" value="">Always Use Filled Buttons</option>
-                    <option id="filledNight" value="">Use Filled Buttons On Night Mode</option>
-                    <option id="filledLight" value="">Use Filled Buttons On Light Mode</option>
-                </select>
-            </div>
-            <hr>
-            <div id="importExportGroup">
-                <p class="setting-title">Import / Export Settings & Lists</p>
-                <button class="btn btn-primary" id="openImport" type="button">Import &nbsp; <i
-                        class="fa fa-download"></i></button>
-                <button class="btn btn-primary" id="openExport" type="button">Export &nbsp; <i
-                        class="fa fa-upload"></i></button>
-            </div>
-            <hr id="loadOnBrowserStartGroupHR">
-            <div id="loadOnBrowserStart">
-                <p class="setting-title">Load list on browser start</p>
-                <label for="loadListOnStartup">Should a list be loaded when the browser launches?</label>
-                <select class="form-control" id="loadListOnStartup">
-                    <option id="no_list" selected value="">Do not load a list</option>
-                </select>
-            </div>
-            <hr id="loadTabOnFocusGroupHR">
-            <div id="loadTabOnFocusGroup">
-                <p class="setting-title">Delay tab loading until tab is selected</p>
-                <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
-            </div>
-            <hr id="contextMenusHR">
-            <div id="contextMenusGroup">
-                <p class="setting-title">Context menus</p>
-                <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
-            </div>
-            <hr id="openInReverseHR">
-            <div id="openInReverseGroup">
-                <p class="setting-title">Open lists in reverse order</p>
-                <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
-            </div>
-            <hr id="openDebugInfoHR">
-            <div id="openDebugInfoGroup">
-                <p class="setting-title">Get debug info</p>
-                <button class="btn btn-primary" id="openDebugInfo" type="button">Get Debug Info &nbsp; <i
-                        class="fa fa-bug"></i></button>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Automatically open lists</h3>
+                <p>Lists will be automatically opened when selected</p>
+                <div id="autoOpenListsGroup">
+                    <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
+                </div>
             </div>
         </div>
-        <div class="modal-footer">
-            <button class="btn btn-outline-primary" id="saveSettings" type="button">Save settings</button>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Default list to display</h3>
+                <div id="defaultListGroup">
+                    <label for="defaultList">The list that will be displayed when you open the extension:</label>
+                    <select class="form-control" id="defaultList">
+                        <option id="-1" selected value="">Currently opened tabs</option>
+                        <option id="-2" selected value="">Previous urls</option>
+                    </select>
+                </div>
+            </div>
         </div>
     </div>
+    <div class="card-deck mb-5">
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Enable Night Mode</h3>
+                <p>Enable a simple dark version of the app</p>
+                <div id="nightModeGroup">
+                    <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Custom theme</h3>
+                <div id="customThemeGroup">
+                    <label for="customTheme">Custom themes to change the look of Bulk URL Opener</label>
+                    <select class="form-control" id="customTheme">
+                        <option id="defaultBoostrap" selected value="">Default Bootstrap</option>
+                        <option id="fluentDesignBootstrap" value="">Fluent Design Bootstrap</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Currently opened tabs</h3>
+                <div id="currentlyOpenedTabsSettingGroup">
+                    <label for="currentlyOpenedSetting">Which URLS should be shown as 'currently opened':</label>
+                    <select class="form-control" id="currentlyOpenedSetting">
+                        <option id="currentWindow" selected value="">Current window tabs</option>
+                        <option id="allOpenedTabs" value="">All opened tabs</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-deck mb-5">
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">How to handle non-urls</h3>
+                <div id="nonURLHandler">
+                    <label for="nonURLHandlerSetting">What should happen if a string is detected as not being a
+                        url:</label>
+                    <select class="form-control" id="nonURLHandlerSetting">
+                        <option id="searchForString" selected value="">Open in a search window</option>
+                        <option id="ignoreString" value="">Completely ignore the string</option>
+                        <option id="attemptToExtractURL" value="">Attempt to extract a url from the string</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Search Engine Selection</h3>
+                <div id="selectedSearchEngine">
+                    <label for="selectedSearchEngineSetting">If a non-url is to be searched for, which search engine
+                        should be used:</label>
+                    <select class="form-control" id="selectedSearchEngineSetting">
+                        <option id="googleEngine" selected value="">Google</option>
+                        <option id="duckduckgoEngine" value="">DuckDuckGo</option>
+                        <option id="bingEngine" value="">Bing</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Open tabs 'Active'</h3>
+                <div id="activeNewTabsGroup">
+                    <p>Should new tabs be opened as 'Active'</p>
+                    <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-deck mb-5">
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Auto Load Into Textbox</h3>
+                <div id="autoLoadIntoTextAreaGroup">
+                    <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Buttons Look</h3>
+                <div id="buttonLookGroup">
+                    <label for="selectedSearchEngineSetting">Change how the buttons look (Always use filled buttons can
+                        help
+                        with readability):</label>
+                    <select class="form-control" id="buttonLookSetting">
+                        <option id="alwaysOutline" selected value="">Always Use Outline Buttons</option>
+                        <option id="alwaysFilled" value="">Always Use Filled Buttons</option>
+                        <option id="filledNight" value="">Use Filled Buttons On Night Mode</option>
+                        <option id="filledLight" value="">Use Filled Buttons On Light Mode</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Import / Export Data</h3>
+                <div id="importExportGroup">
+                    <button class="btn btn-primary" id="openImport" type="button">Import &nbsp; <i
+                            class="fa fa-download"></i></button>
+                    <button class="btn btn-primary" id="openExport" type="button">Export &nbsp; <i
+                            class="fa fa-upload"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-deck mb-5">
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Load list on browser start</h3>
+                <div id="loadOnBrowserStart">
+                    <label for="loadListOnStartup">Should a list be loaded when the browser launches?</label>
+                    <select class="form-control" id="loadListOnStartup">
+                        <option id="no_list" selected value="">Do not load a list</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Delay tab loading until tab is selected</h3>
+                <div id="loadTabOnFocusGroup">
+                    <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Context menus</h3>
+                <div id="contextMenusGroup">
+                    <p>Enable Bulk URL Opener context menus</p>
+                    <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-deck mb-5">
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Open lists in reverse order</h3>
+                <div id="openInReverseGroup">
+                    <!-- Checkbox has to be loaded dynamically due to styling differences between custom styles -->
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Get debug info</h3>
+                <div id="openDebugInfoGroup">
+                    <button class="btn btn-primary" id="openDebugInfo" type="button">Get Debug Info &nbsp; <i
+                            class="fa fa-bug"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <button class="btn btn-primary btn-block mb-5" id="saveSettings" type="button">Save settings</button>
 </div>
 </body>
 <script>
-    if (typeof module === 'object') {
+    if (typeof module === "object") {
         window.module = module;
         module = undefined;
     }
