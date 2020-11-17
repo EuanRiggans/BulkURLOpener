@@ -32,6 +32,7 @@ if (document.getElementById("goHome")) document.getElementById("goHome").addEven
     const loadTabOnFocusGroup = document.getElementById("loadTabOnFocusGroup");
     const contextMenuEnabledGroup = document.getElementById("contextMenusGroup");
     const openInReverseGroup = document.getElementById("openInReverseGroup");
+    const automaticallyRemoveDuplicates = document.getElementById("automaticallyRemoveDuplicatesGroup");
     let selectedListID = -1;
     let selectedTheme = "defaultBootstrap";
     let currentlyOpenedTabsSetting = "allOpenedTabs";
@@ -97,6 +98,12 @@ if (document.getElementById("goHome")) document.getElementById("goHome").addEven
                     label_text: "Open urls in reverse order",
                     check_status: userSettings.open_urls_in_reverse_order === 1,
                     append_to: openInReverseGroup,
+                },
+                automatically_remove_duplicate_urls: {
+                    checkbox_id: "automaticallyRemoveDuplicates",
+                    label_text: "Automatically remove duplicate urls",
+                    check_status: userSettings.automatically_remove_duplicate_urls === 1,
+                    append_to: automaticallyRemoveDuplicates,
                 },
             };
             for (const todoCheckbox in checkboxesToBuild) {
@@ -201,6 +208,7 @@ function initSettingsSave(dontClose = false) {
     const delayTabLoadingElement = document.getElementById("delayUntilFocus");
     const contextMenuEnabledElement = document.getElementById("contextMenuEnabled");
     const openInReverseElement = document.getElementById("openInReverse");
+    const automaticallyRemoveDuplicatesElement = document.getElementById("automaticallyRemoveDuplicates");
     let tabCreationDelay = parseInt(tabCreationDelayElement.value);
     if (tabCreationDelayElement.value % 1 !== 0) {
         tabCreationDelay = parseFloat(tabCreationDelayElement.value);
@@ -212,6 +220,7 @@ function initSettingsSave(dontClose = false) {
     let delayTabLoading = 0;
     let contextMenusEnabled = 0;
     let openInReverse = 0;
+    let automaticallyRemoveDuplicates = 0;
     const defaultList = getSelectedListID();
     const theme = getSelectedTheme();
     const currentlyOpenedTabsSetting = getCurrentlyOpenedTabsSetting();
@@ -239,6 +248,9 @@ function initSettingsSave(dontClose = false) {
     }
     if (openInReverseElement.checked) {
         openInReverse = 1;
+    }
+    if (automaticallyRemoveDuplicatesElement.checked) {
+        automaticallyRemoveDuplicates = 1;
     }
     if (!(isNumber(tabCreationDelay)) || tabCreationDelay < 0) {
         alert("Your tab creation delay must be zero or a positive number!");
@@ -268,6 +280,7 @@ function initSettingsSave(dontClose = false) {
         load_on_focus: 0,
         context_menu_enabled: 0,
         open_urls_in_reverse_order: 0,
+        automatically_remove_duplicate_urls: 0,
     };
     userSettings.tab_creation_delay = tabCreationDelay;
     userSettings.night_mode = nightMode;
@@ -284,6 +297,7 @@ function initSettingsSave(dontClose = false) {
     userSettings.load_on_focus = delayTabLoading;
     userSettings.context_menu_enabled = contextMenusEnabled;
     userSettings.open_urls_in_reverse_order = openInReverse;
+    userSettings.automatically_remove_duplicate_urls = automaticallyRemoveDuplicates;
 
     if (userSettings.context_menu_enabled !== getSetting("context_menu_enabled")) {
         if (userSettings.context_menu_enabled === 0) {

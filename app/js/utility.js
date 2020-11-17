@@ -52,7 +52,7 @@ function checkHostType() {
             }
         }
     } else {
-    // Fallback if all checks fail, then the app is most likely the web app version.
+        // Fallback if all checks fail, then the app is most likely the web app version.
         hostType = "webapp";
     }
     return hostType;
@@ -192,6 +192,8 @@ function getSetting(setting) {
                 return userSettings.context_menu_enabled;
             case "open_urls_in_reverse_order":
                 return userSettings.open_urls_in_reverse_order;
+            case "automatically_remove_duplicate_urls":
+                return userSettings.automatically_remove_duplicate_urls;
             default:
                 break;
             }
@@ -278,7 +280,7 @@ function saveList(Id, newListObject, close = true) {
 function saveSettings(userSettings, dontClose) {
     removeList("settings", false);
     localStorage.setItem("settings", JSON.stringify(userSettings));
-    if(!dontClose) {
+    if (!dontClose) {
         alert("Settings successfully saved!");
         if (checkHostType() === "firefox") {
             // alert("Unable to close window due to Firefox security policy. Please close this window manually.");
@@ -593,6 +595,7 @@ function createSettings() {
                 load_on_focus: 0,
                 context_menu_enabled: 0,
                 open_urls_in_reverse_order: 0,
+                automatically_remove_duplicate_urls: 0,
             };
             localStorage.setItem("settings", JSON.stringify(newSettings));
             return;
@@ -614,6 +617,7 @@ function createSettings() {
             load_on_focus: 0,
             context_menu_enabled: 0,
             open_urls_in_reverse_order: 0,
+            automatically_remove_duplicate_urls: 0,
         };
         localStorage.setItem("settings", JSON.stringify(newSettings));
     }
@@ -706,6 +710,21 @@ function backgroundLinksIterator(i, strings, tabCreationDelay) {
     if (i < strings.length) {
         setTimeout(backgroundLinksIterator, tabCreationDelay, i, strings, tabCreationDelay);
     }
+}
+
+/**
+ * Removes duplicate urls from array
+ * @param urls
+ * @returns {[]}
+ */
+function removeDuplicateURLs(urls) {
+    let cleanedArr = [];
+    for(let url of urls) {
+        if(!(cleanedArr.includes(url))) {
+            cleanedArr.push(url);
+        }
+    }
+    return cleanedArr;
 }
 
 function buildFluentBootstrapCheckbox(checkboxID, labelText, checkedStatus, appendTo) {

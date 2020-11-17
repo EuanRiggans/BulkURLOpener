@@ -199,6 +199,9 @@ function clearLinksList() {
  */
 function openList(list) {
     let strings = list.split(/\r\n|\r|\n/);
+    if(getSetting("automatically_remove_duplicate_urls") === 1) {
+        strings = removeDuplicateURLs(strings);
+    }
     if (getSetting("open_urls_in_reverse_order") === 1) {
         strings = strings.reverse();
     }
