@@ -240,11 +240,15 @@ function initSettingsSave(dontClose = false) {
     if (autoLoadIntoTextareaElement.checked) {
         autoLoadIntoTextArea = 1;
     }
-    if (delayTabLoadingElement.checked) {
-        delayTabLoading = 1;
+    if (delayTabLoadingElement) {
+        if (delayTabLoadingElement.checked) {
+            delayTabLoading = 1;
+        }
     }
-    if (contextMenuEnabledElement.checked) {
-        contextMenusEnabled = 1;
+    if (contextMenuEnabledElement) {
+        if (contextMenuEnabledElement.checked) {
+            contextMenusEnabled = 1;
+        }
     }
     if (openInReverseElement.checked) {
         openInReverse = 1;
@@ -404,7 +408,7 @@ function getButtonLookSetting() {
 }
 
 function getLoadListOnStartupSetting() {
-    return document.getElementById("loadListOnStartup").options[document.getElementById("loadListOnStartup").selectedIndex].id;
+    return document.getElementById("loadListOnStartup") ? document.getElementById("loadListOnStartup").options[document.getElementById("loadListOnStartup").selectedIndex].id : 0;
 }
 
 function goHome() {

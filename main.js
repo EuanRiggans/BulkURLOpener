@@ -23,14 +23,14 @@ function createWindow() {
     win.loadFile("./app/popup.html");
 
     // Open the DevTools. Automated test to make sure this is closed(?)
-    // win.webContents.openDevTools()
+    // win.webContents.openDevTools();
 
     win.on("closed", () => {
-    /**
-		 * Dereference the window object,
-		 * usually you would store windows in an array if your app supports multi
-		 * windows, this is the time when you should delete the corresponding element.
-		 */
+        /**
+             * Dereference the window object,
+             * usually you would store windows in an array if your app supports multi
+             * windows, this is the time when you should delete the corresponding element.
+             */
         win = null;
     });
 }
@@ -44,7 +44,7 @@ app.on("ready", () => {
     const isCalledViaCLI = utilities.checkIfCalledViaCLI(process.argv);
     if (isCalledViaCLI) {
         utilities.setVersion(app.getVersion());
-        win = new BrowserWindow({show: false, width: 0, height: 0});
+        win = new BrowserWindow({ show: false, width: 0, height: 0 });
         win.hide();
         utilities.processArgs();
         win.close();
