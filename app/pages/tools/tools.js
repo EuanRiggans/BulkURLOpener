@@ -12,6 +12,13 @@ document.getElementById("openReverse").addEventListener("click", openReverse);
 
 /* End Of Event Listeners */
 
+(() => {
+    if (checkHostType() !== "electron") {
+        document.getElementById("tools-container").classList.remove("fluid-container");
+        document.getElementById("tools-container").classList.add("container");
+    }
+})();
+
 function openExtractor() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({

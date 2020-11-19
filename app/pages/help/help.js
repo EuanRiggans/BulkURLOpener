@@ -50,6 +50,10 @@ if (document.getElementById("goHome")) document.getElementById("goHome").addEven
     if (checkHostType() === "electron") {
         document.getElementById("browserSync").remove();
     }
+    if (checkHostType() !== "electron") {
+        document.getElementById("help-container").classList.remove("fluid-container");
+        document.getElementById("help-container").classList.add("container");
+    }
 })();
 
 function openFAQ() {

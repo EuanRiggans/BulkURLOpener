@@ -23,6 +23,10 @@ if (document.getElementById("goHome")) document.getElementById("goHome").addEven
 /* End Of Event Listeners */
 
 (() => {
+    if (checkHostType() !== "electron") {
+        document.getElementById("settings-container").classList.remove("fluid-container");
+        document.getElementById("settings-container").classList.add("container");
+    }
     createSettings();
     const tabCreationDelayElement = document.getElementById("tabCreationDelay");
     const nightModeGroup = document.getElementById("nightModeGroup");

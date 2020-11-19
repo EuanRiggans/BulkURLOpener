@@ -6,6 +6,13 @@ document.getElementById("manualExtractButton").addEventListener("click", attempt
 
 /* End Of Event Listeners */
 
+(() => {
+    if (checkHostType() !== "electron") {
+        document.getElementById("extractor-container").classList.remove("fluid-container");
+        document.getElementById("extractor-container").classList.add("container");
+    }
+})();
+
 function attemptURLExtraction() {
     const strings = document.getElementById("extractFrom").value.split(/\r\n|\r|\n/);
     const extracted = [];
