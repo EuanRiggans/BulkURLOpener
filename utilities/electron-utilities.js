@@ -59,7 +59,7 @@ function checkIfCalledViaCLI(args) {
 function checkValidArgs(args) {
     let valid = false;
     for (const arg in args) {
-    // eslint-disable-next-line no-prototype-builtins
+        // eslint-disable-next-line no-prototype-builtins
         if (args.hasOwnProperty(arg)) {
             if (validArgs.includes(args[arg])) {
                 receivedArgs.push(args[arg]);
@@ -79,20 +79,20 @@ function checkValidArgs(args) {
  */
 function processArgs() {
     for (const arg in receivedArgs) {
-    // eslint-disable-next-line no-prototype-builtins
+        // eslint-disable-next-line no-prototype-builtins
         if (receivedArgs.hasOwnProperty(arg)) {
             const argument = getArgumentDefinitionFromArgument(receivedArgs[arg]);
             switch (argument[0]) {
-            case "version":
-                console.log(version);
-                break;
-            case "help":
-                console.log("Valid command line arguments and their use:");
-                console.log("  -v or --version        Displays the version of the app");
-                console.log("  -h or --help           Outputs this message");
-                break;
-            default:
-                console.warn(`Unable to find the use of argument: ${receivedArgs[arg]}`);
+                case "version":
+                    console.log(version);
+                    break;
+                case "help":
+                    console.log("Valid command line arguments and their use:");
+                    console.log("  -v or --version        Displays the version of the app");
+                    console.log("  -h or --help           Outputs this message");
+                    break;
+                default:
+                    console.warn(`Unable to find the use of argument: ${receivedArgs[arg]}`);
             }
         }
     }

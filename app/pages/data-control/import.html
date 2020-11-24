@@ -10,28 +10,28 @@
 </head>
 
 <body>
-<div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h4 class="modal-title">Import Data</h4>
-            <button aria-label="Close" class="close" id="closeModal" type="button">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Import Data</h4>
+                <button aria-label="Close" class="close" id="closeModal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
 
-        <div class="modal-body">
-            <div id="importTextAreaGroup">
-                <label for="importTextArea">Paste your exported data:</label>
-                <textarea autofocus="autofocus" class="form-control" id="importTextArea" rows="5"></textarea>
+            <div class="modal-body">
+                <div id="importTextAreaGroup">
+                    <label for="importTextArea">Paste your exported data:</label>
+                    <textarea autofocus="autofocus" class="form-control" id="importTextArea" rows="5"></textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary btn-block" id="importData" type="button">Import &nbsp; <i
+                        class="fa fa-download"></i></button>
             </div>
         </div>
-
-        <div class="modal-footer">
-            <button class="btn btn-primary btn-block" id="importData" type="button">Import &nbsp; <i
-                    class="fa fa-download"></i></button>
-        </div>
     </div>
-</div>
 </body>
 <script>
     if (typeof module === 'object') {

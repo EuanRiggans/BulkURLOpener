@@ -5,52 +5,52 @@
     <link href="css/bootstrap.min.css" rel="stylesheet" id="bootstrap">
     <link href="css/font-awesome.min.css" rel="stylesheet" id="font-awesome">
     <link href="css/style.css" rel="stylesheet" id="styles">
-    <meta charset="utf-8"/>
+    <meta charset="utf-8" />
     <title>Bulk URL Opener</title>
 </head>
 
 <body id="body" class="popup-body">
-<div class="header">
-    <h1 class="header title">Bulk Open
-        <small id="version"></small>
-    </h1>
-    <a data-placement="top" data-toggle="tooltip" href="#" id="openInPopup" title="Open extension in popup"><i
-            aria-hidden="true" class="fa fa-external-link"></i></a>
-    <div class="header help">
-        <a class="no-highlight" data-placement="top" data-toggle="tooltip" href="#" title="Open help">
-            <i aria-hidden="true" class="fa fa-question-circle" id="openHelp"></i>
-        </a>
+    <div class="header">
+        <h1 class="header title">Bulk Open
+            <small id="version"></small>
+        </h1>
+        <a data-placement="top" data-toggle="tooltip" href="#" id="openInPopup" title="Open extension in popup"><i
+                aria-hidden="true" class="fa fa-external-link"></i></a>
+        <div class="header help">
+            <a class="no-highlight" data-placement="top" data-toggle="tooltip" href="#" title="Open help">
+                <i aria-hidden="true" class="fa fa-question-circle" id="openHelp"></i>
+            </a>
+        </div>
+        <div class="header settings">
+            <a class="no-highlight" data-placement="top" data-toggle="tooltip" href="#" title="Open settings">
+                <i aria-hidden="true" class="fa fa-cog" id="openSettings"></i>
+            </a>
+        </div>
     </div>
-    <div class="header settings">
-        <a class="no-highlight" data-placement="top" data-toggle="tooltip" href="#" title="Open settings">
-            <i aria-hidden="true" class="fa fa-cog" id="openSettings"></i>
-        </a>
+    <div class="form-group" id="urlsForm">
+        <label for="list">URLs:</label>
+        <textarea autofocus="autofocus" class="form-control" id="list" rows="5"></textarea>
     </div>
-</div>
-<div class="form-group" id="urlsForm">
-    <label for="list">URLs:</label>
-    <textarea autofocus="autofocus" class="form-control" id="list" rows="5"></textarea>
-</div>
-<br/>
-<button class="btn btn-outline-primary" id="openButton" type="button"><span>Open Links</span></button>
-<button class="btn btn-outline-primary" id="copyCurrentOpen" type="button"><span>Get list of currently open
+    <br />
+    <button class="btn btn-outline-primary" id="openButton" type="button"><span>Open Links</span></button>
+    <button class="btn btn-outline-primary" id="copyCurrentOpen" type="button"><span>Get list of currently open
             tabs</span>
-</button>
-<button class="btn btn-outline-warning" id="clearList" type="button"><span>Clear current links</span></button>
-<div class="form-group" id="controls">
-    <div class="input-group" id="savedListsOptions">
-        <select class="form-control" id="savedLists">
-            <option disabled id="-1" selected value="">Your saved lists</option>
-        </select>
-        <button class="btn btn-outline-success selectaddon" id="openList" type="button"><span>Load
+    </button>
+    <button class="btn btn-outline-warning" id="clearList" type="button"><span>Clear current links</span></button>
+    <div class="form-group" id="controls">
+        <div class="input-group" id="savedListsOptions">
+            <select class="form-control" id="savedLists">
+                <option disabled id="-1" selected value="">Your saved lists</option>
+            </select>
+            <button class="btn btn-outline-success selectaddon" id="openList" type="button"><span>Load
                     list</span></button>
-        <button class="btn btn-outline-primary selectaddon" id="createNewList" type="button"><span>New list</span>
-        </button>
-        <button class="btn btn-outline-info selectaddon" id="editList" type="button"><span>Edit list</span></button>
-        <button class="btn btn-outline-danger selectaddon" id="deleteList" type="button"><span>Delete list</span>
-        </button>
+            <button class="btn btn-outline-primary selectaddon" id="createNewList" type="button"><span>New list</span>
+            </button>
+            <button class="btn btn-outline-info selectaddon" id="editList" type="button"><span>Edit list</span></button>
+            <button class="btn btn-outline-danger selectaddon" id="deleteList" type="button"><span>Delete list</span>
+            </button>
+        </div>
     </div>
-</div>
 </body>
 <script>
     if (typeof module === 'object') {

@@ -11,20 +11,20 @@
 </head>
 
 <body>
-<div class="main">
-    <div id="loading">
-        <p>Your tabs are currently being opened. Please do not close this window.</p>
-        <i class="fa fa-refresh fa-spin fa-3x fa-fw" id="loadingSpinner"></i>
-        <span class="sr-only">Loading...</span>
-        <br/>
-        <button class="btn btn-primary btn-sm" id="toggleOpening">Pause Opening</button>
+    <div class="main">
+        <div id="loading">
+            <p>Your tabs are currently being opened. Please do not close this window.</p>
+            <i class="fa fa-refresh fa-spin fa-3x fa-fw" id="loadingSpinner"></i>
+            <span class="sr-only">Loading...</span>
+            <br />
+            <button class="btn btn-primary btn-sm" id="toggleOpening">Pause Opening</button>
+        </div>
+        <div id="completed" style="display:none">
+            <p>Your tabs have all been opened, you can now close ths window.</p>
+            <i class="fa fa-check fa-3x fa-fw"></i>
+            <span class="sr-only">Loading...</span>
+        </div>
     </div>
-    <div id="completed" style="display:none">
-        <p>Your tabs have all been opened, you can now close ths window.</p>
-        <i class="fa fa-check fa-3x fa-fw"></i>
-        <span class="sr-only">Loading...</span>
-    </div>
-</div>
 </body>
 <script>
     if (typeof module === 'object') {

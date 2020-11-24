@@ -11,51 +11,51 @@
 </head>
 
 <body>
-<div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h4 class="modal-title">Help - FAQ</h4>
-            <button aria-label="Close" class="close" id="closeModal" type="button">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div class="modal-body">
-            <h5 class="question">Tab creation delay is not working:</h5>
-            <p class="answer">For tab creation delay to work correctly, the Bulk URL Opener window must be left open
-                until all tabs have been created, this is due to how javascript runs in browsers.</p>
-            <h5 class="question">Can I view the source code for this addon?</h5>
-            <p class="answer">Yes. The code for the Chrome, Firefox and Electron versions can be found on my github,
-                <a href="#" id="openGithub">here</a></p>
-            <h5 class="question">Where can I find the changelog:</h5>
-            <p class="answer">The changelog can be found by clicking <a href="#" id="openChangelog">here</a></p>
-            <h5 class="question">How can I report a bug:</h5>
-            <p class="answer">Bugs can be reported on this projects Github page, found <a
-                    href="#" id="openGithubBugs">here</a></p>
-            <h5 class="question">How can I get support or suggest a feature:</h5>
-            <p class="answer">You can make suggestions or ask for help on this projects Github page, found <a
-                    href="#" id="openGithubSuggestions">here</a></p>
-            <h5 class="question">What is an experimental feature:</h5>
-            <p class="answer">Many new features have been added to the extension that can not be full tested before
-                release. So these features are marked as experimental for a period while any usability issues or
-                bugs
-                can be identified. They have been tested to the same extend as other features prior to release but
-                issue
-                may persist due to the nature of these features. If you find any issues with these features please
-                report on the github issues page found above</p>
-            <h5 class="question">How do I edit/delete a list when automatically open lists is enabled:</h5>
-            <p class="answer">If you wish to edit or delete a list when you have automatically open lists enabled
-                you
-                can check the checkbox on the popup for the extension with the label 'Override Auto Open'. This will
-                temporarily disable the auto open setting allowing you to edit and delete saved lists.</p>
-            <h5 class="question">Is there is a list of known issues?</h5>
-            <p class="answer">Yes, there is a list of know issues in the project readme on github. Found <a
-                    href="https://euan.link/buo-ff-issues" target="_blank">here</a></p>
-        </div>
-        <div class="modal-footer">
-            <small id="help-footer">Bulk URL Opener</small>
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Help - FAQ</h4>
+                <button aria-label="Close" class="close" id="closeModal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h5 class="question">Tab creation delay is not working:</h5>
+                <p class="answer">For tab creation delay to work correctly, the Bulk URL Opener window must be left open
+                    until all tabs have been created, this is due to how javascript runs in browsers.</p>
+                <h5 class="question">Can I view the source code for this addon?</h5>
+                <p class="answer">Yes. The code for the Chrome, Firefox and Electron versions can be found on my github,
+                    <a href="#" id="openGithub">here</a></p>
+                <h5 class="question">Where can I find the changelog:</h5>
+                <p class="answer">The changelog can be found by clicking <a href="#" id="openChangelog">here</a></p>
+                <h5 class="question">How can I report a bug:</h5>
+                <p class="answer">Bugs can be reported on this projects Github page, found <a href="#"
+                        id="openGithubBugs">here</a></p>
+                <h5 class="question">How can I get support or suggest a feature:</h5>
+                <p class="answer">You can make suggestions or ask for help on this projects Github page, found <a
+                        href="#" id="openGithubSuggestions">here</a></p>
+                <h5 class="question">What is an experimental feature:</h5>
+                <p class="answer">Many new features have been added to the extension that can not be full tested before
+                    release. So these features are marked as experimental for a period while any usability issues or
+                    bugs
+                    can be identified. They have been tested to the same extend as other features prior to release but
+                    issue
+                    may persist due to the nature of these features. If you find any issues with these features please
+                    report on the github issues page found above</p>
+                <h5 class="question">How do I edit/delete a list when automatically open lists is enabled:</h5>
+                <p class="answer">If you wish to edit or delete a list when you have automatically open lists enabled
+                    you
+                    can check the checkbox on the popup for the extension with the label 'Override Auto Open'. This will
+                    temporarily disable the auto open setting allowing you to edit and delete saved lists.</p>
+                <h5 class="question">Is there is a list of known issues?</h5>
+                <p class="answer">Yes, there is a list of know issues in the project readme on github. Found <a
+                        href="https://euan.link/buo-ff-issues" target="_blank">here</a></p>
+            </div>
+            <div class="modal-footer">
+                <small id="help-footer">Bulk URL Opener</small>
+            </div>
         </div>
     </div>
-</div>
 </body>
 <script>
     if (typeof module === 'object') {

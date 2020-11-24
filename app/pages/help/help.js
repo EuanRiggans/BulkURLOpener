@@ -144,7 +144,7 @@ function syncToBrowser() {
         }
     }
     exportData = JSON.stringify(exportData);
-    chrome.storage.sync.set({"user_settings": exportData}, () => {
+    chrome.storage.sync.set({ "user_settings": exportData }, () => {
         alert("Successfully saved data to browser storage.");
     });
 }
@@ -237,124 +237,124 @@ function overwriteCurrentWithBrowserStorage() {
  */
 function settingsBuildSwitch(modalBody, userLists, userSettings, setting) {
     switch (setting) {
-    case "tab_creation_delay":
-        appendHtml(
-            modalBody,
-            buildSyncSettingDisplay(
-                setting,
-                userSettings[setting] + " seconds"
-            )
-        );
-        break;
-    case "default_list_open":
-        appendHtml(
-            modalBody,
-            buildSyncSettingDisplay(
-                setting,
-                userSettings[setting] === -1
-                    ? "Current Tabs"
-                    : getListFromIdSync(userLists, userSettings[setting])
-            )
-        );
-        break;
-    case "custom_theme":
-        appendHtml(
-            modalBody,
-            buildSyncSettingDisplay(
-                setting,
-                userSettings[setting] === "defaultBoostrap"
-                    ? "Bootstrap"
-                    : "Fluent Design Bootstrap"
-            )
-        );
-        break;
-    case "currently_opened_tabs_display":
-        appendHtml(
-            modalBody,
-            buildSyncSettingDisplay(
-                setting,
-                userSettings[setting] === "currentWindow"
-                    ? "Current Window"
-                    : "All tabs"
-            )
-        );
-        break;
-    case "non_url_handler":
-        output = "";
-        if (userSettings[setting] === "searchForString") {
-            output = "Search For String";
-        } else if (userSettings[setting] === "ignoreString") {
-            output = "Ignore String";
-        } else if (userSettings[setting] === "attemptToExtractURL") {
-            output = "Attempt To Extract URL";
-        }
-        appendHtml(modalBody, buildSyncSettingDisplay(setting, output));
-        break;
-    case "search_engine":
-        output = "";
-        if (userSettings[setting] === "googleEngine") {
-            output = "Google";
-        } else if (userSettings[setting] === "duckduckgoEngine") {
-            output = "DuckDuckGo";
-        } else if (userSettings[setting] === "bingEngine") {
-            output = "Bing";
-        }
-        appendHtml(modalBody, buildSyncSettingDisplay(setting, output));
-        break;
-    case "new_tabs_active":
-        appendHtml(
-            modalBody,
-            buildSyncSettingDisplay(
-                setting,
-                userSettings[setting] === 1
-                    ? "On"
-                    : "Off"
-            )
-        );
-        break;
-    case "auto_load_into_textarea":
-        appendHtml(
-            modalBody,
-            buildSyncSettingDisplay(
-                setting,
-                userSettings[setting] === 1
-                    ? "On"
-                    : "Off"
-            )
-        );
-        break;
-    case "button_look":
-        output = "";
-        if (userSettings[setting] === "alwaysOutline") {
-            output = "Always Outline";
-        } else if (userSettings[setting] === "alwaysFilled") {
-            output = "Always Filled";
-        } else if (userSettings[setting] === "filledNight") {
-            output = "Filled On Night Theme";
-        } else if (userSettings[setting] === "filledLight") {
-            output = "Filled On Light Theme";
-        }
-        appendHtml(modalBody, buildSyncSettingDisplay(setting, output));
-        break;
-    case "open_on_launch":
-        try {
+        case "tab_creation_delay":
             appendHtml(
                 modalBody,
                 buildSyncSettingDisplay(
                     setting,
-                    userSettings[setting] === "no_list"
-                        ? "No List"
-                        : getListFromIdSync(userLists, parseInt(userSettings[setting]))
+                    userSettings[setting] + " seconds"
                 )
             );
-        } catch (e) {
-            console.log(e);
-            alert("Error while parsing setting: open_on_launch");
-        }
-        break;
-    default:
-        genericEnabledDisabledSettingBuilder(modalBody, userSettings, setting);
-        break;
+            break;
+        case "default_list_open":
+            appendHtml(
+                modalBody,
+                buildSyncSettingDisplay(
+                    setting,
+                    userSettings[setting] === -1
+                        ? "Current Tabs"
+                        : getListFromIdSync(userLists, userSettings[setting])
+                )
+            );
+            break;
+        case "custom_theme":
+            appendHtml(
+                modalBody,
+                buildSyncSettingDisplay(
+                    setting,
+                    userSettings[setting] === "defaultBoostrap"
+                        ? "Bootstrap"
+                        : "Fluent Design Bootstrap"
+                )
+            );
+            break;
+        case "currently_opened_tabs_display":
+            appendHtml(
+                modalBody,
+                buildSyncSettingDisplay(
+                    setting,
+                    userSettings[setting] === "currentWindow"
+                        ? "Current Window"
+                        : "All tabs"
+                )
+            );
+            break;
+        case "non_url_handler":
+            output = "";
+            if (userSettings[setting] === "searchForString") {
+                output = "Search For String";
+            } else if (userSettings[setting] === "ignoreString") {
+                output = "Ignore String";
+            } else if (userSettings[setting] === "attemptToExtractURL") {
+                output = "Attempt To Extract URL";
+            }
+            appendHtml(modalBody, buildSyncSettingDisplay(setting, output));
+            break;
+        case "search_engine":
+            output = "";
+            if (userSettings[setting] === "googleEngine") {
+                output = "Google";
+            } else if (userSettings[setting] === "duckduckgoEngine") {
+                output = "DuckDuckGo";
+            } else if (userSettings[setting] === "bingEngine") {
+                output = "Bing";
+            }
+            appendHtml(modalBody, buildSyncSettingDisplay(setting, output));
+            break;
+        case "new_tabs_active":
+            appendHtml(
+                modalBody,
+                buildSyncSettingDisplay(
+                    setting,
+                    userSettings[setting] === 1
+                        ? "On"
+                        : "Off"
+                )
+            );
+            break;
+        case "auto_load_into_textarea":
+            appendHtml(
+                modalBody,
+                buildSyncSettingDisplay(
+                    setting,
+                    userSettings[setting] === 1
+                        ? "On"
+                        : "Off"
+                )
+            );
+            break;
+        case "button_look":
+            output = "";
+            if (userSettings[setting] === "alwaysOutline") {
+                output = "Always Outline";
+            } else if (userSettings[setting] === "alwaysFilled") {
+                output = "Always Filled";
+            } else if (userSettings[setting] === "filledNight") {
+                output = "Filled On Night Theme";
+            } else if (userSettings[setting] === "filledLight") {
+                output = "Filled On Light Theme";
+            }
+            appendHtml(modalBody, buildSyncSettingDisplay(setting, output));
+            break;
+        case "open_on_launch":
+            try {
+                appendHtml(
+                    modalBody,
+                    buildSyncSettingDisplay(
+                        setting,
+                        userSettings[setting] === "no_list"
+                            ? "No List"
+                            : getListFromIdSync(userLists, parseInt(userSettings[setting]))
+                    )
+                );
+            } catch (e) {
+                console.log(e);
+                alert("Error while parsing setting: open_on_launch");
+            }
+            break;
+        default:
+            genericEnabledDisabledSettingBuilder(modalBody, userSettings, setting);
+            break;
     }
 }
 

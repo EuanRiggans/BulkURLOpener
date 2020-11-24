@@ -19,12 +19,12 @@ function getCustomTheme() {
         }
     }
     switch (customTheme) {
-    case "defaultBootstrap":
-        return "defaultBootstrap";
-    case "fluentDesignBootstrap":
-        return "fluentDesignBootstrap";
-    default:
-        return "defaultBootstrap";
+        case "defaultBootstrap":
+            return "defaultBootstrap";
+        case "fluentDesignBootstrap":
+            return "fluentDesignBootstrap";
+        default:
+            return "defaultBootstrap";
     }
 }
 
@@ -35,23 +35,23 @@ function getCustomTheme() {
     if (!(getCustomTheme() === "defaultBootstrap")) {
         const customTheme = getCustomTheme();
         switch (customTheme) {
-        case "fluentDesignBootstrap":
-            // eslint-disable-next-line no-case-declarations
-            const head = document.getElementsByTagName("head")[0];
-            // eslint-disable-next-line no-case-declarations
-            const nightModeStylesheet = document.createElement("link");
-            if (checkHostType() !== "electron") {
-                nightModeStylesheet.href = "/css/fluent.css";
-            } else if (getCurrentFileName() === "popup.html" || getCurrentFileName() === "delayedloading.html" || getCurrentFileName() === "openingtabs.html") {
-                nightModeStylesheet.href = "./css/fluent.css";
-            } else {
-                nightModeStylesheet.href = "../../css/fluent.css";
-            }
-            nightModeStylesheet.rel = "stylesheet";
-            head.appendChild(nightModeStylesheet);
-            break;
-        default:
-            break;
+            case "fluentDesignBootstrap":
+                // eslint-disable-next-line no-case-declarations
+                const head = document.getElementsByTagName("head")[0];
+                // eslint-disable-next-line no-case-declarations
+                const nightModeStylesheet = document.createElement("link");
+                if (checkHostType() !== "electron") {
+                    nightModeStylesheet.href = "/css/fluent.css";
+                } else if (getCurrentFileName() === "popup.html" || getCurrentFileName() === "delayedloading.html" || getCurrentFileName() === "openingtabs.html") {
+                    nightModeStylesheet.href = "./css/fluent.css";
+                } else {
+                    nightModeStylesheet.href = "../../css/fluent.css";
+                }
+                nightModeStylesheet.rel = "stylesheet";
+                head.appendChild(nightModeStylesheet);
+                break;
+            default:
+                break;
         }
     }
     if (isNightModeEnabled()) {

@@ -164,38 +164,38 @@ function getSetting(setting) {
         if (localStorage.key(i) === "settings") {
             const userSettings = JSON.parse(tempStorage);
             switch (settingSelected) {
-            case "tab_creation_delay":
-                return userSettings.tab_creation_delay;
-            case "auto_open_lists":
-                return userSettings.auto_open_lists;
-            case "default_list_open":
-                return userSettings.default_list_open;
-            case "custom_theme":
-                return userSettings.custom_theme;
-            case "currently_opened_tabs_display":
-                return userSettings.currently_opened_tabs_display;
-            case "non_url_handler":
-                return userSettings.non_url_handler;
-            case "search_engine":
-                return userSettings.search_engine;
-            case "new_tabs_active":
-                return userSettings.new_tabs_active;
-            case "auto_load_into_textarea":
-                return userSettings.auto_load_into_textarea;
-            case "button_look":
-                return userSettings.button_look;
-            case "open_on_launch":
-                return userSettings.open_on_launch;
-            case "load_on_focus":
-                return userSettings.load_on_focus;
-            case "context_menu_enabled":
-                return userSettings.context_menu_enabled;
-            case "open_urls_in_reverse_order":
-                return userSettings.open_urls_in_reverse_order;
-            case "automatically_remove_duplicate_urls":
-                return userSettings.automatically_remove_duplicate_urls;
-            default:
-                break;
+                case "tab_creation_delay":
+                    return userSettings.tab_creation_delay;
+                case "auto_open_lists":
+                    return userSettings.auto_open_lists;
+                case "default_list_open":
+                    return userSettings.default_list_open;
+                case "custom_theme":
+                    return userSettings.custom_theme;
+                case "currently_opened_tabs_display":
+                    return userSettings.currently_opened_tabs_display;
+                case "non_url_handler":
+                    return userSettings.non_url_handler;
+                case "search_engine":
+                    return userSettings.search_engine;
+                case "new_tabs_active":
+                    return userSettings.new_tabs_active;
+                case "auto_load_into_textarea":
+                    return userSettings.auto_load_into_textarea;
+                case "button_look":
+                    return userSettings.button_look;
+                case "open_on_launch":
+                    return userSettings.open_on_launch;
+                case "load_on_focus":
+                    return userSettings.load_on_focus;
+                case "context_menu_enabled":
+                    return userSettings.context_menu_enabled;
+                case "open_urls_in_reverse_order":
+                    return userSettings.open_urls_in_reverse_order;
+                case "automatically_remove_duplicate_urls":
+                    return userSettings.automatically_remove_duplicate_urls;
+                default:
+                    break;
             }
         }
     }
@@ -719,8 +719,8 @@ function backgroundLinksIterator(i, strings, tabCreationDelay) {
  */
 function removeDuplicateURLs(urls) {
     let cleanedArr = [];
-    for(let url of urls) {
-        if(!(cleanedArr.includes(url))) {
+    for (let url of urls) {
+        if (!(cleanedArr.includes(url))) {
             cleanedArr.push(url);
         }
     }
