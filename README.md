@@ -37,7 +37,6 @@ electron .
 
 ## To Do List
 
-- Add setting and tool to remove duplicate links from a list
 - Add ability for users to add custom search engine (Baidu etc)
 - Fix defaultBoostrap typo
 - Improve design of settings page.
