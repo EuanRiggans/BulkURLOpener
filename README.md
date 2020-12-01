@@ -6,6 +6,7 @@
 
 - Chrome: https://chrome.google.com/webstore/detail/bulk-url-opener/kgnfciolbjojfdbbelbdbhhocjmhenep
 - Firefox: https://addons.mozilla.org/en-GB/firefox/addon/bulkurlopener/
+- Edge: https://microsoftedge.microsoft.com/addons/detail/bulk-url-opener/cfopcknfhpogkpcnnppcaedkhokachoo
 - Opera: https://addons.opera.com/en-gb/extensions/details/bulk-url-opener-2/
 - Desktop: https://github.com/EuanRiggans/BulkURLOpener/releases
 - Desktop (Snap): https://snapcraft.io/bulkurlopener [![bulkurlopener](https://snapcraft.io//bulkurlopener/badge.svg)](https://snapcraft.io/bulkurlopener)
@@ -36,7 +37,6 @@ electron .
 
 ## To Do List
 
-- Add setting and tool to remove duplicate links from a list
 - Add ability for users to add custom search engine (Baidu etc)
 - Fix defaultBoostrap typo
 - Improve design of settings page.
