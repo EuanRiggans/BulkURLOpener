@@ -38,6 +38,8 @@ electron .
 ## To Do List
 
 - Add ability for users to add custom search engine (Baidu etc)
+- Redesign main interface
+- Add 'extract urls' option to main interface
 - Fix defaultBoostrap typo
 - Improve design of settings page.
 - Switch to using Bootstrap 5 once in stable release.
