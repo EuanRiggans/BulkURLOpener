@@ -71,18 +71,21 @@ function prependHttpIfNotExist(url) {
 function linksIteratorProcessURL(url, last = false) {
     let ignoreURL = false;
 
-    if (extractURLFromString(prependHttpIfNotExist(url)) !== "noextractionsuccess") {
-        url = prependHttpIfNotExist(url);
-    }
-
     if (!isProbablyUrl(url) && getSetting("non_url_handler") === "searchForString") {
         url = encodeSearchQuery(url);
     } else if (!isProbablyUrl(url) && getSetting("non_url_handler") === "ignoreString") {
         ignoreURL = true;
     } else if (!isProbablyUrl(url) && getSetting("non_url_handler") === "attemptToExtractURL") {
         const extractedString = extractURLFromString(url);
+        console.log(extractedString);
         if (isProbablyUrl(extractedString)) {
             url = extractedString;
+        } else {
+            ignoreURL = true;
+        }
+    } else {
+        if (extractURLFromString(prependHttpIfNotExist(url)) !== "noextractionsuccess") {
+            url = prependHttpIfNotExist(url);
         } else {
             ignoreURL = true;
         }
