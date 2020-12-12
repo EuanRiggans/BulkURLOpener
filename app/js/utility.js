@@ -77,18 +77,15 @@ function linksIteratorProcessURL(url, last = false) {
         ignoreURL = true;
     } else if (!isProbablyUrl(url) && getSetting("non_url_handler") === "attemptToExtractURL") {
         const extractedString = extractURLFromString(url);
-        console.log(extractedString);
         if (isProbablyUrl(extractedString)) {
             url = extractedString;
         } else {
             ignoreURL = true;
         }
-    } else {
-        if (extractURLFromString(prependHttpIfNotExist(url)) !== "noextractionsuccess") {
-            url = prependHttpIfNotExist(url);
-        } else {
-            ignoreURL = true;
-        }
+    }
+    if (extractURLFromString(prependHttpIfNotExist(url)) !== "noextractionsuccess") {
+        url = prependHttpIfNotExist(url);
+        ignoreURL = false;
     }
     if (!ignoreURL) {
         if (getSetting("load_on_focus") === 1) {
@@ -748,6 +745,16 @@ function buildBootstrapCheckbox(checkboxID, labelText, checkedStatus, appendTo) 
         checkboxHTML = `<div class="checkbox"><label><input type="checkbox" id="${checkboxID}">&nbsp; ${labelText}</label></div>`;
     }
     appendHtml(appendTo, checkboxHTML);
+}
+
+/**
+ * UUID Generator (https://stackoverflow.com/a/2117523)
+ * @returns {*}
+ */
+function uuidv4() {
+    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
 }
 
 function getCurrentFileName() {
