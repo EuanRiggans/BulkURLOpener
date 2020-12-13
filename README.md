@@ -38,6 +38,8 @@ electron .
 ## To Do List
 
 - Add ability for users to add custom search engine (Baidu etc)
+- New context menu: Open selected links
+- New tool: Sort list into alphabetical order
 - Redesign main interface
 - Add 'extract urls' option to main interface
 - Fix defaultBoostrap typo
