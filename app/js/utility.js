@@ -258,7 +258,7 @@ function getCurrentVersion() {
  * @param newListObject     The object containing the data for the list
  */
 function saveList(Id, newListObject, close = true) {
-    localStorage.setItem(Id, JSON.stringify(newListObject));
+    localStorage.setItem(uuidv4(), JSON.stringify(newListObject));
     localStorage.setItem("maxID", Id);
     alert("List saved successfully!");
     if (close) {
