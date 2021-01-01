@@ -3,6 +3,8 @@
 - Redesigned settings page:
   - New card based layout.
   - Settings now auto save.
+- Bug Fixes
+  - List saving bug
 
 ## 1.10.0
 
