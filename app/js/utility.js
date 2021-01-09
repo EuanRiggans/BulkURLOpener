@@ -815,6 +815,7 @@ function snapshotLocalStorage() {
 }
 
 function clearLocalStorage() {
+    snapshotLocalStorage();
     for (let i = 0; i < localStorage.length; i++) {
         if (localStorage.key(i) !== "storage_snapshots") {
             localStorage.removeItem(localStorage.key(i));
