@@ -1,4 +1,4 @@
-## Unreleased
+## 1.11.0
 
 - Redesigned settings page:
   - New card based layout.
