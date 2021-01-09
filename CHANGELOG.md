@@ -1,3 +1,7 @@
+## 1.11.1
+
+- Limited snapshots to 50
+
 ## 1.11.0
 
 - Redesigned settings page:
