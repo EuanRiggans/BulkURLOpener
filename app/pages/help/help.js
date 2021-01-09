@@ -35,10 +35,20 @@ document.getElementById("syncFromBrowser").addEventListener("click", () => {
     syncFromBrowser();
 });
 
+document.getElementById("syncFromSnapshot").addEventListener("click", () => {
+    syncFromSnapshot();
+});
+
 document.getElementById("acceptSyncedChanges").addEventListener("click", () => {
     // @todo Switch for pure js rather than jquery
     $("#syncFromModal").modal("hide");
     overwriteCurrentWithBrowserStorage();
+});
+
+document.getElementById("acceptSnapshotSyncedChanges").addEventListener("click", () => {
+    // @todo Switch for pure js rather than jquery
+    $("#snapshotRestoreModal").modal("hide");
+    overwriteCurrentWithSelectedSnapshot();
 });
 
 if (document.getElementById("goHome")) document.getElementById("goHome").addEventListener("click", goHome);
@@ -53,6 +63,17 @@ if (document.getElementById("goHome")) document.getElementById("goHome").addEven
     if (checkHostType() !== "electron") {
         document.getElementById("help-container").classList.remove("fluid-container");
         document.getElementById("help-container").classList.add("container");
+        try {
+            let snapshots = JSON.parse(localStorage.getItem("storage_snapshots"));
+            for (let backup of snapshots.backups) {
+                backup = JSON.parse(backup);
+                backup.snapshot_time = new Date(backup.snapshot_time);
+                appendHtml(document.getElementById("snapshotToRestore"), `<option id="${backup.snapshot_id}">${backup.snapshot_time}</option>`);
+            }
+        } catch (e) {
+            console.log(e);
+            console.log("No snapshots");
+        }
     }
 })();
 
@@ -144,7 +165,7 @@ function syncToBrowser() {
         }
     }
     exportData = JSON.stringify(exportData);
-    chrome.storage.sync.set({ "user_settings": exportData }, () => {
+    chrome.storage.sync.set({"user_settings": exportData}, () => {
         alert("Successfully saved data to browser storage.");
     });
 }
@@ -183,6 +204,44 @@ function syncFromBrowser() {
     });
 }
 
+function syncFromSnapshot() {
+    let snapshotToRestoreFrom = document.getElementById("snapshotToRestore") ? document.getElementById("snapshotToRestore").options[document.getElementById("snapshotToRestore").selectedIndex].id : 0;
+    if (snapshotToRestoreFrom === "no-snapshot") {
+        alert("No snapshot selected!");
+        return;
+    }
+    let syncedData = JSON.parse(localStorage.getItem("storage_snapshots"));
+    let restoreFrom;
+    for (let backup of syncedData.backups) {
+        backup = JSON.parse(backup);
+        backup.snapshot_time = new Date();
+        if (backup.snapshot_id === snapshotToRestoreFrom) {
+            restoreFrom = backup;
+        }
+    }
+    let userSettings = restoreFrom.settings;
+    let userLists = restoreFrom.lists;
+    let modalBody = document.getElementById("snapshotRestoreModalBody");
+    modalBody.innerHTML = "";
+    appendHtml(modalBody, "<h4>Lists:</h4>");
+    for (let list in userLists) {
+        if (list !== "object_description") {
+            appendHtml(modalBody, buildListSyncDisplay(userLists[list].list_name));
+            for (let listURL of userLists[list].list_links) {
+                document.getElementById(userLists[list].list_name).value += `${listURL}\n`;
+            }
+        }
+    }
+    appendHtml(modalBody, "<h4>Settings:</h4>");
+    for (let setting in userSettings) {
+        if (setting !== "object_description") {
+            settingsBuildSwitch(modalBody, userLists, userSettings, setting);
+        }
+    }
+    // @todo Switch for pure js rather than jquery
+    $("#snapshotRestoreModal").modal("show");
+}
+
 function overwriteCurrentWithBrowserStorage() {
     chrome.storage.sync.get(function (result) {
         let syncedData;
@@ -211,7 +270,8 @@ function overwriteCurrentWithBrowserStorage() {
                     return;
                 }
             }
-            localStorage.clear();
+            snapshotLocalStorage();
+            clearLocalStorage();
             let maxID = 0;
             let userLists = [];
             let userSettings;
@@ -230,6 +290,56 @@ function overwriteCurrentWithBrowserStorage() {
             alert("Successfully imported settings.");
         }
     });
+}
+
+function overwriteCurrentWithSelectedSnapshot() {
+    let snapshotToRestoreFrom = document.getElementById("snapshotToRestore") ? document.getElementById("snapshotToRestore").options[document.getElementById("snapshotToRestore").selectedIndex].id : 0;
+    let syncedData = JSON.parse(localStorage.getItem("storage_snapshots"));
+    let restoreFromSnapshot;
+    for (let backup of syncedData.backups) {
+        backup = JSON.parse(backup);
+        if (backup.snapshot_id === snapshotToRestoreFrom) {
+            restoreFromSnapshot = backup;
+        }
+    }
+    console.log(restoreFromSnapshot);
+    if (confirm(
+        "This will overwrite all of your current settings (Lists, settings etc) with the data synced to " +
+        "from the selected snapshot. Are you sure you wish to continue?"
+    )) {
+        let skipLists = false;
+        let skipSettings = false;
+        if (restoreFromSnapshot.maxID === undefined || restoreFromSnapshot.lists === undefined) {
+            skipLists = true;
+            if (!confirm("Your imported data is missing lists or lists max ID. Do you wish to continue with importing this data?")) {
+                return;
+            }
+        }
+        if (restoreFromSnapshot.settings === undefined) {
+            skipSettings = true;
+            if (!confirm("Your imported data is missing settings. Do you wish to continue with importing this data?")) {
+                return;
+            }
+        }
+        snapshotLocalStorage();
+        clearLocalStorage();
+        let maxID = 0;
+        let userLists = [];
+        let userSettings;
+        if (!skipLists) {
+            maxID = restoreFromSnapshot.maxID;
+            userLists = restoreFromSnapshot.lists;
+        }
+        if (!skipSettings) {
+            userSettings = restoreFromSnapshot.settings;
+        }
+        localStorage.setItem("maxID", maxID);
+        for (const list of userLists) {
+            localStorage.setItem(list.list_id, JSON.stringify(list));
+        }
+        localStorage.setItem("settings", JSON.stringify(userSettings));
+        alert("Successfully restored snapshot.");
+    }
 }
 
 /**

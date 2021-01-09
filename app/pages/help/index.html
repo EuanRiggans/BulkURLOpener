@@ -11,110 +11,142 @@
 </head>
 
 <body>
-    <div class="fluid-container mt-5" id="help-container">
-        <nav aria-label="breadcrumb" class="mb-5">
-            <ol class="breadcrumb" id="electron-nav-breadcrumb">
-                <li class="breadcrumb-item"><a class="breadcrumb-item-text" href="#" id="goHome">Url opener</a></li>
-                <li aria-current="page" class="breadcrumb-item breadcrumb-item-text active">Help</li>
-            </ol>
-        </nav>
-        <h1 class="text-center pb-5">
-            Bulk URL Opener - Help Documentation
-        </h1>
-        <div class="card-deck mb-5">
-            <div class="card">
-                <div class="card-body d-flex flex-column">
-                    <h3 class="card-title">FAQ's</h3>
-                    <p class="card-text">Frequently asked questions about Bulk URL Opener.</p>
-                    <a class="btn btn-primary btn-block mt-auto" href="#" id="openFAQ">Open FAQ</a>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body d-flex flex-column">
-                    <h3 class="card-title">Report a bug</h3>
-                    <p class="card-text">Link to the Github repository for this project, where you can report bugs or
-                        request features.</p>
-                    <a class="btn btn-primary btn-block mt-auto" href="#" id="openGithubBug">Open Github Issues</a>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body d-flex flex-column">
-                    <h3 class="card-title">Tools</h3>
-                    <p class="card-text">Useful tools for managing urls</p>
-                    <a class="btn btn-primary btn-block mt-auto" href="#" id="openTools">Open Tools</a>
-                </div>
+<div class="fluid-container mt-5" id="help-container">
+    <nav aria-label="breadcrumb" class="mb-5">
+        <ol class="breadcrumb" id="electron-nav-breadcrumb">
+            <li class="breadcrumb-item"><a class="breadcrumb-item-text" href="#" id="goHome">Url opener</a></li>
+            <li aria-current="page" class="breadcrumb-item breadcrumb-item-text active">Help</li>
+        </ol>
+    </nav>
+    <h1 class="text-center pb-5">
+        Bulk URL Opener - Help Documentation
+    </h1>
+    <div class="card-deck mb-5">
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">FAQ's</h3>
+                <p class="card-text">Frequently asked questions about Bulk URL Opener.</p>
+                <a class="btn btn-primary btn-block mt-auto" href="#" id="openFAQ">Open FAQ</a>
             </div>
         </div>
-        <div class="card-deck mb-5">
-            <div class="card">
-                <div class="card-body d-flex flex-column">
-                    <h3 class="card-title">View changelog</h3>
-                    <p class="card-text">Checkout the latest changes in Bulk URL Opener, to stay up to date with the
-                        latest
-                        features.</p>
-                    <a class="btn btn-primary btn-block mt-auto" href="#" id="openChangelog">Open Changelog</a>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body d-flex flex-column">
-                    <h3 class="card-title">View source code</h3>
-                    <p class="card-text">View the source code for this app</p>
-                    <a class="btn btn-primary btn-block mt-auto" href="#" id="openSourceCode">Open Github Repository</a>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body d-flex flex-column">
-                    <h3 class="card-title">Check for updates</h3>
-                    <p class="card-text">Check if your version of Bulk URL Opener is out of date, and find out how to
-                        update
-                        it!</p>
-                    <a class="btn btn-primary btn-block mt-auto" href="#" id="checkForUpdates">Check for updates</a>
-                </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Report a bug</h3>
+                <p class="card-text">Link to the Github repository for this project, where you can report bugs or
+                    request features.</p>
+                <a class="btn btn-primary btn-block mt-auto" href="#" id="openGithubBug">Open Github Issues</a>
             </div>
         </div>
-        <div class="card-deck mb-5" id="browserSync">
-            <div class="card">
-                <div class="card-body d-flex flex-column">
-                    <h3 class="card-title">Sync to browser storage</h3>
-                    <p class="card-text">Sync all of your settings and lists to the browsers storage. This storage is
-                        persistent across normal and private windows. And should be synced to other browsers
-                        where you are signed in.</p>
-                    <a class="btn btn-primary btn-block mt-auto" href="#" id="syncToBrowser">Sync to browser storage</a>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-body d-flex flex-column">
-                    <h3 class="card-title">Sync from browser storage</h3>
-                    <p class="card-text">Sync your settings and lists that are stored in the browsers storage.
-                        This allows you to sync between normal and private windows, as well as different
-                        browsers where you are signed in.</p>
-                    <a class="btn btn-primary btn-block mt-auto" href="#" id="syncFromBrowser">Sync from browser
-                        storage</a>
-                </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Tools</h3>
+                <p class="card-text">Useful tools for managing urls</p>
+                <a class="btn btn-primary btn-block mt-auto" href="#" id="openTools">Open Tools</a>
             </div>
         </div>
-        <div class="modal fade" id="syncFromModal" tabindex="-1" role="dialog" aria-labelledby="syncFromModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="syncFromModalLabel">This data will overwrite your current data:-
-                        </h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body" id="syncFromModalBody">
+    </div>
+    <div class="card-deck mb-5">
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">View changelog</h3>
+                <p class="card-text">Checkout the latest changes in Bulk URL Opener, to stay up to date with the
+                    latest
+                    features.</p>
+                <a class="btn btn-primary btn-block mt-auto" href="#" id="openChangelog">Open Changelog</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">View source code</h3>
+                <p class="card-text">View the source code for this app</p>
+                <a class="btn btn-primary btn-block mt-auto" href="#" id="openSourceCode">Open Github Repository</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Check for updates</h3>
+                <p class="card-text">Check if your version of Bulk URL Opener is out of date, and find out how to
+                    update
+                    it!</p>
+                <a class="btn btn-primary btn-block mt-auto" href="#" id="checkForUpdates">Check for updates</a>
+            </div>
+        </div>
+    </div>
+    <div class="card-deck mb-5" id="browserSync">
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Sync to browser storage</h3>
+                <p class="card-text">Sync all of your settings and lists to the browsers storage. This storage is
+                    persistent across normal and private windows. And should be synced to other browsers
+                    where you are signed in.</p>
+                <a class="btn btn-primary btn-block mt-auto" href="#" id="syncToBrowser">Sync to browser storage</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Sync from browser storage</h3>
+                <p class="card-text">Sync your settings and lists that are stored in the browsers storage.
+                    This allows you to sync between normal and private windows, as well as different
+                    browsers where you are signed in.</p>
+                <a class="btn btn-primary btn-block mt-auto" href="#" id="syncFromBrowser">Sync from browser
+                    storage</a>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title">Sync from snapshot</h3>
+                <p class="card-text">When a destructive action is taken (editing list, deleting list etc) a snapshot is
+                    automatically taken, you can restore from these snapshots if something goes wrong.</p>
+                <select class="form-control" id="snapshotToRestore">
+                    <option id="no-snapshot" selected value="">Select a snapshot</option>
+                </select>
+                <a class="btn btn-primary btn-block mt-auto" href="#" id="syncFromSnapshot">Sync from snapshot</a>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="syncFromModal" tabindex="-1" role="dialog" aria-labelledby="syncFromModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="syncFromModalLabel">This data will overwrite your current data:-
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="syncFromModalBody">
 
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="acceptSyncedChanges">Okay</button>
-                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="acceptSyncedChanges">Okay</button>
                 </div>
             </div>
         </div>
     </div>
+    <div class="modal fade" id="snapshotRestoreModal" tabindex="-1" role="dialog" aria-labelledby="syncFromModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="snapshotRestoreModalLabel">This data will overwrite your current data:-
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="snapshotRestoreModalBody">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="acceptSnapshotSyncedChanges">Okay</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 <script>
     if (typeof module === "object") {

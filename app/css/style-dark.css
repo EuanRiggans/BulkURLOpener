@@ -25,7 +25,8 @@ body,
 #reverseFrom,
 #reverseTo,
 .text-area-import,
-#debugInfoTextArea {
+#debugInfoTextArea,
+#snapshotToRestore {
     color: #fff;
     background-color: #404040;
 }

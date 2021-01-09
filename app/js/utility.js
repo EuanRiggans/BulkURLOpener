@@ -258,6 +258,7 @@ function getCurrentVersion() {
  * @param newListObject     The object containing the data for the list
  */
 function saveList(Id, newListObject, close = true) {
+    snapshotLocalStorage();
     localStorage.setItem(uuidv4(), JSON.stringify(newListObject));
     localStorage.setItem("maxID", Id);
     alert("List saved successfully!");
@@ -278,6 +279,7 @@ function saveList(Id, newListObject, close = true) {
  * @param userSettings  The users settings object
  */
 function saveSettings(userSettings, dontClose) {
+    snapshotLocalStorage();
     removeList("settings", false);
     localStorage.setItem("settings", JSON.stringify(userSettings));
     if (!dontClose) {
@@ -324,6 +326,7 @@ function getCurrentMaxID() {
  * @param noAlert   Whether a alert should be shown when list is deleted
  */
 function removeList(id, noAlert) {
+    snapshotLocalStorage();
     for (let i = 0; i < localStorage.length; i++) {
         const tempArray = loadList(localStorage.key(i));
         try {
@@ -353,6 +356,7 @@ function removeList(id, noAlert) {
 function removeTempList() {
     for (let i = 0; i < localStorage.length; i++) {
         if (localStorage.key(i) === "temp") {
+            snapshotLocalStorage();
             localStorage.removeItem(localStorage.key(i));
         }
     }
@@ -364,6 +368,7 @@ function removeTempList() {
 function removeLinksToOpenList() {
     for (let i = 0; i < localStorage.length; i++) {
         if (localStorage.key(i) === "linksToOpen") {
+            snapshotLocalStorage();
             localStorage.removeItem(localStorage.key(i));
         }
     }
@@ -752,9 +757,69 @@ function buildBootstrapCheckbox(checkboxID, labelText, checkedStatus, appendTo) 
  * @returns {*}
  */
 function uuidv4() {
-    return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
         (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
+}
+
+function snapshotLocalStorage() {
+    if (!(checkHostType() === "electron")) {
+        let firstSnapshot = false;
+        let exportData = {
+            backups: []
+        };
+        let backupData = {
+            snapshot_id: uuidv4(),
+            snapshot_time: new Date(),
+            maxID: 0,
+            lists: [],
+            settings: {},
+        };
+        let previousSnapshots;
+        try {
+            previousSnapshots = JSON.parse(localStorage.getItem("storage_snapshots"));
+        } catch (e) {
+            firstSnapshot = true;
+        }
+        if (previousSnapshots) {
+            exportData = previousSnapshots;
+            for (let i = 0; i < localStorage.length; i++) {
+                const tempStorage = loadList(localStorage.key(i));
+                const parsedJSON = JSON.parse(tempStorage);
+                if (localStorage.key(i) === "settings") {
+                    backupData.settings = parsedJSON;
+                } else if (parsedJSON.object_description === "list_storage") {
+                    backupData.lists.push(parsedJSON);
+                } else if (localStorage.getItem("maxID") !== "NaN") {
+                    backupData.maxID = localStorage.getItem("maxID");
+                }
+            }
+            exportData.backups.push(JSON.stringify(backupData));
+            localStorage.setItem("storage_snapshots", JSON.stringify(exportData));
+        } else {
+            for (let i = 0; i < localStorage.length; i++) {
+                const tempStorage = loadList(localStorage.key(i));
+                const parsedJSON = JSON.parse(tempStorage);
+                if (localStorage.key(i) === "settings") {
+                    backupData.settings = parsedJSON;
+                } else if (parsedJSON.object_description === "list_storage") {
+                    backupData.lists.push(parsedJSON);
+                } else if (localStorage.getItem("maxID") !== "NaN") {
+                    backupData.maxID = localStorage.getItem("maxID");
+                }
+            }
+            exportData.backups.push(JSON.stringify(backupData));
+            localStorage.setItem("storage_snapshots", JSON.stringify(exportData));
+        }
+    }
+}
+
+function clearLocalStorage() {
+    for (let i = 0; i < localStorage.length; i++) {
+        if (localStorage.key(i) !== "storage_snapshots") {
+            localStorage.removeItem(localStorage.key(i));
+        }
+    }
 }
 
 function getCurrentFileName() {
