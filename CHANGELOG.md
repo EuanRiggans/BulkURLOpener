@@ -3,6 +3,8 @@
 - Redesigned settings page:
   - New card based layout.
   - Settings now auto save.
+- Added automatic snapshotting:
+  - Local storage is automatically snapshotted when a destructive action is taken, so user has option to restore to previous versions
 - Bug Fixes
   - List saving bug
 
