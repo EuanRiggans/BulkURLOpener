@@ -10,7 +10,7 @@
 - Added automatic snapshotting:
   - Local storage is automatically snapshotted when a destructive action is taken, so user has option to restore to previous versions
 - Bug Fixes
-  - List saving bug
+  - List saving bug (Lists in localstorage now use a uuid rather than an incremental integer key).
 
 ## 1.10.0
 
