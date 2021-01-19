@@ -819,7 +819,7 @@ function snapshotLocalStorage() {
             }
             if (previousSnapshots) {
                 exportData = previousSnapshots;
-                exportData.backups = exportData.backups.slice(-5);
+                exportData.backups = exportData.backups.slice(-4);
                 for (let i = 0; i < localStorage.length; i++) {
                     const tempStorage = loadList(localStorage.key(i));
                     const parsedJSON = JSON.parse(tempStorage);
