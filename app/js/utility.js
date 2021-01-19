@@ -251,7 +251,7 @@ function getCurrentVersion() {
         manifestData = chrome.runtime.getManifest();
         return (manifestData.version);
     }
-    return "1.11.1";
+    return "1.11.2";
 }
 
 /**

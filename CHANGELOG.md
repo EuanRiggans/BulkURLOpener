@@ -1,3 +1,10 @@
+## 1.11.2
+
+- Limited snapshots to 4
+- Added option to disable snapshots & to delete snapshots
+- Added more context menu items for tools, settings help.
+- Added better error handling for localstorage writes, to prevent unhandled errors if users localstorage is full.
+
 ## 1.11.1
 
 - Limited snapshots to 50
