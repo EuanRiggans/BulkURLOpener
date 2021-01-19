@@ -32,6 +32,66 @@ function contextClickHandler(info) {
         removeContextMenus();
         addContextMenus();
     }
+    if (info.menuItemId === "open-tools") {
+        if (checkHostType() === "firefox") {
+            browser.tabs.create({
+                active: true,
+                url: browser.extension.getURL("/pages/tools/index.html"),
+            });
+        } else if (checkHostType() === "chrome") {
+            chrome.tabs.create({
+                url: chrome.extension.getURL("/pages/tools/index.html"),
+            });
+        }
+    }
+    if (info.menuItemId === "open-url-extractor") {
+        if (checkHostType() === "firefox") {
+            browser.tabs.create({
+                active: true,
+                url: browser.extension.getURL("/pages/tools/extractor.html"),
+            });
+        } else if (checkHostType() === "chrome") {
+            chrome.tabs.create({
+                url: chrome.extension.getURL("/pages/tools/extractor.html"),
+            });
+        }
+    }
+    if (info.menuItemId === "open-list-reverse") {
+        if (checkHostType() === "firefox") {
+            browser.tabs.create({
+                active: true,
+                url: browser.extension.getURL("/pages/tools/reverse.html"),
+            });
+        } else if (checkHostType() === "chrome") {
+            chrome.tabs.create({
+                url: chrome.extension.getURL("/pages/tools/reverse.html"),
+            });
+        }
+    }
+    if (info.menuItemId === "open-settings") {
+        if (checkHostType() === "firefox") {
+            browser.tabs.create({
+                active: true,
+                url: browser.extension.getURL("/pages/settings/index.html"),
+            });
+        } else if (checkHostType() === "chrome") {
+            chrome.tabs.create({
+                url: chrome.extension.getURL("/pages/settings/index.html"),
+            });
+        }
+    }
+    if (info.menuItemId === "open-help") {
+        if (checkHostType() === "firefox") {
+            browser.tabs.create({
+                active: true,
+                url: browser.extension.getURL("/pages/help/index.html"),
+            });
+        } else if (checkHostType() === "chrome") {
+            chrome.tabs.create({
+                url: chrome.extension.getURL("/pages/help/index.html"),
+            });
+        }
+    }
 }
 
 /**
@@ -85,6 +145,33 @@ function addContextMenus() {
                     });
                 }
                 chrome.contextMenus.create({
+                    title: "Tools",
+                    id: "open-tools",
+                    contexts: ["all"],
+                });
+                chrome.contextMenus.create({
+                    id: "open-url-extractor",
+                    title: "URL Extractor",
+                    parentId: "open-tools",
+                    contexts: ["all"],
+                });
+                chrome.contextMenus.create({
+                    id: "open-list-reverse",
+                    title: "List Reverse",
+                    parentId: "open-tools",
+                    contexts: ["all"],
+                });
+                chrome.contextMenus.create({
+                    id: "open-settings",
+                    title: "Settings",
+                    contexts: ["all"],
+                });
+                chrome.contextMenus.create({
+                    id: "open-help",
+                    title: "Help",
+                    contexts: ["all"],
+                });
+                chrome.contextMenus.create({
                     id: "refresh-lists",
                     title: "Refresh Lists",
                     contexts: ["all"],
@@ -132,6 +219,33 @@ function addContextMenus() {
                         contexts: ["all"],
                     });
                 }
+                browser.contextMenus.create({
+                    title: "Tools",
+                    id: "open-tools",
+                    contexts: ["all"],
+                });
+                browser.contextMenus.create({
+                    id: "open-url-extractor",
+                    title: "URL Extractor",
+                    parentId: "open-tools",
+                    contexts: ["all"],
+                });
+                browser.contextMenus.create({
+                    id: "open-list-reverse",
+                    title: "List Reverse",
+                    parentId: "open-tools",
+                    contexts: ["all"],
+                });
+                browser.contextMenus.create({
+                    id: "open-settings",
+                    title: "Settings",
+                    contexts: ["all"],
+                });
+                browser.contextMenus.create({
+                    id: "open-help",
+                    title: "Help",
+                    contexts: ["all"],
+                });
                 browser.contextMenus.create({
                     id: "refresh-lists",
                     title: "Refresh Lists",
