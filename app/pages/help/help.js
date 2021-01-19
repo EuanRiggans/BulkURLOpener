@@ -282,11 +282,32 @@ function overwriteCurrentWithBrowserStorage() {
             if (!skipSettings) {
                 userSettings = syncedData.settings;
             }
-            localStorage.setItem("maxID", maxID);
-            for (const list of userLists) {
-                localStorage.setItem(list.list_id, JSON.stringify(list));
+            try {
+                localStorage.setItem("maxID", maxID);
+            } catch (e) {
+                console.log(e);
+                alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+                    "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+                    "settings page. Otherwise you will need to delete some lists to free up space.");
             }
-            localStorage.setItem("settings", JSON.stringify(userSettings));
+            for (const list of userLists) {
+                try {
+                    localStorage.setItem(list.list_id, JSON.stringify(list));
+                } catch (e) {
+                    console.log(e);
+                    alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+                        "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+                        "settings page. Otherwise you will need to delete some lists to free up space.");
+                }
+            }
+            try {
+                localStorage.setItem("settings", JSON.stringify(userSettings));
+            } catch (e) {
+                console.log(e);
+                alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+                    "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+                    "settings page. Otherwise you will need to delete some lists to free up space.");
+            }
             alert("Successfully imported settings.");
         }
     });
@@ -333,11 +354,32 @@ function overwriteCurrentWithSelectedSnapshot() {
         if (!skipSettings) {
             userSettings = restoreFromSnapshot.settings;
         }
-        localStorage.setItem("maxID", maxID);
-        for (const list of userLists) {
-            localStorage.setItem(list.list_id, JSON.stringify(list));
+        try {
+            localStorage.setItem("maxID", maxID);
+        } catch (e) {
+            console.log(e);
+            alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+                "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+                "settings page. Otherwise you will need to delete some lists to free up space.");
         }
-        localStorage.setItem("settings", JSON.stringify(userSettings));
+        for (const list of userLists) {
+            try {
+                localStorage.setItem(list.list_id, JSON.stringify(list));
+            } catch (e) {
+                console.log(e);
+                alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+                    "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+                    "settings page. Otherwise you will need to delete some lists to free up space.");
+            }
+        }
+        try {
+            localStorage.setItem("settings", JSON.stringify(userSettings));
+        } catch (e) {
+            console.log(e);
+            alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+                "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+                "settings page. Otherwise you will need to delete some lists to free up space.");
+        }
         alert("Successfully restored snapshot.");
     }
 }

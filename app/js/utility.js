@@ -259,8 +259,15 @@ function getCurrentVersion() {
  */
 function saveList(Id, newListObject, close = true) {
     snapshotLocalStorage();
-    localStorage.setItem(uuidv4(), JSON.stringify(newListObject));
-    localStorage.setItem("maxID", Id);
+    try {
+        localStorage.setItem(uuidv4(), JSON.stringify(newListObject));
+        localStorage.setItem("maxID", Id);
+    } catch (e) {
+        console.log(e);
+        alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+            "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+            "settings page. Otherwise you will need to delete some lists to free up space.");
+    }
     alert("List saved successfully!");
     if (close) {
         if (checkHostType() === "firefox") {
@@ -281,7 +288,14 @@ function saveList(Id, newListObject, close = true) {
 function saveSettings(userSettings, dontClose) {
     snapshotLocalStorage();
     removeList("settings", false);
-    localStorage.setItem("settings", JSON.stringify(userSettings));
+    try {
+        localStorage.setItem("settings", JSON.stringify(userSettings));
+    } catch (e) {
+        console.log(e);
+        alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+            "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+            "settings page. Otherwise you will need to delete some lists to free up space.");
+    }
     if (!dontClose) {
         alert("Settings successfully saved!");
         if (checkHostType() === "firefox") {
@@ -602,7 +616,14 @@ function createSettings() {
                 open_urls_in_reverse_order: 0,
                 automatically_remove_duplicate_urls: 0,
             };
-            localStorage.setItem("settings", JSON.stringify(newSettings));
+            try {
+                localStorage.setItem("settings", JSON.stringify(newSettings));
+            } catch (e) {
+                console.log(e);
+                alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+                    "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+                    "settings page. Otherwise you will need to delete some lists to free up space.");
+            }
             return;
         }
         const newSettings = {
@@ -624,7 +645,14 @@ function createSettings() {
             open_urls_in_reverse_order: 0,
             automatically_remove_duplicate_urls: 0,
         };
-        localStorage.setItem("settings", JSON.stringify(newSettings));
+        try {
+            localStorage.setItem("settings", JSON.stringify(newSettings));
+        } catch (e) {
+            console.log(e);
+            alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+                "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+                "settings page. Otherwise you will need to delete some lists to free up space.");
+        }
     }
 }
 
@@ -681,7 +709,14 @@ function backgroundOpenList(list) {
         for (const link of strings) {
             linksToOpen.list_links.push(link);
         }
-        localStorage.setItem("linksToOpen", JSON.stringify(linksToOpen));
+        try {
+            localStorage.setItem("linksToOpen", JSON.stringify(linksToOpen));
+        } catch (e) {
+            console.log(e);
+            alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+                "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+                "settings page. Otherwise you will need to delete some lists to free up space.");
+        }
         if (checkHostType() === "firefox") {
             browser.tabs.create({
                 active: true,
@@ -796,7 +831,14 @@ function snapshotLocalStorage() {
                 }
             }
             exportData.backups.push(JSON.stringify(backupData));
-            localStorage.setItem("storage_snapshots", JSON.stringify(exportData));
+            try {
+                localStorage.setItem("storage_snapshots", JSON.stringify(exportData));
+            } catch (e) {
+                console.log(e);
+                alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+                    "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+                    "settings page. Otherwise you will need to delete some lists to free up space.");
+            }
         } else {
             for (let i = 0; i < localStorage.length; i++) {
                 const tempStorage = loadList(localStorage.key(i));
@@ -810,7 +852,14 @@ function snapshotLocalStorage() {
                 }
             }
             exportData.backups.push(JSON.stringify(backupData));
-            localStorage.setItem("storage_snapshots", JSON.stringify(exportData));
+            try {
+                localStorage.setItem("storage_snapshots", JSON.stringify(exportData));
+            } catch (e) {
+                console.log(e);
+                alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+                    "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+                    "settings page. Otherwise you will need to delete some lists to free up space.");
+            }
         }
     }
 }
