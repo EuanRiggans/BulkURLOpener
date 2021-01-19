@@ -49,7 +49,6 @@ function importData() {
         }
     }
     if (confirm("Importing this data will overwrite all of your settings and lists you have currently. Are you sure you wish to proceed?")) {
-        snapshotLocalStorage();
         clearLocalStorage();
         let maxID = 0;
         let userLists = [];

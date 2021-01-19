@@ -258,7 +258,6 @@ function getCurrentVersion() {
  * @param newListObject     The object containing the data for the list
  */
 function saveList(Id, newListObject, close = true) {
-    snapshotLocalStorage();
     try {
         localStorage.setItem(uuidv4(), JSON.stringify(newListObject));
         localStorage.setItem("maxID", Id);
@@ -286,7 +285,6 @@ function saveList(Id, newListObject, close = true) {
  * @param userSettings  The users settings object
  */
 function saveSettings(userSettings, dontClose) {
-    snapshotLocalStorage();
     removeList("settings", false);
     try {
         localStorage.setItem("settings", JSON.stringify(userSettings));
@@ -370,7 +368,6 @@ function removeList(id, noAlert) {
 function removeTempList() {
     for (let i = 0; i < localStorage.length; i++) {
         if (localStorage.key(i) === "temp") {
-            snapshotLocalStorage();
             localStorage.removeItem(localStorage.key(i));
         }
     }
@@ -382,7 +379,6 @@ function removeTempList() {
 function removeLinksToOpenList() {
     for (let i = 0; i < localStorage.length; i++) {
         if (localStorage.key(i) === "linksToOpen") {
-            snapshotLocalStorage();
             localStorage.removeItem(localStorage.key(i));
         }
     }
@@ -818,7 +814,7 @@ function snapshotLocalStorage() {
         }
         if (previousSnapshots) {
             exportData = previousSnapshots;
-            exportData.backups = exportData.backups.slice(-50);
+            exportData.backups = exportData.backups.slice(-5);
             for (let i = 0; i < localStorage.length; i++) {
                 const tempStorage = loadList(localStorage.key(i));
                 const parsedJSON = JSON.parse(tempStorage);

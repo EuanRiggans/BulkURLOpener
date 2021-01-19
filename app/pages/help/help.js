@@ -270,7 +270,6 @@ function overwriteCurrentWithBrowserStorage() {
                     return;
                 }
             }
-            snapshotLocalStorage();
             clearLocalStorage();
             let maxID = 0;
             let userLists = [];
@@ -342,7 +341,6 @@ function overwriteCurrentWithSelectedSnapshot() {
                 return;
             }
         }
-        snapshotLocalStorage();
         clearLocalStorage();
         let maxID = 0;
         let userLists = [];
