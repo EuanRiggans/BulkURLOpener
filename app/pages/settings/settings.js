@@ -20,6 +20,8 @@ document.getElementById("openSettingsHelp").addEventListener("click", () => {
 
 if (document.getElementById("goHome")) document.getElementById("goHome").addEventListener("click", goHome);
 
+if (document.getElementById("deleteSnapshots")) document.getElementById("deleteSnapshots").addEventListener("click", deleteSnapshots);
+
 /* End Of Event Listeners */
 
 (() => {
@@ -37,6 +39,7 @@ if (document.getElementById("goHome")) document.getElementById("goHome").addEven
     const contextMenuEnabledGroup = document.getElementById("contextMenusGroup");
     const openInReverseGroup = document.getElementById("openInReverseGroup");
     const automaticallyRemoveDuplicates = document.getElementById("automaticallyRemoveDuplicatesGroup");
+    const disableSnapshots = document.getElementById("disableSnapshotsGroup");
     let selectedListID = -1;
     let selectedTheme = "defaultBootstrap";
     let currentlyOpenedTabsSetting = "allOpenedTabs";
@@ -108,6 +111,12 @@ if (document.getElementById("goHome")) document.getElementById("goHome").addEven
                     label_text: "Automatically remove duplicate urls",
                     check_status: userSettings.automatically_remove_duplicate_urls === 1,
                     append_to: automaticallyRemoveDuplicates,
+                },
+                disable_snapshots: {
+                    checkbox_id: "disableSnapshots",
+                    label_text: "Disable Snapshots",
+                    check_status: userSettings.disable_snapshots === 1,
+                    append_to: disableSnapshots,
                 },
             };
             for (const todoCheckbox in checkboxesToBuild) {
@@ -183,6 +192,7 @@ if (document.getElementById("goHome")) document.getElementById("goHome").addEven
         document.getElementById("loadOnBrowserStart").innerText = "Setting not available on Electron.";
         document.getElementById("loadTabOnFocusGroup").innerText = "Setting not available on Electron.";
         document.getElementById("contextMenusGroup").innerText = "Setting not available on Electron.";
+        document.getElementById("disableSnapshotsGroup").innerText = "Setting not available on Electron.";
     }
 
     const allInputs = document.getElementsByTagName("input");
@@ -213,6 +223,7 @@ function initSettingsSave(dontClose = false) {
     const contextMenuEnabledElement = document.getElementById("contextMenuEnabled");
     const openInReverseElement = document.getElementById("openInReverse");
     const automaticallyRemoveDuplicatesElement = document.getElementById("automaticallyRemoveDuplicates");
+    const disableSnapshotsElement = document.getElementById("disableSnapshots");
     let tabCreationDelay = parseInt(tabCreationDelayElement.value);
     if (tabCreationDelayElement.value % 1 !== 0) {
         tabCreationDelay = parseFloat(tabCreationDelayElement.value);
@@ -225,6 +236,7 @@ function initSettingsSave(dontClose = false) {
     let contextMenusEnabled = 0;
     let openInReverse = 0;
     let automaticallyRemoveDuplicates = 0;
+    let disableSnapshots = 0;
     const defaultList = getSelectedListID();
     const theme = getSelectedTheme();
     const currentlyOpenedTabsSetting = getCurrentlyOpenedTabsSetting();
@@ -260,6 +272,9 @@ function initSettingsSave(dontClose = false) {
     if (automaticallyRemoveDuplicatesElement.checked) {
         automaticallyRemoveDuplicates = 1;
     }
+    if (disableSnapshotsElement.checked) {
+        disableSnapshots = 1;
+    }
     if (!(isNumber(tabCreationDelay)) || tabCreationDelay < 0) {
         alert("Your tab creation delay must be zero or a positive number!");
         return;
@@ -289,6 +304,7 @@ function initSettingsSave(dontClose = false) {
         context_menu_enabled: 0,
         open_urls_in_reverse_order: 0,
         automatically_remove_duplicate_urls: 0,
+        disable_snapshots: 0,
     };
     userSettings.tab_creation_delay = tabCreationDelay;
     userSettings.night_mode = nightMode;
@@ -306,6 +322,7 @@ function initSettingsSave(dontClose = false) {
     userSettings.context_menu_enabled = contextMenusEnabled;
     userSettings.open_urls_in_reverse_order = openInReverse;
     userSettings.automatically_remove_duplicate_urls = automaticallyRemoveDuplicates;
+    userSettings.disable_snapshots = disableSnapshots;
 
     if (userSettings.context_menu_enabled !== getSetting("context_menu_enabled")) {
         if (userSettings.context_menu_enabled === 0) {

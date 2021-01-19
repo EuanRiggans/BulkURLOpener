@@ -194,6 +194,8 @@ function getSetting(setting) {
                     return userSettings.open_urls_in_reverse_order;
                 case "automatically_remove_duplicate_urls":
                     return userSettings.automatically_remove_duplicate_urls;
+                case "disable_snapshots":
+                    return userSettings.disable_snapshots;
                 default:
                     break;
             }
@@ -611,6 +613,7 @@ function createSettings() {
                 context_menu_enabled: 0,
                 open_urls_in_reverse_order: 0,
                 automatically_remove_duplicate_urls: 0,
+                disable_snapshots: 0,
             };
             try {
                 localStorage.setItem("settings", JSON.stringify(newSettings));
@@ -640,6 +643,7 @@ function createSettings() {
             context_menu_enabled: 0,
             open_urls_in_reverse_order: 0,
             automatically_remove_duplicate_urls: 0,
+            disable_snapshots: 0,
         };
         try {
             localStorage.setItem("settings", JSON.stringify(newSettings));
@@ -794,69 +798,80 @@ function uuidv4() {
 }
 
 function snapshotLocalStorage() {
-    if (!(checkHostType() === "electron")) {
-        let firstSnapshot = false;
-        let exportData = {
-            backups: []
-        };
-        let backupData = {
-            snapshot_id: uuidv4(),
-            snapshot_time: new Date(),
-            maxID: 0,
-            lists: [],
-            settings: {},
-        };
-        let previousSnapshots;
-        try {
-            previousSnapshots = JSON.parse(localStorage.getItem("storage_snapshots"));
-        } catch (e) {
-            firstSnapshot = true;
-        }
-        if (previousSnapshots) {
-            exportData = previousSnapshots;
-            exportData.backups = exportData.backups.slice(-5);
-            for (let i = 0; i < localStorage.length; i++) {
-                const tempStorage = loadList(localStorage.key(i));
-                const parsedJSON = JSON.parse(tempStorage);
-                if (localStorage.key(i) === "settings") {
-                    backupData.settings = parsedJSON;
-                } else if (parsedJSON.object_description === "list_storage") {
-                    backupData.lists.push(parsedJSON);
-                } else if (localStorage.getItem("maxID") !== "NaN") {
-                    backupData.maxID = localStorage.getItem("maxID");
+    if (getSetting("disable_snapshots") === 0) {
+        if (!(checkHostType() === "electron")) {
+            let firstSnapshot = false;
+            let exportData = {
+                backups: []
+            };
+            let backupData = {
+                snapshot_id: uuidv4(),
+                snapshot_time: new Date(),
+                maxID: 0,
+                lists: [],
+                settings: {},
+            };
+            let previousSnapshots;
+            try {
+                previousSnapshots = JSON.parse(localStorage.getItem("storage_snapshots"));
+            } catch (e) {
+                firstSnapshot = true;
+            }
+            if (previousSnapshots) {
+                exportData = previousSnapshots;
+                exportData.backups = exportData.backups.slice(-5);
+                for (let i = 0; i < localStorage.length; i++) {
+                    const tempStorage = loadList(localStorage.key(i));
+                    const parsedJSON = JSON.parse(tempStorage);
+                    if (localStorage.key(i) === "settings") {
+                        backupData.settings = parsedJSON;
+                    } else if (parsedJSON.object_description === "list_storage") {
+                        backupData.lists.push(parsedJSON);
+                    } else if (localStorage.getItem("maxID") !== "NaN") {
+                        backupData.maxID = localStorage.getItem("maxID");
+                    }
+                }
+                exportData.backups.push(JSON.stringify(backupData));
+                try {
+                    localStorage.setItem("storage_snapshots", JSON.stringify(exportData));
+                } catch (e) {
+                    console.log(e);
+                    alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+                        "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+                        "settings page. Otherwise you will need to delete some lists to free up space.");
+                }
+            } else {
+                for (let i = 0; i < localStorage.length; i++) {
+                    const tempStorage = loadList(localStorage.key(i));
+                    const parsedJSON = JSON.parse(tempStorage);
+                    if (localStorage.key(i) === "settings") {
+                        backupData.settings = parsedJSON;
+                    } else if (parsedJSON.object_description === "list_storage") {
+                        backupData.lists.push(parsedJSON);
+                    } else if (localStorage.getItem("maxID") !== "NaN") {
+                        backupData.maxID = localStorage.getItem("maxID");
+                    }
+                }
+                exportData.backups.push(JSON.stringify(backupData));
+                try {
+                    localStorage.setItem("storage_snapshots", JSON.stringify(exportData));
+                } catch (e) {
+                    console.log(e);
+                    alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
+                        "Consider disabling and purging your snapshots to free up space. This can be done from the " +
+                        "settings page. Otherwise you will need to delete some lists to free up space.");
                 }
             }
-            exportData.backups.push(JSON.stringify(backupData));
-            try {
-                localStorage.setItem("storage_snapshots", JSON.stringify(exportData));
-            } catch (e) {
-                console.log(e);
-                alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
-                    "Consider disabling and purging your snapshots to free up space. This can be done from the " +
-                    "settings page. Otherwise you will need to delete some lists to free up space.");
-            }
-        } else {
-            for (let i = 0; i < localStorage.length; i++) {
-                const tempStorage = loadList(localStorage.key(i));
-                const parsedJSON = JSON.parse(tempStorage);
-                if (localStorage.key(i) === "settings") {
-                    backupData.settings = parsedJSON;
-                } else if (parsedJSON.object_description === "list_storage") {
-                    backupData.lists.push(parsedJSON);
-                } else if (localStorage.getItem("maxID") !== "NaN") {
-                    backupData.maxID = localStorage.getItem("maxID");
-                }
-            }
-            exportData.backups.push(JSON.stringify(backupData));
-            try {
-                localStorage.setItem("storage_snapshots", JSON.stringify(exportData));
-            } catch (e) {
-                console.log(e);
-                alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
-                    "Consider disabling and purging your snapshots to free up space. This can be done from the " +
-                    "settings page. Otherwise you will need to delete some lists to free up space.");
-            }
         }
+    }
+}
+
+function deleteSnapshots() {
+    try {
+        localStorage.removeItem("storage_snapshots");
+    } catch (e) {
+        console.log(e);
+        alert("Unable to delete snapshots, maybe you dont have any snapshots?");
     }
 }
 
