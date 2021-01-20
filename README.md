@@ -37,12 +37,12 @@ electron .
 
 ## To Do List
 
+- Improve 'Opening Tabs' page, display tabs that are being opened in order, and allow user to remove urls from that list.
 - Add ability for users to add custom search engine (Baidu etc)
 - New context menu: Open selected links
 - New tool: Sort list into alphabetical order
 - Redesign main interface
 - Add 'extract urls' option to main interface
 - Fix defaultBoostrap typo
-- Improve design of settings page.
 - Switch to using Bootstrap 5 once in stable release.
 - Refactor some of the old code which is quite clunky.
