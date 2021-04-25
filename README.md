@@ -37,6 +37,7 @@ electron .
 
 ## To Do List
 
+- Add ability for user to set a delay for a specific list
 - Improve 'Opening Tabs' page, display tabs that are being opened in order, and allow user to remove urls from that list.
 - Add ability for users to add custom search engine (Baidu etc)
 - New context menu: Open selected links
