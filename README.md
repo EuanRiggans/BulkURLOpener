@@ -4,12 +4,15 @@
 
 ## Install / Download Links
 
-- Chrome: https://chrome.google.com/webstore/detail/bulk-url-opener/kgnfciolbjojfdbbelbdbhhocjmhenep
-- Firefox: https://addons.mozilla.org/en-GB/firefox/addon/bulkurlopener/
-- Edge: https://microsoftedge.microsoft.com/addons/detail/bulk-url-opener/cfopcknfhpogkpcnnppcaedkhokachoo
-- Opera: https://addons.opera.com/en-gb/extensions/details/bulk-url-opener-2/
-- Desktop: https://github.com/EuanRiggans/BulkURLOpener/releases
-- Desktop (Snap): https://snapcraft.io/bulkurlopener [![bulkurlopener](https://snapcraft.io//bulkurlopener/badge.svg)](https://snapcraft.io/bulkurlopener)
+| Package | Status | URL |
+| ------- | ---------- | ---- |
+| Chrome / Chromium | Offical Version | [Chrome Webstore](https://chrome.google.com/webstore/detail/bulk-url-opener/kgnfciolbjojfdbbelbdbhhocjmhenep) |
+| Firefox | Offical Version | [Firefox Addons](https://addons.mozilla.org/en-GB/firefox/addon/bulkurlopener/) |
+| Edge | Offical Version | [Edge Addons](https://microsoftedge.microsoft.com/addons/detail/bulk-url-opener/cfopcknfhpogkpcnnppcaedkhokachoo) |
+| Opera | Offical Version | [Opera Addons](https://addons.opera.com/en-gb/extensions/details/bulk-url-opener-2/) |
+| Desktop | Offical Version | [Multi-Platform Github Releases](https://github.com/EuanRiggans/BulkURLOpener/releases) |
+| Snap [![bulkurlopener](https://snapcraft.io//bulkurlopener/badge.svg)](https://snapcraft.io/bulkurlopener) | Offical Version | [Snapcraft](https://snapcraft.io/bulkurlopener) |
+
 ## Running From Source
 
 #### Browser Extension
