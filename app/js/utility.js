@@ -31,7 +31,7 @@
  */
 function checkHostType() {
     let hostType = null;
-    if (typeof require === "function") {
+    if (isElectron()) {
         hostType = "electron";
         return hostType;
     }
@@ -56,6 +56,30 @@ function checkHostType() {
         hostType = "webapp";
     }
     return hostType;
+}
+
+/**
+ * Returns true / false depending on whether electron is being used to run app.
+ * Source: https://github.com/cheton/is-electron / https://stackoverflow.com/questions/61725325/detect-an-electron-instance-via-javascript/61725416#61725416
+ * @returns {boolean}
+ */
+function isElectron() {
+    // Renderer process
+    if (typeof window !== "undefined" && typeof window.process === "object" && window.process.type === "renderer") {
+        return true;
+    }
+
+    // Main process
+    if (typeof process !== "undefined" && typeof process.versions === "object" && !!process.versions.electron) {
+        return true;
+    }
+
+    // Detect the user agent when the `nodeIntegration` option is set to true
+    if (typeof navigator === "object" && typeof navigator.userAgent === "string" && navigator.userAgent.indexOf("Electron") >= 0) {
+        return true;
+    }
+
+    return false;
 }
 
 /**
