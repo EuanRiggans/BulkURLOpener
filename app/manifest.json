@@ -2,7 +2,7 @@
   "name": "Bulk URL Opener",
   "short_name": "BulkOpen",
   "author": "Euan Riggans",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "version": "1.11.2",
   "description": "Browser addon to open multiple urls with one click. With many more tools to help you manage urls.",
   "permissions": [
@@ -11,13 +11,9 @@
     "contextMenus"
   ],
   "background": {
-    "scripts": [
-      "js/utility.js",
-      "js/background.js",
-      "js/contexts.js"
-    ]
+    "service_worker": "service-worker.js"
   },
-  "browser_action": {
+  "action": {
     "default_icon": "icon/64.png",
     "default_title": "Bulk URL Open",
     "default_popup": "popup.html"

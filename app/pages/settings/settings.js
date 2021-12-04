@@ -343,7 +343,7 @@ function openImport() {
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            url: chrome.extension.getURL("/pages/data-control/import.html"),
+            url: chrome.runtime.getURL("/pages/data-control/import.html"),
         });
     } else if (checkHostType() === "electron") {
         window.location.replace("../data-control/import.html");
@@ -358,7 +358,7 @@ function openExport() {
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            url: chrome.extension.getURL("/pages/data-control/export.html"),
+            url: chrome.runtime.getURL("/pages/data-control/export.html"),
         });
     } else if (checkHostType() === "electron") {
         window.location.replace("../data-control/export.html");
@@ -373,7 +373,7 @@ function openDebug() {
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            url: chrome.extension.getURL("/pages/debug/get-info.html"),
+            url: chrome.runtime.getURL("/pages/debug/get-info.html"),
         });
     } else if (checkHostType() === "electron") {
         window.location.replace("../debug/get-info.html");

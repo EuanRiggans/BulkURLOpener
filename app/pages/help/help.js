@@ -85,7 +85,7 @@ function openFAQ() {
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            url: chrome.extension.getURL("/pages/faq/index.html"),
+            url: chrome.runtime.getURL("/pages/faq/index.html"),
         });
     } else if (checkHostType() === "electron") {
         window.location.replace("../faq/index.html");
@@ -100,7 +100,7 @@ function openTools() {
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            url: chrome.extension.getURL("/pages/tools/index.html"),
+            url: chrome.runtime.getURL("/pages/tools/index.html"),
         });
     } else if (checkHostType() === "electron") {
         window.location.replace("../tools/index.html");
@@ -115,7 +115,7 @@ function openChangelog() {
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            url: chrome.extension.getURL("/pages/changelog/index.html"),
+            url: chrome.runtime.getURL("/pages/changelog/index.html"),
         });
     } else if (checkHostType() === "electron") {
         window.location.replace("../changelog/index.html");

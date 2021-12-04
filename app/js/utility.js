@@ -121,7 +121,7 @@ function linksIteratorProcessURL(url, last = false) {
             } else if (checkHostType() === "chrome") {
                 chrome.tabs.create({
                     active: false,
-                    url: chrome.extension.getURL("delayedloading.html?url=") + encodeURIComponent(url),
+                    url: chrome.runtime.getURL("delayedloading.html?url=") + encodeURIComponent(url),
                 });
             }
         } else {
@@ -287,6 +287,7 @@ function saveList(Id, newListObject, close = true) {
     try {
         localStorage.setItem(uuidv4(), JSON.stringify(newListObject));
         localStorage.setItem("maxID", Id);
+        saveListsToStorage();
     } catch (e) {
         console.log(e);
         alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
@@ -314,6 +315,11 @@ function saveSettings(userSettings, dontClose) {
     removeList("settings", false);
     try {
         localStorage.setItem("settings", JSON.stringify(userSettings));
+        if(checkHostType() === "chrome") {
+            chrome.storage.local.set({userSettings});
+        } else if(checkHostType() === "firefox") {
+            browser.storage.local.set({userSettings});
+        }
     } catch (e) {
         console.log(e);
         alert("Unexpected error occurred when writing to local storage. Your local storage may be full. " +
@@ -748,7 +754,7 @@ function backgroundOpenList(list) {
             });
         } else if (checkHostType() === "chrome") {
             chrome.tabs.create({
-                url: chrome.extension.getURL("openingtabs.html"),
+                url: chrome.runtime.getURL("openingtabs.html"),
             });
         } else if (checkHostType() === "electron") {
             window.location.replace("openingtabs.html");
@@ -911,4 +917,20 @@ function clearLocalStorage() {
 function getCurrentFileName() {
     const path = window.location.pathname;
     return path.split("/").pop();
+}
+
+function saveListsToStorage() {
+    let lists = [];
+    let obj;
+    for (let i = 0; i < localStorage.length; i++) {
+        obj = JSON.parse(loadList(localStorage.key(i)));
+        if(obj.object_description === "list_storage") {
+            lists.push(obj);
+        }
+    }
+    if(checkHostType() === "chrome") {
+        chrome.storage.local.set({lists});
+    } else if(checkHostType() === "firefox") {
+        browser.storage.local.set({lists});
+    }
 }

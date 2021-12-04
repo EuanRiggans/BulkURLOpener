@@ -54,7 +54,7 @@ document.getElementById("savedLists").addEventListener("change", () => {
 
 (() => {
     upgradeToJSONFormatting();
-
+    saveListsToStorage();
     createSettings();
 
     if (getSetting("auto_open_lists") === 1) {
@@ -238,7 +238,7 @@ function openList(list) {
             });
         } else if (checkHostType() === "chrome") {
             chrome.tabs.create({
-                url: chrome.extension.getURL("openingtabs.html"),
+                url: chrome.runtime.getURL("openingtabs.html"),
             });
         } else if (checkHostType() === "electron") {
             window.location.replace("openingtabs.html");
@@ -295,7 +295,7 @@ function openSaveNewListDialog() {
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            url: chrome.extension.getURL("/pages/lists/new.html"),
+            url: chrome.runtime.getURL("/pages/lists/new.html"),
         });
     } else if (checkHostType() === "electron") {
         window.location.replace("./pages/lists/new.html");
@@ -362,7 +362,7 @@ function openSettingsDialog() {
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            url: chrome.extension.getURL("/pages/settings/index.html"),
+            url: chrome.runtime.getURL("/pages/settings/index.html"),
         });
     } else if (checkHostType() === "electron") {
         window.location.replace("./pages/settings/index.html");
@@ -380,7 +380,7 @@ function openHelpDialog() {
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            url: chrome.extension.getURL("/pages/help/index.html"),
+            url: chrome.runtime.getURL("/pages/help/index.html"),
         });
     } else if (checkHostType() === "electron") {
         window.location.replace("./pages/help/index.html");
@@ -420,7 +420,7 @@ function editSelectedList() {
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            url: chrome.extension.getURL(`/pages/lists/edit.html?id=${getSelectedListID()}&name=${getSelectedList()}`),
+            url: chrome.runtime.getURL(`/pages/lists/edit.html?id=${getSelectedListID()}&name=${getSelectedList()}`),
         });
     } else if (checkHostType() === "electron") {
         window.location.replace(`./pages/lists/edit.html?id=${getSelectedListID()}&name=${getSelectedList()}`);

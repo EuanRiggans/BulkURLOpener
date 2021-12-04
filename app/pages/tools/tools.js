@@ -27,7 +27,7 @@ function openExtractor() {
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            url: chrome.extension.getURL("/pages/tools/extractor.html"),
+            url: chrome.runtime.getURL("/pages/tools/extractor.html"),
         });
     } else if (checkHostType() === "electron") {
         window.location.replace("./extractor.html");
@@ -42,7 +42,7 @@ function openReverse() {
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            url: chrome.extension.getURL("/pages/tools/reverse.html"),
+            url: chrome.runtime.getURL("/pages/tools/reverse.html"),
         });
     } else if (checkHostType() === "electron") {
         window.location.replace("./reverse.html");

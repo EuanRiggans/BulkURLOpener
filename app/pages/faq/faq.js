@@ -35,7 +35,7 @@ document.getElementById("openChangelog").addEventListener("click", () => {
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
-            url: chrome.extension.getURL("/pages/changelog/index.html"),
+            url: chrome.runtime.getURL("/pages/changelog/index.html"),
         });
     } else if (checkHostType() === "electron") {
         window.location.replace("./pages/changelog/index.html");
