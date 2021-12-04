@@ -1,3 +1,8 @@
+## Unreleased Changes
+
+- Migrated app to work with Manifest V3
+- Updated context menus to work more consistently
+
 ## 1.11.2
 
 - Limited snapshots to 4
