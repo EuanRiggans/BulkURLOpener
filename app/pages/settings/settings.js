@@ -193,6 +193,7 @@ if (document.getElementById("deleteSnapshots")) document.getElementById("deleteS
         document.getElementById("loadTabOnFocusGroup").innerText = "Setting not available on Electron.";
         document.getElementById("contextMenusGroup").innerText = "Setting not available on Electron.";
         document.getElementById("disableSnapshotsGroup").innerText = "Setting not available on Electron.";
+        document.getElementById("deleteSnapshots").remove();
     }
 
     const allInputs = document.getElementsByTagName("input");
