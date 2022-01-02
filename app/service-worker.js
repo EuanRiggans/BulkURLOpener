@@ -48,11 +48,7 @@ async function browserStartup() {
  * General contexts click handler
  * @param info
  */
-function contextClickHandler(info) {
-    if (info.menuItemId === "refresh-lists") {
-        removeContextMenus();
-        addContextMenus();
-    }
+async function contextClickHandler(info) {
     if (info.menuItemId === "open-tools") {
         if (checkHostType() === "firefox") {
             browser.tabs.create({
@@ -190,16 +186,13 @@ function addContextMenus() {
                     title: "Help",
                     contexts: ["all"],
                 });
-                chrome.contextMenus.create({
-                    id: "refresh-lists",
-                    title: "Refresh Lists",
-                    contexts: ["all"],
-                });
             }
             chrome.contextMenus.onClicked.addListener((info, tab) => {
                 if(info.parentMenuItemId) {
                     if(info.parentMenuItemId === "open-list") {
                         contextMenuListOpenHandler(info, tab);
+                    } else {
+                        contextClickHandler(info, tab);
                     }
                 } else {
                     contextClickHandler(info, tab);
@@ -266,11 +259,6 @@ function addContextMenus() {
                 browser.contextMenus.create({
                     id: "open-help",
                     title: "Help",
-                    contexts: ["all"],
-                });
-                browser.contextMenus.create({
-                    id: "refresh-lists",
-                    title: "Refresh Lists",
                     contexts: ["all"],
                 });
             }
