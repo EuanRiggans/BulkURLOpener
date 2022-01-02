@@ -49,6 +49,15 @@ function toggleLoadingStatus() {
 }
 
 function linksIterator(i, strings, tabCreationDelay) {
+    document.getElementById("tabs-to-be-opened").innerText = "";
+    for(let x = i + 1; x < strings.length; x++) {
+        let linkToBeOpened = document.createElement("div");
+        let linkToBeOpenedHREF = document.createElement("a");
+        linkToBeOpenedHREF.innerText = strings[x];
+        linkToBeOpenedHREF.href = strings[x];
+        linkToBeOpened.append(linkToBeOpenedHREF);
+        document.getElementById("tabs-to-be-opened").append(linkToBeOpened);
+    }
     if (strings[i] !== undefined) {
         strings[i] = strings[i].trim();
     }
