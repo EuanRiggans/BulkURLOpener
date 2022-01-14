@@ -1,7 +1,7 @@
 ## Unreleased Changes
 
 - Migrated app to work with Manifest V3
-- Updated context menus to work more consistently
+- Temporally disabled context menus, as the way services workers work makes the context menu click event handlers work very poorly. Leading to context menus often not working correctly.
 - Added a list of tabs that are still to be created on the openingtabs page. This allows the user to easily see what (and how many) tabs are still to be created.
 
 ## 1.11.2
