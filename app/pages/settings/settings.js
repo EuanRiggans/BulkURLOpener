@@ -94,12 +94,12 @@ if (document.getElementById("deleteSnapshots")) document.getElementById("deleteS
                     check_status: userSettings.load_on_focus === 1,
                     append_to: loadTabOnFocusGroup,
                 },
-                context_menu_enabled: {
-                    checkbox_id: "contextMenuEnabled",
-                    label_text: "Enable context menus (Right click menus)",
-                    check_status: userSettings.context_menu_enabled === 1,
-                    append_to: contextMenuEnabledGroup,
-                },
+                // context_menu_enabled: {
+                //     checkbox_id: "contextMenuEnabled",
+                //     label_text: "Enable context menus (Right click menus)",
+                //     check_status: userSettings.context_menu_enabled === 1,
+                //     append_to: contextMenuEnabledGroup,
+                // },
                 open_urls_in_reverse_order: {
                     checkbox_id: "openInReverse",
                     label_text: "Open urls in reverse order",
