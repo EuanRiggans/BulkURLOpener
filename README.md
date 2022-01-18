@@ -7,7 +7,7 @@
 | Package | Status | Version | URL |
 | ---------- | ---------- | ---------- | ---------- |
 | Chrome / Chromium | Official Version | 1.11.2 | [Chrome Webstore](https://chrome.google.com/webstore/detail/bulk-url-opener/kgnfciolbjojfdbbelbdbhhocjmhenep) |
-| Firefox | Official Version | 1.11.2 | [Firefox Addons](https://addons.mozilla.org/en-GB/firefox/addon/bulkurlopener/) |
+| Firefox | Official Version | 1.11.2 | [Firefox Addons](https://addons.mozilla.org/firefox/addon/bulkurlopener/) |
 | Edge | Official Version | 1.11.2 | [Edge Addons](https://microsoftedge.microsoft.com/addons/detail/bulk-url-opener/cfopcknfhpogkpcnnppcaedkhokachoo) |
 | Opera | Official Version | 1.9.0 (1.11.2 Submitted) | [Opera Addons](https://addons.opera.com/en-gb/extensions/details/bulk-url-opener-2/) |
 | Desktop | Official Version | 1.11.2 | [Multi-Platform Github Releases](https://github.com/EuanRiggans/BulkURLOpener/releases) |
