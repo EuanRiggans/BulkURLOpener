@@ -30,7 +30,7 @@
   "author": "Euan Riggans",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^19.0.0",
+    "electron": "^19.0.1",
     "eslint": "^8.16.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
