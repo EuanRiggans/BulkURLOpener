@@ -248,7 +248,7 @@ function encodeSearchQuery(string) {
  * @param {*} string
  */
 function extractURLFromString(string) {
-    const primaryURLRegex = /(https?:\/\/[\w-]+\.[a-z0-9\/:%_+.,#?!@&=-~]+)/;
+    const primaryURLRegex = /(https?:\/\/[\w-]+\.[a-z0-9\/:\%\_\+\.\,\#\?\!\@\&\=\-\~]+)/;
     const secondaryURLRegex = /(https?:\/\/[^ ]*)/;
     let url;
     if (string.match(primaryURLRegex)) {
