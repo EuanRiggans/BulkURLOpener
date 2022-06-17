@@ -3,7 +3,7 @@
   "short_name": "BulkOpen",
   "author": "Euan Riggans",
   "manifest_version": 2,
-  "version": "1.11.2",
+  "version": "1.11.3",
   "description": "Browser addon to open multiple urls with one click. With many more tools to help you manage urls.",
   "permissions": [
     "tabs",

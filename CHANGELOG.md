@@ -1,3 +1,7 @@
+## 1.11.3
+
+- Fixed URL extraction (Thanks @allanlaal)
+
 ## 1.11.2
 
 - Limited snapshots to 4
