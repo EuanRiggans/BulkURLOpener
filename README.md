@@ -40,6 +40,8 @@ electron .
 
 ## To Do List
 
+- Add "Next tab open" countdown on "openingtabs.html"
+- Add button to open next tab on "openingtabs.html"
 - Add option to open in new window rather than new tab
 - Add ability for user to set a delay for a specific list
 - Improve 'Opening Tabs' page, display tabs that are being opened in order, and allow user to remove urls from that list.
