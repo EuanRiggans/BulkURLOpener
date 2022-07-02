@@ -234,7 +234,7 @@ function openList(list) {
         if (checkHostType() === "firefox") {
             browser.tabs.create({
                 active: true,
-                url: browser.extension.getURL("openingtabs.html"),
+                url: browser.runtime.getURL("openingtabs.html"),
             });
         } else if (checkHostType() === "chrome") {
             chrome.tabs.create({
@@ -291,7 +291,7 @@ function openSaveNewListDialog() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            url: browser.extension.getURL("/pages/lists/new.html"),
+            url: browser.runtime.getURL("/pages/lists/new.html"),
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
@@ -358,7 +358,7 @@ function openSettingsDialog() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            url: browser.extension.getURL("/pages/settings/index.html"),
+            url: browser.runtime.getURL("/pages/settings/index.html"),
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
@@ -376,7 +376,7 @@ function openHelpDialog() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            url: browser.extension.getURL("/pages/help/index.html"),
+            url: browser.runtime.getURL("/pages/help/index.html"),
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
@@ -416,7 +416,7 @@ function editSelectedList() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            url: browser.extension.getURL(`/pages/lists/edit.html?id=${getSelectedListID()}&name=${getSelectedList()}`),
+            url: browser.runtime.getURL(`/pages/lists/edit.html?id=${getSelectedListID()}&name=${getSelectedList()}`),
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({

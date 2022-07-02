@@ -23,7 +23,7 @@ function openExtractor() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            url: browser.extension.getURL("/pages/tools/extractor.html"),
+            url: browser.runtime.getURL("/pages/tools/extractor.html"),
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
@@ -38,7 +38,7 @@ function openReverse() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            url: browser.extension.getURL("/pages/tools/reverse.html"),
+            url: browser.runtime.getURL("/pages/tools/reverse.html"),
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({

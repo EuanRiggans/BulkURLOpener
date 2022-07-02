@@ -81,7 +81,7 @@ function openFAQ() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            url: browser.extension.getURL("/pages/faq/index.html"),
+            url: browser.runtime.getURL("/pages/faq/index.html"),
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
@@ -96,7 +96,7 @@ function openTools() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            url: browser.extension.getURL("/pages/tools/index.html"),
+            url: browser.runtime.getURL("/pages/tools/index.html"),
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
@@ -111,7 +111,7 @@ function openChangelog() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            url: browser.extension.getURL("/pages/changelog/index.html"),
+            url: browser.runtime.getURL("/pages/changelog/index.html"),
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({

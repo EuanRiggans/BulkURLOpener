@@ -340,7 +340,7 @@ function openImport() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            url: browser.extension.getURL("/pages/data-control/import.html"),
+            url: browser.runtime.getURL("/pages/data-control/import.html"),
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
@@ -355,7 +355,7 @@ function openExport() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            url: browser.extension.getURL("/pages/data-control/export.html"),
+            url: browser.runtime.getURL("/pages/data-control/export.html"),
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({
@@ -370,7 +370,7 @@ function openDebug() {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            url: browser.extension.getURL("/pages/debug/get-info.html"),
+            url: browser.runtime.getURL("/pages/debug/get-info.html"),
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({

@@ -31,7 +31,7 @@ document.getElementById("openChangelog").addEventListener("click", () => {
     if (checkHostType() === "firefox") {
         browser.tabs.create({
             active: true,
-            url: browser.extension.getURL("/pages/changelog/index.html"),
+            url: browser.runtime.getURL("/pages/changelog/index.html"),
         });
     } else if (checkHostType() === "chrome") {
         chrome.tabs.create({

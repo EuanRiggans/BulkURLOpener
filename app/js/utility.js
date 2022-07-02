@@ -116,7 +116,7 @@ function linksIteratorProcessURL(url, last = false) {
             if (checkHostType() === "firefox") {
                 browser.tabs.create({
                     active: false,
-                    url: browser.extension.getURL("delayedloading.html?url=") + encodeURIComponent(url),
+                    url: browser.runtime.getURL("delayedloading.html?url=") + encodeURIComponent(url),
                 });
             } else if (checkHostType() === "chrome") {
                 chrome.tabs.create({
@@ -750,7 +750,7 @@ function backgroundOpenList(list) {
         if (checkHostType() === "firefox") {
             browser.tabs.create({
                 active: true,
-                url: browser.extension.getURL("openingtabs.html"),
+                url: browser.runtime.getURL("openingtabs.html"),
             });
         } else if (checkHostType() === "chrome") {
             chrome.tabs.create({
