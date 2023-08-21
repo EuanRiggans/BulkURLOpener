@@ -33,7 +33,7 @@
     "electron": "^20.2.0",
     "eslint": "^8.23.1",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-import": "^2.28.1",
     "mocha": "^10.0.0",
     "spectron": "^19.0.0"
   },
