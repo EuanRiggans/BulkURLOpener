@@ -1,65 +1,83 @@
-<p align="center">
-    <img src="https://static.euanriggans.com/file/static-euanriggans-com/apps/bulkurlopener/images/440x280.png">
-</p>
+# Bulk URL Opener
 
-## Redevelopment
+A browser extension for opening URLs and searches in batches and managing saved lists.
 
-The `redevelopment` branch is a fresh browser-extension modernization effort.
-Phase 0 preserves the legacy application and adds its
-[feature and storage baseline](docs/PHASE_0_BASELINE.md),
-[redevelopment plan](docs/REDEVELOPMENT_PLAN.md), and synthetic fixtures.
-Run `npm run test:baseline` with Node.js 24; it needs no dependency installation
-and exercises the legacy source in memory. Tests labelled `legacy defect:`
-document existing failures rather than desired replacement behaviour.
+**The `redevelopment` branch is a development preview.** Phase 1 establishes browser-only tooling and UI entrypoints. The new preview does not yet migrate data, open batches or save lists. Use an isolated development browser profile; it is not a replacement for your installed extension.
 
-## Install / Download Links
+The popup stays focused on URL entry and simple actions. Creating and editing lists use separate pages. The planned context menu is `Bulk URL Opener → Open Lists → [saved lists]`.
 
-| Package | Status | Version | URL |
-| ---------- | ---------- | ---------- | ---------- |
-| Chrome / Chromium | Official Version | 1.11.2 | [Chrome Webstore](https://chrome.google.com/webstore/detail/bulk-url-opener/kgnfciolbjojfdbbelbdbhhocjmhenep) |
-| Firefox | Official Version | 1.11.2 | [Firefox Addons](https://addons.mozilla.org/firefox/addon/bulkurlopener/) |
-| Edge | Official Version | 1.11.2 | [Edge Addons](https://microsoftedge.microsoft.com/addons/detail/bulk-url-opener/cfopcknfhpogkpcnnppcaedkhokachoo) |
-| Opera | Official Version | 1.9.0 (1.11.2 Submitted) | [Opera Addons](https://addons.opera.com/en-gb/extensions/details/bulk-url-opener-2/) |
-| Desktop | Official Version | 1.11.2 | [Multi-Platform Github Releases](https://github.com/EuanRiggans/BulkURLOpener/releases) |
-| Snap [![bulkurlopener](https://snapcraft.io//bulkurlopener/badge.svg)](https://snapcraft.io/bulkurlopener) | Official Version | 1.10.0 | [Snapcraft](https://snapcraft.io/bulkurlopener) |
+## Development
 
-## Running From Source
+Use Node.js 24 (see `.nvmrc`) and npm.
 
-#### Browser Extension
-
-To run the app from source as a browser extension, just download / clone this repository. All you need from the repository is the 'app' folder. You can then install it to your browser. In Chrome, for example, you can navigate to the exensions page (Three dots in top right => More tools => Extensions). Then drag and drop the app folder onto that page to install it.
-
-#### Electron
-
-Running the electron version is very simple, clone / download the repository:
-
-```shell script
-npm install
+```sh
+npm ci
+npm run validate
 ```
 
-```shell script
-electron .
+```sh
+npm run dev           # Chromium development build
+npm run dev:firefox   # Firefox development build; requires Firefox
 ```
 
-## Known Issues
+Use WXT's isolated development profile or a separate disposable profile. Never uninstall your normal add-on to test an upgrade. The Firefox build deliberately retains the existing add-on ID, so loading it in your normal profile could replace that installation.
 
-- Close buttons not working. This is because Firefox does not allow a window to be closed by a script, if that window was opened by a script.
-- 'Opening Tabs' window does not close. This is caused by the same issue as mentioned above.
-- Addon does not open file: or about: urls. (See issue [#2](https://github.com/EuanRiggans/BulkURLOpener/issues/2))
-- Context menus working initially on Firefox. Solution: If your context menus are not working on Firefox, then please restart your browser as this is an known issue. 
+## Builds and checks
 
-## To Do List
+| Command                 | Purpose                                                                                     |
+| ----------------------- | ------------------------------------------------------------------------------------------- |
+| `npm run build`         | Production-mode Chromium MV3 preview in `.output/chrome-mv3/`.                              |
+| `npm run build:firefox` | Production-mode Firefox MV3 preview in `.output/firefox-mv3/`.                              |
+| `npm run build:all`     | Build both browsers.                                                                        |
+| `npm run check`         | Strict TypeScript, ESLint, formatting, Vitest and legacy characterization.                  |
+| `npm run check:build`   | Check generated manifests, resources, CSP, icons and build contents. Run after both builds. |
+| `npm run lint:firefox`  | Mozilla validation of the generated Firefox extension.                                      |
+| `npm run validate`      | All of the above checks and both builds.                                                    |
+| `npm run test:baseline` | Legacy behaviour tests using Node's built-in runner; no dependency installation required.   |
 
-- Add "Next tab open" countdown on "openingtabs.html"
-- Add button to open next tab on "openingtabs.html"
-- Add option to open in new window rather than new tab
-- Add ability for user to set a delay for a specific list
-- Improve 'Opening Tabs' page, display tabs that are being opened in order, and allow user to remove urls from that list.
-- Add ability for users to add custom search engine (Baidu etc)
-- New context menu: Open selected links
-- New tool: Sort list into alphabetical order
-- Redesign main interface
-- Add 'extract urls' option to main interface
-- Fix defaultBoostrap typo
-- Switch to using Bootstrap 5 once in stable release.
-- Refactor some of the old code which is quite clunky.
+WXT generates browser-specific background configuration: a Chromium service worker and Firefox background scripts. Source version `2.0.0` comes from `package.json`; this is an unreleased redevelopment version, not a store submission.
+
+The Phase 1 capability floors are Chromium 120 and Firefox 142. The release test policy targets current/previous Chrome and Edge stable, current Firefox stable and supported ESR. Capability floors do not establish completed browser testing.
+
+## Project layout
+
+```text
+src/entrypoints/              Background, popup, options, new-list and edit-list
+src/infrastructure/browser/  Browser API adapters
+src/shared/                  Pure internal navigation helpers
+src/ui/                      Shared Preact components and local CSS
+public/icon/                 Existing extension icons
+test/unit/                   Modern Vitest checks
+test/characterization/       Executable legacy behaviour baseline
+test/fixtures/legacy/        Synthetic historical storage examples
+scripts/                     Generated-build verification
+docs/                        Baseline, decisions, phases and validation evidence
+```
+
+`app/` remains the untouched legacy extension reference. Desktop files (`main.js`, `utilities/`, `build/`, `test/spec.js`, and `unstable-build-script.sh`) remain historical source pending cleanup. Electron, Spectron, Mocha and desktop build/start commands are removed from the active npm toolchain. The old shell script and desktop instructions from Git history do not apply to this toolchain.
+
+## Data and privacy
+
+The Phase 1 preview keeps typed text in memory only. It does not initialize defaults, write extension storage or contact external destinations. Migration and recoverable persistence come before active list editing in later phases.
+
+This is a public repository. Never commit personal exports, browser profiles, private URLs/list names or unsanitized diagnostics. All committed migration fixtures are synthetic. The Firefox add-on ID is public extension metadata.
+
+## Redevelopment records
+
+- [Phase 0 baseline and feature inventory](docs/PHASE_0_BASELINE.md)
+- [Redevelopment decisions and roadmap](docs/REDEVELOPMENT_PLAN.md)
+- [Phase 1 tooling and validation](docs/PHASE_1_TOOLING.md)
+- [Historical storage fixtures](test/fixtures/legacy/README.md)
+
+Completed phases are committed, pushed to `redevelopment` and verified against GitHub. Source/build checks do not replace real browser, accessibility, cross-device sync or genuine signed-upgrade testing.
+
+## Existing store listings
+
+These links are retained from the legacy project. They do not distribute this development preview.
+
+- [Chrome](https://chrome.google.com/webstore/detail/bulk-url-opener/kgnfciolbjojfdbbelbdbhhocjmhenep)
+- [Firefox](https://addons.mozilla.org/firefox/addon/bulkurlopener/)
+- [Edge](https://microsoftedge.microsoft.com/addons/detail/bulk-url-opener/cfopcknfhpogkpcnnppcaedkhokachoo)
+- [Opera](https://addons.opera.com/en-gb/extensions/details/bulk-url-opener-2/)
+
+MIT licensed; see [LICENSE](LICENSE).

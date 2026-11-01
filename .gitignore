@@ -66,3 +66,13 @@ dist
 .idea
 
 /web-ext-artifacts/
+
+# Modern extension builds and generated types
+.wxt/
+.output/
+
+# Local browser profiles, private exports and intermediate work
+/work/
+/private/
+/browser-profiles/
+.env.*

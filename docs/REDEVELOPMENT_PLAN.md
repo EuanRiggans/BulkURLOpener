@@ -53,6 +53,11 @@ testing. Prefer WXT's typed browser abstraction; add another compatibility layer
 only if the selected implementation needs it. Use npm and a committed lockfile.
 Node.js 24 is the development/CI baseline.
 
+Phase 1 implements this foundation with WXT/Vite, Preact and supported compatible
+TypeScript/ESLint versions. See [its implementation record](PHASE_1_TOOLING.md).
+Runtime schema validation is added with the actual storage/migration models in
+Phase 2. The Phase 1 preview does not initialize or modify user data.
+
 Keep entrypoints thin. Separate pure URL/list/settings models from browser APIs,
 storage, scheduling and UI. Use a validated, versioned canonical store in
 `storage.local`, separate job/recovery records where appropriate, and one
@@ -92,7 +97,7 @@ package metadata during tooling modernization while retaining asset licences.
 | Phase | Work | Exit evidence |
 | --- | --- | --- |
 | 0: Establish the baseline | Record requirements, complete feature/settings/storage inventory, preserve synthetic historical fixtures and characterize legacy behaviour. | Baseline checks pass; legacy runtime unchanged; phase commit exists on GitHub. |
-| 1: Establish browser-only tooling | Introduce modern builds, TS, UI foundation, manifests, lint/tests and CI alongside the legacy reference. | Reproducible Chromium/Firefox outputs, valid resources/manifests, documented identity strategy. |
+| 1: Establish browser-only tooling | Modern builds, TS, UI foundation, manifests, lint/tests and CI alongside the legacy reference; active desktop tooling retired. | Chromium/Firefox output, generated-resource validation and identity strategy documented in [Phase 1](PHASE_1_TOOLING.md). |
 | 2: Protect and migrate data | Read document storage and mirrors; back up raw sources, validate/reconcile, stage and verify canonical state; expose recovery. | Corruption, conflicts, repeated execution, quota and interruption cases preserve raw data and verified records. |
 | 3: Extract shared services | URL policy, list/settings services, browser adapter, recoverable opening jobs and basic context menu. | Consistent settings across popup/startup/menu paths; failure/restart handling tested. |
 | 4: Rebuild functional flows | Popup, separate list editors, options, all opening modes, capture, tools, transfer/sync, help and recovery. | Feature inventory checked row by row; all legacy preferences mapped or an intentional change documented. |

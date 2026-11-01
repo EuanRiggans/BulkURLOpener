@@ -1,54 +1,54 @@
 {
   "name": "bulkurlopener",
-  "version": "1.12.0",
-  "description": "Desktop version of the Bulk URL Opener browser extension",
-  "main": "main.js",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A browser extension for opening URLs in batches and managing saved lists",
   "scripts": {
-    "start": "electron .",
-    "lint": "eslint \"**/*.js\" --ignore-pattern node_modules/",
-    "lint:fix": "eslint \"**/*.js\" --ignore-pattern node_modules/ --fix",
-    "test": "mocha",
+    "dev": "wxt -b chrome --mv3",
+    "dev:firefox": "wxt -b firefox --mv3",
+    "prepare:types": "wxt prepare",
+    "postinstall": "wxt prepare",
+    "build": "wxt build -b chrome --mv3",
+    "build:firefox": "wxt build -b firefox --mv3",
+    "build:all": "npm run build && npm run build:firefox",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:unit": "vitest run",
     "test:baseline": "node --test --test-isolation=none test/characterization/*.test.js",
-    "make:all": "npm run make:linux:x64 && npm run make:mac:zip && npm run make:win",
-    "make:win": "electron-builder build --win",
-    "make:win:exe": "electron-builder build --win nsis",
-    "make:win:zip": "electron-builder build --win zip",
-    "make:mac:zip": "electron-builder build --mac zip",
-    "make:mac:dmg": "electron-builder build --mac dmg",
-    "make:linux:x64": "electron-builder build --linux --x64",
-    "make:linux:x64:deb": "electron-builder build --linux deb --x64",
-    "make:linux:x64:rpm": "electron-builder build --linux rpm --x64",
-    "make:linux:x64:appimage": "electron-builder build --linux appimage --x64",
-    "make:linux:x64:zip": "electron-builder build --linux zip --x64",
-    "make:linux:x64:tar": "electron-builder build --linux tar.xz --x64",
-    "make:linux:arm": "electron-builder build --linux --arm64",
-    "make:linux:arm:deb": "electron-builder build --linux deb --arm64",
-    "make:linux:arm:rpm": "electron-builder build --linux rpm --arm64",
-    "make:linux:arm:zip": "electron-builder build --linux zip --arm64",
-    "make:linux:arm:tar.xz": "electron-builder build --linux tar.xz --arm64"
+    "test": "npm run test:unit && npm run test:baseline",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test",
+    "check:build": "node scripts/verify-builds.mjs",
+    "lint:firefox": "node scripts/lint-firefox.mjs",
+    "validate": "npm run check && npm run build:all && npm run check:build && npm run lint:firefox"
   },
-  "repository": "https://github.com/EuanRiggans/BulkURLOpener-Electron",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EuanRiggans/BulkURLOpener.git"
+  },
   "author": "Euan Riggans",
-  "license": "ISC",
-  "devDependencies": {
-    "electron": "^20.2.0",
-    "eslint": "^8.23.1",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.26.0",
-    "mocha": "^10.0.0",
-    "spectron": "^19.0.0"
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.0.0"
   },
-  "dependencies": {},
-  "build": {
-    "appId": "com.bulkurlopener",
-    "productName": "bulkurlopener",
-    "artifactName": "${productName}-${version}-${os}.${ext}",
-    "linux": {
-      "category": "Utility"
-    },
-    "mac": {
-      "category": "public.app-category.utilities",
-      "type": "distribution"
-    }
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@jridgewell/trace-mapping": "0.3.31",
+    "@preact/preset-vite": "2.10.6",
+    "@types/node": "24.19.2",
+    "eslint": "10.14.0",
+    "globals": "17.14.0",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
+    "vite": "8.3.5",
+    "vitest": "5.0.5",
+    "web-ext": "10.8.0",
+    "wxt": "0.21.5"
+  },
+  "dependencies": {
+    "preact": "11.1.1"
   }
 }
