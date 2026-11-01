@@ -58,7 +58,9 @@ TypeScript/ESLint versions. See [its implementation record](PHASE_1_TOOLING.md).
 Runtime schema validation is added with the actual storage/migration models in
 Phase 2. [Phase 2's implementation](PHASE_2_DATA.md) uses Valibot, verified raw
 backups, reviewed reconciliation and a serialized local publication/undo protocol.
-Migration is explicit on the options page; opening and normal CRUD remain gated.
+Migration is explicit on the options page. [Phase 3](PHASE_3_SERVICES.md) adds
+gated shared mutations, a URL policy, recoverable opening jobs, startup and basic
+menus. The functional popup/editor/settings/transfer rebuild remains Phase 4.
 
 Keep entrypoints thin. Separate pure URL/list/settings models from browser APIs,
 storage, scheduling and UI. Use a validated, versioned canonical store in
@@ -101,7 +103,7 @@ package metadata during tooling modernization while retaining asset licences.
 | 0: Establish the baseline | Record requirements, complete feature/settings/storage inventory, preserve synthetic historical fixtures and characterize legacy behaviour. | Baseline checks pass; legacy runtime unchanged; phase commit exists on GitHub. |
 | 1: Establish browser-only tooling | Modern builds, TS, UI foundation, manifests, lint/tests and CI alongside the legacy reference; active desktop tooling retired. | Chromium/Firefox output, generated-resource validation and identity strategy documented in [Phase 1](PHASE_1_TOOLING.md). |
 | 2: Protect and migrate data | Read document storage and mirrors; back up raw sources, validate/reconcile, stage and verify canonical state; expose recovery. | Synthetic corruption/conflict/quota/interruption/concurrency checks and retained-data rules are recorded in [Phase 2](PHASE_2_DATA.md); real upgrade/runtime evidence remains required. |
-| 3: Extract shared services | URL policy, list/settings services, browser adapter, recoverable opening jobs and basic context menu. | Consistent settings across popup/startup/menu paths; failure/restart handling tested. |
+| 3: Extract shared services | URL policy, list/settings services, browser adapter, recoverable opening jobs and basic context menu. | Shared-trigger, acknowledgement-failure, startup/menu and held-tab evidence is recorded in [Phase 3](PHASE_3_SERVICES.md); actual browser/upgrade evidence remains required. |
 | 4: Rebuild functional flows | Popup, separate list editors, options, all opening modes, capture, tools, transfer/sync, help and recovery. | Feature inventory checked row by row; all legacy preferences mapped or an intentional change documented. |
 | 5: Accessibility and browser hardening | Keyboard/screen readers, zoom, large lists, restricted destinations, private windows, worker suspension and cross-device sync. | Real browser evidence and explicit remaining limitations. |
 | 6: Remove legacy components | Remove Electron and replaced application/vendor code, retire executable legacy tests, retain historical data fixtures/migration, update dependencies/docs/packages. | Checks pass on the cleaned candidate; source/archive reproduction and contents inspection complete. |

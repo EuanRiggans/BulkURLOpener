@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
+import { browser } from 'wxt/browser';
 import { digest } from '../../domain/storage/json';
 import { requireCondition } from '../../domain/storage/errors';
 import {
@@ -44,6 +45,35 @@ export function RecoveryPanel() {
 
   useEffect(() => {
     let mounted = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const changed = (
+      changes: Record<string, { oldValue?: unknown }>,
+      area: string,
+    ) => {
+      if (
+        area !== 'local' ||
+        !Object.entries(changes).some(
+          ([key, change]) =>
+            key === 'buo:v2:head' ||
+            (key.startsWith('buo:v2:job:') && change.oldValue === undefined),
+        )
+      )
+        return;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        void migrationRequest({ type: 'buo:migration/status' }, statusSchema)
+          .then((value) => {
+            if (mounted) setStatus(value);
+          })
+          .catch((reason: unknown) => {
+            if (mounted) {
+              setStatus(null);
+              setError(recoveryError(reason));
+            }
+          });
+      }, 150);
+    };
+    browser.storage.onChanged.addListener(changed);
     void migrationRequest({ type: 'buo:migration/status' }, statusSchema)
       .then((value) => {
         if (mounted) setStatus(value);
@@ -56,6 +86,8 @@ export function RecoveryPanel() {
       });
     return () => {
       mounted = false;
+      clearTimeout(timer);
+      browser.storage.onChanged.removeListener(changed);
     };
   }, []);
 
@@ -225,7 +257,7 @@ export function RecoveryPanel() {
           />
         </>
       )}
-      {status?.status === 'ready' && (
+      {status?.status === 'ready' && status.canRollback && (
         <details>
           <summary>Undo this migration</summary>
           <p>

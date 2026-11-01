@@ -3,6 +3,7 @@ import { pageUrl } from '../../infrastructure/browser/pages';
 import { PageLayout } from '../../ui/PageLayout';
 import { mount } from '../../ui/mount';
 import { RecoveryPanel } from '../../ui/recovery/RecoveryPanel';
+import { ServiceControls } from '../../ui/services/ServiceControls';
 
 function Options() {
   return (
@@ -15,6 +16,7 @@ function Options() {
         <a href={pageUrl('/new-list.html')}>Create a list</a>
       </p>
       <RecoveryPanel />
+      <ServiceControls />
       <p class="hint">Version {browser.runtime.getManifest().version}</p>
     </PageLayout>
   );

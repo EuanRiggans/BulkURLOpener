@@ -1,5 +1,8 @@
 # Phase 2: Protect and migrate data
 
+This is the historical Phase 2 record. Normal mutations, opening jobs and
+current permission/privacy limits are documented in [Phase 3](PHASE_3_SERVICES.md).
+
 Recorded 1 November 2026. This phase starts at
 `b2dea29fac06fff27f2de521903cab1dbdfac3c6` on `redevelopment`. The legacy
 application and synthetic historical fixtures remain unchanged.

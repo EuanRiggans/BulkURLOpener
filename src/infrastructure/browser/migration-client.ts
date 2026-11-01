@@ -1,9 +1,9 @@
 import * as v from 'valibot';
-import { browser } from 'wxt/browser';
-import { MigrationError, requireCondition } from '../../domain/storage/errors';
+import { requireCondition } from '../../domain/storage/errors';
 import { documentSchema } from '../../domain/storage/schema';
 import { sameContent } from '../../domain/storage/migrate';
 import type { MigrationRequest } from '../../application/storage/protocol';
+import { extensionRequest } from './client';
 
 export function captureDocument(
   storage: Storage = localStorage,
@@ -24,19 +24,9 @@ export function captureDocument(
   return first;
 }
 
-const envelope = v.variant('ok', [
-  v.strictObject({ ok: v.literal(true), value: v.unknown() }),
-  v.strictObject({ ok: v.literal(false), error: v.string() }),
-]);
-
 export async function migrationRequest<T>(
   request: MigrationRequest,
   schema: v.GenericSchema<T>,
 ): Promise<T> {
-  const response = v.parse(
-    envelope,
-    await browser.runtime.sendMessage(request),
-  );
-  if (!response.ok) throw new MigrationError(response.error);
-  return v.parse(schema, response.value);
+  return extensionRequest(request, schema);
 }

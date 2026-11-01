@@ -6,6 +6,8 @@ Current tooling and its validation limits are documented in
 [Phase 1](docs/PHASE_1_TOOLING.md).
 Storage invariants and recovery limits are recorded in
 [Phase 2](docs/PHASE_2_DATA.md).
+Shared services and opening invariants are recorded in
+[Phase 3](docs/PHASE_3_SERVICES.md).
 
 - Work on `redevelopment`. Its fresh starting commit is
   `4eb346d3bca8a12e6fa0f7e5ba891fcb711d9bf7`.
@@ -57,5 +59,16 @@ backups/stages/history, verify full content and expected revisions, and publish
 the active head last. Never initialize defaults over unreadable/future state or
 erase recovery data to fix quota. A readiness check outside a mutation is not a
 transaction. List/settings/opening/menu services must use the migration gate.
+Normal mutation records use schema 2 while retaining readable schema-1 migration
+history. Keep assigned list IDs through edits, deduplicate request IDs and reject
+stale revisions. Job plans/results are immutable; publish progress heads last.
+Establish alarms before publishing a job; its signal and idle cleanup are ordered
+under the writer lock. Keep tab effects and sleeping outside that lock, and use
+the separate runner lock for tab effects. Never
+automatically replay unconfirmed tab creation or reuse window/tab IDs across
+browser sessions without explicit retargeting. Helper URLs carry opaque refs.
+Opaque startup/runtime metadata uses storage.session with its named locks;
+user-data writes still belong to the coordinator. Private senders/targets are
+blocked before persistence until session-only execution is implemented/tested.
 Mozilla validation has one narrowly source-mapped, version-pinned Preact vendor
 warning exception; new application warnings must not be silently added to it.

@@ -2,7 +2,9 @@ import { browser } from 'wxt/browser';
 import { StorageCoordinator } from '../../application/storage/coordinator';
 import { MigrationError } from '../../domain/storage/errors';
 
-export function createStorageCoordinator(): StorageCoordinator {
+export function createStorageCoordinator(
+  jobSignal: () => Promise<void> = () => Promise.resolve(),
+): StorageCoordinator {
   return new StorageCoordinator(
     {
       readLocal: () => browser.storage.local.get(null),
@@ -17,5 +19,7 @@ export function createStorageCoordinator(): StorageCoordinator {
         work,
       );
     },
+    undefined,
+    jobSignal,
   );
 }

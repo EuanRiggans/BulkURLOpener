@@ -3,7 +3,7 @@ import { MigrationError } from '../../domain/storage/errors';
 import type { StorageCoordinator } from './coordinator';
 import { isMigrationMessage, isRecoveryPage, requestSchema } from './protocol';
 
-type Sender = { id?: string; url?: string };
+type Sender = { id?: string; url?: string; tab?: { incognito?: boolean } };
 type Reply = { ok: true; value: unknown } | { ok: false; error: string };
 
 export function createMigrationListener(
@@ -14,6 +14,8 @@ export function createMigrationListener(
     try {
       if (!isRecoveryPage(sender, identity.id, identity.root))
         throw new MigrationError('UNAUTHORIZED_PAGE');
+      if (sender.tab?.incognito)
+        throw new MigrationError('PRIVATE_WINDOW_UNSUPPORTED');
       const request = v.parse(requestSchema, message);
       let value: unknown;
       switch (request.type) {

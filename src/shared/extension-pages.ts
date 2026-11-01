@@ -4,6 +4,8 @@ export const extensionPages = [
   '/options.html',
   '/new-list.html',
   '/edit-list.html',
+  '/opening.html',
+  '/deferred.html',
 ] as const;
 
 export type ExtensionPage = (typeof extensionPages)[number];

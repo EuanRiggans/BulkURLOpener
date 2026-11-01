@@ -7,7 +7,14 @@ const project = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const packageJson = JSON.parse(
   readFileSync(join(project, 'package.json'), 'utf8'),
 );
-const pages = ['popup.html', 'options.html', 'new-list.html', 'edit-list.html'];
+const pages = [
+  'popup.html',
+  'options.html',
+  'new-list.html',
+  'edit-list.html',
+  'opening.html',
+  'deferred.html',
+];
 
 function filesWithin(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -53,8 +60,8 @@ for (const browser of ['chrome', 'firefox']) {
   assert(!manifest.commands._execute_browser_action);
   assert.deepEqual(
     manifest.permissions ?? [],
-    ['storage'],
-    'Phase 2 requests storage only for local migration and recovery',
+    ['storage', 'tabs', 'alarms', 'contextMenus'],
+    'Phase 3 permissions implement storage, capture, job recovery and saved-list menus',
   );
   assert.deepEqual(manifest.host_permissions ?? [], []);
   assert.deepEqual(manifest.content_scripts ?? [], []);
@@ -79,7 +86,7 @@ for (const browser of ['chrome', 'firefox']) {
     assert.deepEqual(
       manifest.browser_specific_settings.gecko.data_collection_permissions
         .required,
-      ['none'],
+      ['browsingActivity', 'searchTerms'],
     );
   } else {
     resource(manifest.background.service_worker);

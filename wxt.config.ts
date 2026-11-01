@@ -9,7 +9,7 @@ export default defineConfig({
     name: 'Bulk URL Opener',
     description: 'Open URLs in batches and manage saved lists.',
     action: { default_title: 'Bulk URL Opener' },
-    permissions: ['storage'],
+    permissions: ['storage', 'tabs', 'alarms', 'contextMenus'],
     icons: {
       16: 'icon/16.png',
       32: 'icon/32.png',
@@ -28,8 +28,10 @@ export default defineConfig({
             gecko: {
               id: '{c5b32a48-5514-4a46-81f2-075ebf3cbc29}',
               strict_min_version: '142.0',
-              // Review when features that transmit data (search, sync) are introduced.
-              data_collection_permissions: { required: ['none'] },
+              // Navigation and search now send destinations/queries to chosen sites.
+              data_collection_permissions: {
+                required: ['browsingActivity', 'searchTerms'],
+              },
             },
           },
         }

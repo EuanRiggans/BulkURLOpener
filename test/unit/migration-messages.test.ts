@@ -27,6 +27,25 @@ function setup() {
 }
 
 describe('migration messaging boundary', () => {
+  it('rejects migration from a private extension document before persisting any private source', async () => {
+    const { listener, port } = setup();
+    const reply = await new Promise((resolve) => {
+      expect(
+        listener(
+          {
+            type: 'buo:migration/prepare',
+            document: {
+              previous_list_input: '["https://private.example.test/"]',
+            },
+          },
+          { ...sender, tab: { incognito: true } },
+          resolve,
+        ),
+      ).toBe(true);
+    });
+    expect(reply).toEqual({ ok: false, error: 'PRIVATE_WINDOW_UNSUPPORTED' });
+    expect(port.writes).toEqual([]);
+  });
   it('uses callback replies with literal true for older Chromium and ignores unrelated messages', async () => {
     const { listener, request } = setup();
     expect(
@@ -34,7 +53,12 @@ describe('migration messaging boundary', () => {
     ).toBeUndefined();
     expect(await request({ type: 'buo:migration/status' })).toEqual({
       ok: true,
-      value: { status: 'uninitialized', data: null, head: null },
+      value: {
+        status: 'uninitialized',
+        data: null,
+        head: null,
+        canRollback: false,
+      },
     });
   });
   it.each([

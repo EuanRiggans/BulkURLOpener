@@ -54,12 +54,16 @@ export const settingKeys = Object.keys(
 ) as (keyof Settings)[];
 export const settingKeySchema = v.picklist(settingKeys);
 
-export const listSchema = v.strictObject({
+const legacyListSchema = v.strictObject({
   id: listIdSchema,
   legacyId: natural,
   name: v.string(),
   lines,
   sources: v.array(v.string()),
+});
+export const listSchema = v.strictObject({
+  ...legacyListSchema.entries,
+  legacyId: v.nullable(natural),
 });
 export type SavedList = v.InferOutput<typeof listSchema>;
 const recoveredInputSchema = v.strictObject({
@@ -92,7 +96,7 @@ export type CanonicalData = v.InferOutput<typeof dataSchema>;
 
 export const planSchema = v.strictObject({
   lists: v.array(
-    v.strictObject({ ...listSchema.entries, reconstructed: v.boolean() }),
+    v.strictObject({ ...legacyListSchema.entries, reconstructed: v.boolean() }),
   ),
   preferences: v.array(
     v.strictObject({
@@ -165,7 +169,34 @@ export const stageSchema = v.strictObject({
   data: dataSchema,
 });
 export type Stage = v.InferOutput<typeof stageSchema>;
-export const stateSchema = v.strictObject({
+export const libraryCommandSchema = v.variant('kind', [
+  v.strictObject({ kind: v.literal('list.create'), name: v.string(), lines }),
+  v.strictObject({
+    kind: v.literal('list.update'),
+    id: listIdSchema,
+    name: v.string(),
+    lines,
+  }),
+  v.strictObject({ kind: v.literal('list.delete'), id: listIdSchema }),
+  v.strictObject({
+    kind: v.literal('settings.update'),
+    patch: v.partial(settingsSchema),
+  }),
+  v.strictObject({ kind: v.literal('draft.update'), lines: v.nullable(lines) }),
+]);
+export type LibraryCommand = v.InferOutput<typeof libraryCommandSchema>;
+export const operationSchema = v.strictObject({
+  id: hashSchema,
+  command: libraryCommandSchema,
+  requestDigest: hashSchema,
+});
+export const mutationInputSchema = v.strictObject({
+  id: hashSchema,
+  expectedHead: headSchema,
+  command: libraryCommandSchema,
+});
+export type MutationInput = v.InferOutput<typeof mutationInputSchema>;
+export const migrationStateSchema = v.strictObject({
   schemaVersion: v.literal(1),
   revision,
   kind: v.picklist(['migration', 'rollback']),
@@ -175,6 +206,17 @@ export const stateSchema = v.strictObject({
   restoreTarget: v.nullable(headSchema),
   data: v.nullable(dataSchema),
 });
+export type MigrationState = v.InferOutput<typeof migrationStateSchema>;
+export const mutationStateSchema = v.strictObject({
+  ...migrationStateSchema.entries,
+  schemaVersion: v.literal(2),
+  kind: v.literal('mutation'),
+  previous: headSchema,
+  restoreTarget: v.null(),
+  data: dataSchema,
+  operation: operationSchema,
+});
+export const stateSchema = v.union([migrationStateSchema, mutationStateSchema]);
 export type StoredState = v.InferOutput<typeof stateSchema>;
 export const reviewSchema = v.strictObject({
   backupDigest: hashSchema,
@@ -188,6 +230,7 @@ export const statusSchema = v.strictObject({
   status: v.picklist(['uninitialized', 'ready', 'rolled-back']),
   head: v.nullable(headSchema),
   data: v.nullable(dataSchema),
+  canRollback: v.boolean(),
 });
 export type StorageStatus = v.InferOutput<typeof statusSchema>;
 

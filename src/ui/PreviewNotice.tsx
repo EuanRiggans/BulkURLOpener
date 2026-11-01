@@ -1,7 +1,7 @@
 export function PreviewNotice() {
   return (
     <p class="preview-notice" role="status">
-      Preview build. Batch opening and list editing are unavailable.
+      Preview build. The popup and list editors are still being rebuilt.
     </p>
   );
 }

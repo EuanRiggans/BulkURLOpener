@@ -1,6 +1,8 @@
 import * as v from 'valibot';
 import { MigrationError, requireCondition } from '../../domain/storage/errors';
 import { digest, jsonObjectSchema } from '../../domain/storage/json';
+import { applyLibraryCommand } from '../../domain/library';
+import { JobJournal } from './job-journal';
 import {
   analyzeSources,
   createCandidate,
@@ -14,6 +16,7 @@ import {
   sourcesSchema,
   stageSchema,
   stateSchema,
+  mutationInputSchema,
   storagePrefix,
   type Backup,
   type Decisions,
@@ -24,6 +27,8 @@ import {
   type StorageStatus,
   type StoredState,
   type RecoveryExport,
+  type MutationInput,
+  type CanonicalData,
 } from '../../domain/storage/schema';
 
 export interface StoragePort {
@@ -52,7 +57,11 @@ function knownKeys(store: Store) {
     key.startsWith(storagePrefix),
   ))
     requireCondition(
-      key === headKey || /^buo:v2:(backup|stage|state):[a-f0-9]{64}$/.test(key),
+      key === headKey ||
+        /^buo:v2:(backup|stage|state|job|job-plan|job-state):[a-f0-9]{64}$/.test(
+          key,
+        ) ||
+        /^buo:v2:job-result:[a-f0-9]{64}:(0|[1-9]\d*)$/.test(key),
       'UNKNOWN_STORAGE_VERSION',
     );
 }
@@ -77,7 +86,12 @@ async function verify(store: Store): Promise<Verified> {
   const reachable = new Set<string>();
   if (!Object.hasOwn(store, headKey))
     return {
-      status: { status: 'uninitialized', head: null, data: null },
+      status: {
+        status: 'uninitialized',
+        head: null,
+        data: null,
+        canRollback: false,
+      },
       state: null,
       reachable,
     };
@@ -111,7 +125,34 @@ async function verify(store: Store): Promise<Verified> {
       'INTEGRITY_CHECK_FAILED',
     );
     const previous = state.previous ? await stateAt(state.previous) : null;
-    if (state.kind === 'migration') {
+    if (state.kind === 'mutation') {
+      requireCondition(
+        previous?.data &&
+          state.restoreTarget === null &&
+          state.backupDigest === previous.backupDigest &&
+          state.stageDigest === previous.stageDigest,
+        'INTEGRITY_CHECK_FAILED',
+      );
+      requireCondition(
+        state.operation.requestDigest ===
+          (await digest({
+            expectedHead: state.previous,
+            command: state.operation.command,
+          })),
+        'INTEGRITY_CHECK_FAILED',
+      );
+      requireCondition(
+        sameContent(
+          state.data,
+          applyLibraryCommand(
+            previous.data,
+            state.operation.command,
+            state.operation.id,
+          ),
+        ),
+        'INTEGRITY_CHECK_FAILED',
+      );
+    } else if (state.kind === 'migration') {
       requireCondition(
         state.restoreTarget === null &&
           state.data !== null &&
@@ -124,7 +165,7 @@ async function verify(store: Store): Promise<Verified> {
           (previous.kind === 'rollback' && previous.data === null),
         'INTEGRITY_CHECK_FAILED',
       );
-    } else {
+    } else if (state.kind === 'rollback') {
       requireCondition(
         previous?.kind === 'migration' &&
           sameContent(state.restoreTarget, previous.previous),
@@ -152,6 +193,11 @@ async function verify(store: Store): Promise<Verified> {
       status: state.data === null ? 'rolled-back' : 'ready',
       head,
       data: state.data,
+      canRollback:
+        state.kind === 'migration' &&
+        !Object.keys(store).some((key) =>
+          key.startsWith(storagePrefix + 'job:'),
+        ),
     },
     state,
     reachable,
@@ -164,6 +210,7 @@ export class StorageCoordinator {
     private readonly port: StoragePort,
     private readonly exclusive: Exclusive,
     private readonly now: () => string = () => new Date().toISOString(),
+    private readonly jobSignal: () => Promise<void> = () => Promise.resolve(),
   ) {}
 
   private run<T>(work: () => Promise<T>): Promise<T> {
@@ -262,6 +309,133 @@ export class StorageCoordinator {
       'MIGRATION_REQUIRED',
     );
     return { head: status.head, data: status.data };
+  }
+
+  mutate(raw: MutationInput): Promise<StorageStatus> {
+    return this.run(async () => {
+      const input = decoded(mutationInputSchema, raw);
+      const store = await this.local();
+      const current = await verify(store);
+      requireCondition(
+        current.status.head && current.status.data && current.state,
+        'MIGRATION_REQUIRED',
+      );
+      const requestDigest = await digest({
+        expectedHead: input.expectedHead,
+        command: input.command,
+      });
+      for (const hash of current.reachable) {
+        const ancestor = decoded(stateSchema, store[recordKey('state', hash)]);
+        if (
+          ancestor.kind === 'mutation' &&
+          ancestor.operation.id === input.id
+        ) {
+          requireCondition(
+            ancestor.operation.requestDigest === requestDigest,
+            'OPERATION_ID_REUSED',
+          );
+          return current.status;
+        }
+      }
+      requireCondition(
+        sameContent(current.status.head, input.expectedHead),
+        'REVISION_CONFLICT',
+      );
+      const state: StoredState = {
+        schemaVersion: 2,
+        kind: 'mutation',
+        revision: input.expectedHead.revision + 1,
+        previous: input.expectedHead,
+        backupDigest: current.state.backupDigest,
+        stageDigest: current.state.stageDigest,
+        restoreTarget: null,
+        data: applyLibraryCommand(current.status.data, input.command, input.id),
+        operation: { id: input.id, command: input.command, requestDigest },
+      };
+      const stateDigest = await digest(state);
+      for (const key of Object.keys(store).filter((key) =>
+        key.startsWith(storagePrefix + 'state:'),
+      ))
+        requireCondition(
+          key === recordKey('state', stateDigest) ||
+            current.reachable.has(key.slice((storagePrefix + 'state:').length)),
+          'PENDING_MUTATION',
+        );
+      const head: Head = {
+        schemaVersion: 1,
+        revision: state.revision,
+        stateDigest,
+      };
+      await this.append(recordKey('state', stateDigest), state);
+      await verify({ ...(await this.local()), [headKey]: head });
+      return this.publish(head, input.expectedHead);
+    });
+  }
+
+  pendingMutations(): Promise<{ stateDigest: string; input: MutationInput }[]> {
+    return this.run(async () => {
+      const store = await this.local();
+      const current = await verify(store);
+      requireCondition(
+        current.status.head && current.status.data,
+        'MIGRATION_REQUIRED',
+      );
+      const pending = [];
+      for (const key of Object.keys(store).filter((key) =>
+        key.startsWith(storagePrefix + 'state:'),
+      )) {
+        const stateDigest = key.slice((storagePrefix + 'state:').length);
+        if (current.reachable.has(stateDigest)) continue;
+        const state = decoded(stateSchema, store[key]);
+        requireCondition(
+          state.kind === 'mutation' &&
+            sameContent(state.previous, current.status.head),
+          'ORPHANED_STATE',
+        );
+        await verify({
+          ...store,
+          [headKey]: {
+            schemaVersion: 1,
+            revision: state.revision,
+            stateDigest,
+          },
+        });
+        pending.push({
+          stateDigest,
+          input: {
+            id: state.operation.id,
+            expectedHead: state.previous,
+            command: state.operation.command,
+          },
+        });
+      }
+      return pending;
+    });
+  }
+
+  withJobs<T>(
+    work: (
+      journal: JobJournal,
+      active: { head: Head; data: CanonicalData },
+    ) => Promise<T>,
+  ): Promise<T> {
+    return this.run(async () => {
+      const current = await verify(await this.local());
+      requireCondition(
+        current.status.head && current.status.data,
+        'MIGRATION_REQUIRED',
+      );
+      const journal = new JobJournal({
+        signal: this.jobSignal,
+        read: () => this.local(),
+        append: (key, value) => this.append(key, value),
+        write: (key, value) => this.write(key, value),
+      });
+      return work(journal, {
+        head: current.status.head,
+        data: current.status.data,
+      });
+    });
   }
 
   prepare(document: Record<string, string>): Promise<MigrationReview> {
@@ -402,7 +576,7 @@ export class StorageCoordinator {
         'REVISION_CONFLICT',
       );
       requireCondition(
-        current.state.kind === 'migration',
+        current.status.canRollback && current.state.kind === 'migration',
         'ROLLBACK_UNAVAILABLE',
       );
       const target = current.state.previous;
@@ -424,6 +598,14 @@ export class StorageCoordinator {
         revision: state.revision,
         stateDigest: await digest(state),
       };
+      for (const key of Object.keys(local).filter((key) =>
+        key.startsWith(storagePrefix + 'state:'),
+      ))
+        requireCondition(
+          key === recordKey('state', head.stateDigest) ||
+            current.reachable.has(key.slice((storagePrefix + 'state:').length)),
+          'PENDING_MUTATION',
+        );
       await this.append(recordKey('state', head.stateDigest), state);
       await verify({ ...(await this.local()), [headKey]: head });
       return this.publish(head, expected);
