@@ -227,7 +227,14 @@ Font Awesome 4.7.0. Replace with the new UI/CSS/SVG assets while preserving
 preferences and licences. Upgrade ESLint 8.23.1; Airbnb base/import plugin are
 declared but not used by the current configuration. The npm lockfile's 440
 package entries are development tooling; vendored assets need separate scanning.
-No fresh advisory count is claimed: the audit's registry request was unavailable.
+No fresh registry audit is claimed: the audit's registry request was unavailable.
+During the Phase 0 push on 1 November 2026, GitHub reported **123 vulnerabilities
+on the default branch: 44 high, 64 moderate and 15 low**, with a link to the
+[repository's Dependabot alerts](https://github.com/EuanRiggans/BulkURLOpener/security/dependabot).
+This is GitHub's default-branch report, not a newly executed audit of this branch
+or proof that every alert is shipped in the extension. Dependency triage/removal
+remains necessary in the browser-only tooling/cleanup work; Phase 0 changes no
+dependency versions.
 
 Retain npm/lockfile, dependency update automation, Firefox tooling and static
 analysis. Modernize existing CI: `braches` typo, Node 12, old checkout/setup-node
@@ -279,6 +286,13 @@ The new `Legacy baseline` GitHub workflow runs these checks on Node 24 on pushes
 to redevelopment and PRs targeting master, without downloading Electron. Action
 versions are pinned to verified commit SHAs. Local success does not establish a
 hosted Actions result; inspect the corresponding run after publication.
+
+Hosted evidence for the initial Phase 0 checkpoint
+[`627b5a7`](https://github.com/EuanRiggans/BulkURLOpener/commit/627b5a7132a7a7c65979fdd0dbe5fdf15dabe9f8):
+the [Legacy baseline run](https://github.com/EuanRiggans/BulkURLOpener/actions/runs/41336812095)
+and [existing lint run](https://github.com/EuanRiggans/BulkURLOpener/actions/runs/41336812004)
+both completed successfully. The GitHub branch API independently confirmed that
+commit as the remote head before this documentation-only follow-up.
 
 The legacy `npm test` still runs the Spectron launch test and remains separate.
 No current desktop-launch, real-browser, signed-upgrade or remote-sync pass is
