@@ -39,6 +39,12 @@ Manual browser-account sync is retained, alongside local storage, JSON transfer
 and recovery snapshots. Chromium browser services and Firefox do not provide a
 shared cross-vendor sync account. Exports remain the transfer route between them.
 
+The repository is public. User-supplied exports, personal destinations/list names,
+profiles, chat transcripts and unsanitized diagnostic data must stay out of
+commits. Inspect private examples in memory; public fixtures must be constructed
+independently with synthetic content. The Firefox add-on ID is public manifest
+metadata and may be recorded for identity preservation.
+
 ## Technical direction
 
 Use WXT/Vite, strict TypeScript, Preact, runtime schema validation (Zod or an
@@ -113,9 +119,10 @@ checkpoint. A blocked push is a reported blocker, not a completed backup.
 
 ## Release conditions still outstanding
 
-The Firefox GUID mentioned in the old transcript is
-`{c5b32a48-5514-4a46-81f2-075ebf3cbc29}`. That historical statement is a lead to
-verify against an installed/signed release, not a recovered implementation.
+The user directly confirmed the Firefox add-on ID on 1 November 2026:
+`{c5b32a48-5514-4a46-81f2-075ebf3cbc29}`. Preserve it in the Firefox manifest.
+Its direct confirmation supersedes reliance on the lost chat. Genuine signed
+upgrade testing under that same identity is still required.
 Chrome/Edge/Opera listing identities from the README likewise need confirmation.
 Do not uninstall an existing add-on to prepare an upgrade test: that can remove
 its data. Use backed-up copies of profiles and genuine same-identity updates.

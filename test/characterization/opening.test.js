@@ -88,6 +88,15 @@ test("startup: a fresh worker with no saved settings performs no opening", async
     assert.deepEqual(worker.calls.tabs, []);
 });
 
+test("startup: zero is a valid selected list identity", async () => {
+    const exported = fixture("zero-id-export.json");
+    const worker = createLegacyContext({ worker: true, extensionLocal: { userSettings: exported.settings, lists: exported.lists } });
+    worker.load("app/service-worker.js");
+    await worker.run("browserStartup()");
+    worker.drainTimers();
+    assert.deepEqual(worker.calls.tabs.map(tab => tab.url), exported.lists[0].list_links);
+});
+
 for (const [scope, expected] of [["currentWindow", { currentWindow: true }], ["allOpenedTabs", {}]]) {
     test(`capture: ${scope} requests the intended tab scope`, () => {
         const page = createLegacyContext({ raw: { settings: JSON.stringify({ ...fixture("default-settings.json"), currently_opened_tabs_display: scope }) }, tabs: [{ url: "https://one.example.test/" }, { url: "https://two.example.test/" }] });

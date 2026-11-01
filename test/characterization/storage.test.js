@@ -53,6 +53,21 @@ test("imports: a valid legacy export round-trips through an empty profile", () =
     assert.deepEqual(JSON.parse(page.element("exportTextArea").value), exported);
 });
 
+test("imports: list ID zero and its settings references survive import/export and popup loading", () => {
+    const exported = fixture("zero-id-export.json");
+    const page = createLegacyContext();
+    page.load("app/js/utility.js");
+    page.load("app/pages/data-control/import.js");
+    page.element("importTextArea").value = JSON.stringify(exported);
+    page.element("importData").dispatch("click");
+    assert.deepEqual(JSON.parse(page.localStorage.getItem("0")), exported.lists[0]);
+    page.load("app/pages/data-control/export.js");
+    assert.deepEqual(JSON.parse(page.element("exportTextArea").value), exported);
+    page.load("app/js/main-interface.js");
+    assert.equal(page.element("list").value, `${exported.lists[0].list_links.join("\n")}\n`);
+    assert.equal(page.run("getNextAvailableID()"), 2);
+});
+
 test("snapshots: backups are nested JSON strings containing list/settings exports", () => {
     const source = fixture("current-profile.json");
     const page = createLegacyContext({ raw: source.localStorage });

@@ -116,6 +116,9 @@ and checked by executing `createSettings()`. Source: `app/js/utility.js:646`.
 | `disable_snapshots` | `0` | Numeric 0/1. |
 
 Settings records additionally carry `object_description: "user_settings"`.
+List ID `0` is valid, including as a default/startup reference; it is not an
+unset value. The synthetic `zero-id-export.json` fixture covers import/export,
+popup selection and startup opening for that case without storing user content.
 Older versions have fewer fields. Do not replace an entire historical record
 with defaults merely because some fields are absent. Preserve unknown data in
 raw recovery artifacts even where it cannot be made active safely.
@@ -276,10 +279,10 @@ ordering checks. They never create browser tabs, touch a real profile or contact
 fixture destinations. They intentionally do not render/parse HTML or model
 permissions, CSP, service-worker suspension or sync servers.
 
-Local validation: **47 checks pass**, consisting of 19 explicitly labelled defect
-demonstrations and 28 other behaviour/fixture checks. Existing ESLint passes with
+Local validation: **49 checks pass**, consisting of 19 explicitly labelled defect
+demonstrations and 30 other behaviour/fixture checks. Existing ESLint passes with
 cache disabled; its disabled correctness rules remain a documented limitation.
-Nine JSON fixtures include seven raw profiles, exact defaults and an export.
+Ten JSON fixtures include seven raw profiles, exact defaults and two exports.
 Historical fixture shape checks are not tests of a new migration implementation.
 
 The new `Legacy baseline` GitHub workflow runs these checks on Node 24 on pushes
@@ -293,6 +296,10 @@ the [Legacy baseline run](https://github.com/EuanRiggans/BulkURLOpener/actions/r
 and [existing lint run](https://github.com/EuanRiggans/BulkURLOpener/actions/runs/41336812004)
 both completed successfully. The GitHub branch API independently confirmed that
 commit as the remote head before this documentation-only follow-up.
+
+The user has required that the public repository contain no confidential data.
+Personal exports are not committed. The fixtures and tests contain synthetic
+destinations/names, and the working agreement requires staged-content review.
 
 The legacy `npm test` still runs the Spectron launch test and remains separate.
 No current desktop-launch, real-browser, signed-upgrade or remote-sync pass is

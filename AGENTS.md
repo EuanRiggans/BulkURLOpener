@@ -27,6 +27,14 @@ Read [the redevelopment plan](docs/REDEVELOPMENT_PLAN.md) and
   Replacement modules need tests for the corrected behaviour.
 - Keep raw migration sources and verified recovery data. Do not silently choose
   between conflicting storage copies or erase malformed records.
+- This repository is public. Never commit user-provided exports, browser
+  profiles, personal URLs/list names, chat transcripts or unsanitized debug data.
+  Inspect private samples in memory and use independently constructed synthetic
+  fixtures with reserved .test destinations and generic names. Review staged
+  changes for private content before each push. The published add-on ID is public
+  extension metadata; preserve it for update compatibility.
+- Review commit metadata too. Use the repository's GitHub noreply email for
+  commits created here instead of a personal contact address.
 - Browser runtime tests, real cross-device sync and genuine signed-upgrade
   tests are separate from mocked tests and build validation.
 - Proceed within the phase authorized in the current conversation. Publishing,

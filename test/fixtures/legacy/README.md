@@ -15,6 +15,7 @@ it up. Preserve exact values before conversion, including malformed records.
 | --- | --- |
 | `default-settings.json` | Exact current browser defaults, including `defaultBoostrap` and numeric booleans. This is a settings object, not a profile envelope. |
 | `export-v1.json` | Legacy `{maxID, lists, settings}` export. This is a direct payload, not a profile envelope. |
+| `zero-id-export.json` | Independently constructed export with numeric IDs 0/1, a string counter, and default/startup references to ID 0. All names, destinations and content are synthetic. |
 | `current-profile.json` | UUID list keys; all 17 preferences; complex URL encoding, Unicode and duplicates; drafts and queue/new-list staging; nested snapshot; matching mirrors and serialized sync. |
 | `numeric-profile.json` | Numeric JSON list keys and older settings missing later fields. Both historical saves and current imports can produce numeric keys. |
 | `pre-json-profile.json` | `listStorage,...` and `settings,...` comma strings actually written by older versions, with an intentionally ambiguous comma-containing record. |
@@ -53,3 +54,7 @@ Future migration tests must consume these same raw values and verify recovery,
 conflict handling and preservation, rather than assuming that baseline fixture
 shape checks establish a working converter. Add fixtures for newly discovered
 installed-profile representations and keep their provenance explicit.
+
+Do not copy actual user exports or their list names/URLs into public fixtures.
+The zero-ID case tests valid legacy semantics without retaining personal content;
+zero must not be rejected by a truthiness check or confused with an unset ID.
