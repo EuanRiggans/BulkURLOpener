@@ -1,0 +1,17 @@
+{
+  "_fixture": {
+    "synthetic": true,
+    "baseline": "4eb346d3bca8a12e6fa0f7e5ba891fcb711d9bf7",
+    "purpose": "Older array-to-string list representation with its ID as the first field.",
+    "sources": [
+      "53596c1:js/lists.js:1",
+      "53596c1:js/lists.js:19"
+    ]
+  },
+  "localStorage": {
+    "1": "1,Start pages,https://start.example.test/,https://docs.example.test/",
+    "maxID": "1"
+  },
+  "storageLocal": {},
+  "storageSync": {}
+}

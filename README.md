@@ -2,6 +2,16 @@
     <img src="https://static.euanriggans.com/file/static-euanriggans-com/apps/bulkurlopener/images/440x280.png">
 </p>
 
+## Redevelopment
+
+The `redevelopment` branch is a fresh browser-extension modernization effort.
+Phase 0 preserves the legacy application and adds its
+[feature and storage baseline](docs/PHASE_0_BASELINE.md),
+[redevelopment plan](docs/REDEVELOPMENT_PLAN.md), and synthetic fixtures.
+Run `npm run test:baseline` with Node.js 24; it needs no dependency installation
+and exercises the legacy source in memory. Tests labelled `legacy defect:`
+document existing failures rather than desired replacement behaviour.
+
 ## Install / Download Links
 
 | Package | Status | Version | URL |

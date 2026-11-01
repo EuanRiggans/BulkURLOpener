@@ -1,0 +1,21 @@
+{
+  "_fixture": {
+    "synthetic": true,
+    "baseline": "4eb346d3bca8a12e6fa0f7e5ba891fcb711d9bf7",
+    "purpose": "Actual comma-string representation written before JSON; literal commas are inherently ambiguous.",
+    "sources": [
+      "842a842:js/lists.js:1",
+      "842a842:js/lists.js:15",
+      "842a842:js/newlist.js:20",
+      "842a842:js/settings.js:21"
+    ]
+  },
+  "localStorage": {
+    "1": "listStorage,1,Start pages,https://start.example.test/,https://docs.example.test/",
+    "2": "listStorage,2,Comma in name, with suffix,https://comma.example.test/a,b",
+    "settings": "settings,0.3",
+    "maxID": "2"
+  },
+  "storageLocal": {},
+  "storageSync": {}
+}

@@ -1,0 +1,37 @@
+# Redevelopment working agreement
+
+Read [the redevelopment plan](docs/REDEVELOPMENT_PLAN.md) and
+[the Phase 0 baseline](docs/PHASE_0_BASELINE.md) before changing the application.
+
+- Work on `redevelopment`. Its fresh starting commit is
+  `4eb346d3bca8a12e6fa0f7e5ba891fcb711d9bf7`.
+- Treat the earlier chat's redevelopment branch, commits and reported test
+  results as lost. They are not an implementation to recover or assume present.
+- At the end of every authorized phase, run the relevant checks, review the
+  diff, commit, push to `origin/redevelopment`, and verify the actual GitHub head
+  equals the local commit. Report the commit and any validation limitations.
+  A local commit or a successful local build alone is not the phase checkpoint.
+- Keep a phase's status honest if pushing or verification is blocked. Preserve
+  completed work and explain the blocker instead of claiming it is backed up.
+- Preserve browser-extension functionality and user data throughout the rewrite.
+  Electron desktop windows, CLI and packaging are intentionally being retired.
+- The popup must stay simple: URL entry/opening, capture/clear and saved-list
+  selection/actions. Put settings, tools, recovery and diagnostics elsewhere.
+- Creating and editing lists must use their own extension page(s), outside the
+  popup. Sharing an editor component is fine; inline popup editors are not.
+- The basic context menu is exactly:
+  `Bulk URL Opener > Open Lists > [saved lists]`.
+  Use stable internal list IDs; do not add tools/settings/selection menus to it.
+- Legacy characterization tests document observed behaviour, including defects.
+  Tests labelled `legacy defect:` are not requirements to retain those bugs.
+  Replacement modules need tests for the corrected behaviour.
+- Keep raw migration sources and verified recovery data. Do not silently choose
+  between conflicting storage copies or erase malformed records.
+- Browser runtime tests, real cross-device sync and genuine signed-upgrade
+  tests are separate from mocked tests and build validation.
+- Proceed within the phase authorized in the current conversation. Publishing,
+  merging to the default branch and store releases are separate actions.
+
+Phase 0 changes documentation, fixtures, tests and their execution setup only.
+The legacy `app/`, desktop source and dependency versions remain unchanged in
+that phase. Use Node.js 24 and `npm run test:baseline` for its tests.

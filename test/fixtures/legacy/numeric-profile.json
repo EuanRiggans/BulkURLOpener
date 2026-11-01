@@ -1,0 +1,19 @@
+{
+  "_fixture": {
+    "synthetic": true,
+    "baseline": "4eb346d3bca8a12e6fa0f7e5ba891fcb711d9bf7",
+    "purpose": "JSON lists under numeric keys with older settings missing later optional fields.",
+    "sources": [
+      "4f511a4:app/js/utility.js:260",
+      "app/pages/data-control/import.js:73"
+    ]
+  },
+  "localStorage": {
+    "settings": "{\"object_description\":\"user_settings\",\"tab_creation_delay\":1,\"night_mode\":0,\"auto_open_lists\":0}",
+    "2": "{\"object_description\":\"list_storage\",\"list_id\":2,\"list_name\":\"Research & notes\",\"list_links\":[\"https://research.example.test/?x=%26y%3Dz&label=caf%C3%A9\",\"https://research.example.test/?x=%26y%3Dz&label=caf%C3%A9\",\"https://unicode.example.test/café#résumé\"]}",
+    "7": "{\"object_description\":\"list_storage\",\"list_id\":7,\"list_name\":\"Start pages\",\"list_links\":[\"http://localhost:8080/dashboard\",\"www.start.example.test\",\"a search phrase\"]}",
+    "maxID": "12"
+  },
+  "storageLocal": {},
+  "storageSync": {}
+}

@@ -1,0 +1,70 @@
+{
+  "_fixture": {
+    "synthetic": true,
+    "baseline": "4eb346d3bca8a12e6fa0f7e5ba891fcb711d9bf7",
+    "purpose": "Current UUID records, all settings, drafts, staging keys, nested snapshot and matching mirrors/sync.",
+    "sources": [
+      "app/js/utility.js:274",
+      "app/js/utility.js:646",
+      "app/js/utility.js:818",
+      "app/pages/help/help.js:150"
+    ]
+  },
+  "localStorage": {
+    "settings": "{\"object_description\":\"user_settings\",\"tab_creation_delay\":0.2,\"night_mode\":1,\"auto_open_lists\":0,\"default_list_open\":2,\"custom_theme\":\"fluentDesignBootstrap\",\"currently_opened_tabs_display\":\"allOpenedTabs\",\"non_url_handler\":\"searchForString\",\"search_engine\":\"duckduckgoEngine\",\"new_tabs_active\":1,\"auto_load_into_textarea\":1,\"button_look\":\"filledNight\",\"open_on_launch\":\"7\",\"load_on_focus\":0,\"context_menu_enabled\":0,\"open_urls_in_reverse_order\":1,\"automatically_remove_duplicate_urls\":1,\"disable_snapshots\":0}",
+    "11111111-1111-4111-8111-111111111111": "{\"object_description\":\"list_storage\",\"list_id\":2,\"list_name\":\"Research & notes\",\"list_links\":[\"https://research.example.test/?x=%26y%3Dz&label=caf%C3%A9\",\"https://research.example.test/?x=%26y%3Dz&label=caf%C3%A9\",\"https://unicode.example.test/café#résumé\"]}",
+    "22222222-2222-4222-8222-222222222222": "{\"object_description\":\"list_storage\",\"list_id\":7,\"list_name\":\"Start pages\",\"list_links\":[\"http://localhost:8080/dashboard\",\"www.start.example.test\",\"a search phrase\"]}",
+    "maxID": "12",
+    "previous_list_input": "[\"https://draft.example.test/?q=one%26two\",\"unsaved search\",\"\"]",
+    "temp": "{\"object_description\":\"temp_storage\",\"list_links\":[\"https://new.example.test/\"]}",
+    "linksToOpen": "{\"object_description\":\"link_to_open\",\"list_links\":[\"https://queued.example.test/1\",\"https://queued.example.test/2\"]}",
+    "storage_snapshots": "{\"backups\":[\"{\\\"snapshot_id\\\":\\\"aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa\\\",\\\"snapshot_time\\\":\\\"2020-12-12T12:00:00.000Z\\\",\\\"maxID\\\":\\\"12\\\",\\\"lists\\\":[{\\\"object_description\\\":\\\"list_storage\\\",\\\"list_id\\\":2,\\\"list_name\\\":\\\"Research & notes\\\",\\\"list_links\\\":[\\\"https://research.example.test/?x=%26y%3Dz&label=caf%C3%A9\\\",\\\"https://research.example.test/?x=%26y%3Dz&label=caf%C3%A9\\\",\\\"https://unicode.example.test/café#résumé\\\"]},{\\\"object_description\\\":\\\"list_storage\\\",\\\"list_id\\\":7,\\\"list_name\\\":\\\"Start pages\\\",\\\"list_links\\\":[\\\"http://localhost:8080/dashboard\\\",\\\"www.start.example.test\\\",\\\"a search phrase\\\"]}],\\\"settings\\\":{\\\"object_description\\\":\\\"user_settings\\\",\\\"tab_creation_delay\\\":0.2,\\\"night_mode\\\":1,\\\"auto_open_lists\\\":0,\\\"default_list_open\\\":2,\\\"custom_theme\\\":\\\"fluentDesignBootstrap\\\",\\\"currently_opened_tabs_display\\\":\\\"allOpenedTabs\\\",\\\"non_url_handler\\\":\\\"searchForString\\\",\\\"search_engine\\\":\\\"duckduckgoEngine\\\",\\\"new_tabs_active\\\":1,\\\"auto_load_into_textarea\\\":1,\\\"button_look\\\":\\\"filledNight\\\",\\\"open_on_launch\\\":\\\"7\\\",\\\"load_on_focus\\\":0,\\\"context_menu_enabled\\\":0,\\\"open_urls_in_reverse_order\\\":1,\\\"automatically_remove_duplicate_urls\\\":1,\\\"disable_snapshots\\\":0}}\"]}"
+  },
+  "storageLocal": {
+    "userSettings": {
+      "object_description": "user_settings",
+      "tab_creation_delay": 0.2,
+      "night_mode": 1,
+      "auto_open_lists": 0,
+      "default_list_open": 2,
+      "custom_theme": "fluentDesignBootstrap",
+      "currently_opened_tabs_display": "allOpenedTabs",
+      "non_url_handler": "searchForString",
+      "search_engine": "duckduckgoEngine",
+      "new_tabs_active": 1,
+      "auto_load_into_textarea": 1,
+      "button_look": "filledNight",
+      "open_on_launch": "7",
+      "load_on_focus": 0,
+      "context_menu_enabled": 0,
+      "open_urls_in_reverse_order": 1,
+      "automatically_remove_duplicate_urls": 1,
+      "disable_snapshots": 0
+    },
+    "lists": [
+      {
+        "object_description": "list_storage",
+        "list_id": 2,
+        "list_name": "Research & notes",
+        "list_links": [
+          "https://research.example.test/?x=%26y%3Dz&label=caf%C3%A9",
+          "https://research.example.test/?x=%26y%3Dz&label=caf%C3%A9",
+          "https://unicode.example.test/café#résumé"
+        ]
+      },
+      {
+        "object_description": "list_storage",
+        "list_id": 7,
+        "list_name": "Start pages",
+        "list_links": [
+          "http://localhost:8080/dashboard",
+          "www.start.example.test",
+          "a search phrase"
+        ]
+      }
+    ]
+  },
+  "storageSync": {
+    "user_settings": "{\"maxID\":\"12\",\"lists\":[{\"object_description\":\"list_storage\",\"list_id\":2,\"list_name\":\"Research & notes\",\"list_links\":[\"https://research.example.test/?x=%26y%3Dz&label=caf%C3%A9\",\"https://research.example.test/?x=%26y%3Dz&label=caf%C3%A9\",\"https://unicode.example.test/café#résumé\"]},{\"object_description\":\"list_storage\",\"list_id\":7,\"list_name\":\"Start pages\",\"list_links\":[\"http://localhost:8080/dashboard\",\"www.start.example.test\",\"a search phrase\"]}],\"settings\":{\"object_description\":\"user_settings\",\"tab_creation_delay\":0.2,\"night_mode\":1,\"auto_open_lists\":0,\"default_list_open\":2,\"custom_theme\":\"fluentDesignBootstrap\",\"currently_opened_tabs_display\":\"allOpenedTabs\",\"non_url_handler\":\"searchForString\",\"search_engine\":\"duckduckgoEngine\",\"new_tabs_active\":1,\"auto_load_into_textarea\":1,\"button_look\":\"filledNight\",\"open_on_launch\":\"7\",\"load_on_focus\":0,\"context_menu_enabled\":0,\"open_urls_in_reverse_order\":1,\"automatically_remove_duplicate_urls\":1,\"disable_snapshots\":0}}"
+  }
+}
