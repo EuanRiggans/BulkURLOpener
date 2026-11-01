@@ -49,6 +49,7 @@
     "wxt": "0.21.5"
   },
   "dependencies": {
-    "preact": "11.1.1"
+    "preact": "11.1.1",
+    "valibot": "1.5.0"
   }
 }

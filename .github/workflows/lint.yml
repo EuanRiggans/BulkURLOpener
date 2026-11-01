@@ -28,7 +28,7 @@ jobs:
       - run: npm run lint:firefox
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: phase-1-extension-preview
+          name: extension-preview
           path: |
             .output/chrome-mv3
             .output/firefox-mv3

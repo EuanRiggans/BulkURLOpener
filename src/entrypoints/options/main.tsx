@@ -2,6 +2,7 @@ import { browser } from 'wxt/browser';
 import { pageUrl } from '../../infrastructure/browser/pages';
 import { PageLayout } from '../../ui/PageLayout';
 import { mount } from '../../ui/mount';
+import { RecoveryPanel } from '../../ui/recovery/RecoveryPanel';
 
 function Options() {
   return (
@@ -13,6 +14,7 @@ function Options() {
       <p>
         <a href={pageUrl('/new-list.html')}>Create a list</a>
       </p>
+      <RecoveryPanel />
       <p class="hint">Version {browser.runtime.getManifest().version}</p>
     </PageLayout>
   );

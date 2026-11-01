@@ -1,5 +1,8 @@
 # Phase 1: Browser-only tooling
 
+This is the historical Phase 1 record. The current migration/recovery layer is
+documented in [Phase 2](PHASE_2_DATA.md).
+
 Phase 1 starts from `b2258cc35f53ff23eae82475e21c2da031ae086a` on the fresh
 `redevelopment` branch. It establishes the modern build and test foundation while
 retaining the original `app/` source and all historical storage fixtures. It does

@@ -2,7 +2,7 @@
 
 A browser extension for opening URLs and searches in batches and managing saved lists.
 
-**The `redevelopment` branch is a development preview.** Phase 1 establishes browser-only tooling and UI entrypoints. The new preview does not yet migrate data, open batches or save lists. Use an isolated development browser profile; it is not a replacement for your installed extension.
+**The `redevelopment` branch is a development preview.** Phase 2 adds reviewed data migration and recovery on the settings page. Batch opening, normal list editing and settings editing remain unavailable. Use an isolated development browser profile; it is not a replacement for your installed extension.
 
 The popup stays focused on URL entry and simple actions. Creating and editing lists use separate pages. The planned context menu is `Bulk URL Opener → Open Lists → [saved lists]`.
 
@@ -44,6 +44,8 @@ The Phase 1 capability floors are Chromium 120 and Firefox 142. The release test
 ```text
 src/entrypoints/              Background, popup, options, new-list and edit-list
 src/infrastructure/browser/  Browser API adapters
+src/application/storage/     Serialized migration/recovery coordinator and protocol
+src/domain/storage/          Typed schemas and pure legacy reconciliation
 src/shared/                  Pure internal navigation helpers
 src/ui/                      Shared Preact components and local CSS
 public/icon/                 Existing extension icons
@@ -58,7 +60,9 @@ docs/                        Baseline, decisions, phases and validation evidence
 
 ## Data and privacy
 
-The Phase 1 preview keeps typed text in memory only. It does not initialize defaults, write extension storage or contact external destinations. Migration and recoverable persistence come before active list editing in later phases.
+The popup and editors keep typed text in memory. In Settings, **Data protection and recovery** can capture exact legacy sources, show conflicts, migrate reviewed data and undo migration. Nothing migrates on startup. Originals, snapshots and sync copies remain unchanged; new local records are verified before activation. Existing sync data is read for recovery, never uploaded by this phase.
+
+Download a recovery file first, then choose **Inspect and back up data**. Conflicting preferences and ambiguous historical comma records require explicit choices. Storage errors block activation rather than deleting data to make room. Recovery downloads contain private data; keep them private. See [the Phase 2 contract and limits](docs/PHASE_2_DATA.md).
 
 This is a public repository. Never commit personal exports, browser profiles, private URLs/list names or unsanitized diagnostics. All committed migration fixtures are synthetic. The Firefox add-on ID is public extension metadata.
 
@@ -67,6 +71,7 @@ This is a public repository. Never commit personal exports, browser profiles, pr
 - [Phase 0 baseline and feature inventory](docs/PHASE_0_BASELINE.md)
 - [Redevelopment decisions and roadmap](docs/REDEVELOPMENT_PLAN.md)
 - [Phase 1 tooling and validation](docs/PHASE_1_TOOLING.md)
+- [Phase 2 data protection and migration](docs/PHASE_2_DATA.md)
 - [Historical storage fixtures](test/fixtures/legacy/README.md)
 
 Completed phases are committed, pushed to `redevelopment` and verified against GitHub. Source/build checks do not replace real browser, accessibility, cross-device sync or genuine signed-upgrade testing.

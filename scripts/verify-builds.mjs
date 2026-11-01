@@ -53,8 +53,8 @@ for (const browser of ['chrome', 'firefox']) {
   assert(!manifest.commands._execute_browser_action);
   assert.deepEqual(
     manifest.permissions ?? [],
-    [],
-    'Phase 1 has no privileged feature permissions',
+    ['storage'],
+    'Phase 2 requests storage only for local migration and recovery',
   );
   assert.deepEqual(manifest.host_permissions ?? [], []);
   assert.deepEqual(manifest.content_scripts ?? [], []);

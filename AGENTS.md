@@ -4,6 +4,8 @@ Read [the redevelopment plan](docs/REDEVELOPMENT_PLAN.md) and
 [the Phase 0 baseline](docs/PHASE_0_BASELINE.md) before changing the application.
 Current tooling and its validation limits are documented in
 [Phase 1](docs/PHASE_1_TOOLING.md).
+Storage invariants and recovery limits are recorded in
+[Phase 2](docs/PHASE_2_DATA.md).
 
 - Work on `redevelopment`. Its fresh starting commit is
   `4eb346d3bca8a12e6fa0f7e5ba891fcb711d9bf7`.
@@ -49,6 +51,11 @@ that phase. Use Node.js 24 and `npm run test:baseline` for its tests.
 The Phase 1 toolchain is browser-only. Use `npm ci` and `npm run validate` on
 Node.js 24; `npm run dev` / `npm run dev:firefox` run the preview. The legacy
 application remains a frozen reference until replacement coverage is complete.
-Do not enable new user-data writes before Phase 2's migration/recovery guard.
+New runtime writes belong to the background storage coordinator and its shared
+Web Lock. Keep legacy document/local/sync sources read-only. Preserve immutable
+backups/stages/history, verify full content and expected revisions, and publish
+the active head last. Never initialize defaults over unreadable/future state or
+erase recovery data to fix quota. A readiness check outside a mutation is not a
+transaction. List/settings/opening/menu services must use the migration gate.
 Mozilla validation has one narrowly source-mapped, version-pinned Preact vendor
 warning exception; new application warnings must not be silently added to it.

@@ -9,6 +9,7 @@ export default defineConfig({
     name: 'Bulk URL Opener',
     description: 'Open URLs in batches and manage saved lists.',
     action: { default_title: 'Bulk URL Opener' },
+    permissions: ['storage'],
     icons: {
       16: 'icon/16.png',
       32: 'icon/32.png',
