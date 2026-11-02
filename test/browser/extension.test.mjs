@@ -61,7 +61,9 @@ before(
     destination = 'http://127.0.0.1:' + server.address().port;
     const builder = new Builder().forBrowser(target);
     if (target === 'chrome') {
-      const options = new chrome.Options().addArguments(
+      const options = new chrome.Options({
+        'goog:chromeOptions': { enableExtensionTargets: true },
+      }).addArguments(
         '--headless=new',
         '--window-size=1280,960',
         '--load-extension=' + resolve('.output/chrome-mv3'),
