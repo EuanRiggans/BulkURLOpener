@@ -136,7 +136,15 @@ before(
     const capabilities = await driver.getCapabilities();
     report.version = capabilities.get('browserVersion');
     report.platform = capabilities.get('platformName');
-    await navigate(root + 'options.html');
+    // Changing Chrome's private-access grant reloads the extension. A completed
+    // WebUI callback can precede that reload; wait for the actual extension API
+    // rather than mistaking the browser's temporary error-page h1 for readiness.
+    await driver.wait(async () => {
+      await navigate(root + 'options.html');
+      return driver.executeScript(
+        'return Boolean((globalThis.browser || globalThis.chrome)?.runtime?.id);',
+      );
+    }, 20_000);
     await driver.wait(until.elementLocated(By.css('h1')), 15_000);
     assert.equal(
       await native('return await api.extension.isAllowedIncognitoAccess();'),
@@ -656,7 +664,7 @@ test(
       type: 'buo:service/open.lines',
       id: id(),
       expectedHead: active.head,
-      lines: [marker],
+      lines: [marker, marker + '&second=1'],
     });
     assert(
       (await native('return await api.alarms.getAll();')).some(
@@ -801,6 +809,168 @@ test(
     );
     report.backgroundRecovery = stopped.kind;
     await settings({ tabCreationDelay: 0.125 });
+  },
+);
+
+test(
+  'held tabs keep destinations out of helper URLs and navigate only when selected',
+  { timeout: 60_000 },
+  async () => {
+    await settings({
+      loadOnFocus: true,
+      newTabsActive: false,
+      tabCreationDelay: 0,
+    });
+    await page('popup.html');
+    const active = await rpc({ type: 'buo:service/library.read' });
+    const path = '/held-' + id().slice(0, 8) + '?q=%2526&note=caf%C3%A9';
+    const url = destination + path;
+    const job = await rpc({
+      type: 'buo:service/open.lines',
+      id: id(),
+      expectedHead: active.head,
+      lines: [url],
+    });
+    let completed;
+    await driver.wait(async () => {
+      completed = (await rpc({ type: 'buo:service/jobs.list' })).find(
+        (item) => item.plan.id === job.plan.id,
+      );
+      return completed?.run.status === 'completed';
+    }, 20_000);
+    const tabId = completed.receipts[0].tabId;
+    const tab = await native('return await api.tabs.get(arguments[0]);', tabId);
+    assert(tab.url.startsWith(root + 'deferred.html?'));
+    assert(!tab.url.includes('held-') && !tab.url.includes('caf'));
+    assert(
+      !requests.includes(path),
+      'An inactive held tab must not contact its destination.',
+    );
+    assert((await rpc({ type: 'buo:service/capture' })).lines.includes(url));
+    await native(
+      'await api.windows.update(arguments[0], {focused: true}); await api.tabs.update(arguments[1], {active: true}); return true;',
+      tab.windowId,
+      tabId,
+    );
+    await driver.wait(
+      async () =>
+        (await native('return await api.tabs.get(arguments[0]);', tabId))
+          .url === url,
+      20_000,
+    );
+    await driver.wait(() => requests.includes(path), 15_000);
+    assert.equal(requests.filter((item) => item === path).length, 1);
+    await driver.switchTo().window(normalRootHandle);
+    await settings({ loadOnFocus: false, tabCreationDelay: 0.125 });
+    report.assertions.push(
+      'real held-tab selection, opaque helper URL, exact encoding and capture',
+    );
+  },
+);
+
+test(
+  'unsafe schemes are rejected before tab creation and browser restrictions stay visible',
+  { timeout: 45_000 },
+  async () => {
+    await page('popup.html');
+    const active = await rpc({ type: 'buo:service/library.read' });
+    const inputs = [
+      'javascript:alert(1)',
+      'data:text/html,synthetic',
+      root + 'options.html',
+    ];
+    const job = await rpc({
+      type: 'buo:service/open.lines',
+      id: id(),
+      expectedHead: active.head,
+      lines: inputs,
+    });
+    assert.equal(job.plan.destinations.length, 0);
+    assert.equal(job.plan.rejected.length, inputs.length);
+    assert(job.plan.rejected.every((item) => item.reason === 'blocked-scheme'));
+    const restricted = await rpc({
+      type: 'buo:service/open.lines',
+      id: id(),
+      expectedHead: active.head,
+      lines: ['about:config'],
+    });
+    let result;
+    await driver.wait(async () => {
+      result = (await rpc({ type: 'buo:service/jobs.list' })).find(
+        (item) => item.plan.id === restricted.plan.id,
+      );
+      return ['completed', 'needs-review'].includes(result?.run.status);
+    }, 20_000);
+    if (result.run.status === 'needs-review')
+      assert.equal(result.run.error, 'TAB_CREATE_FAILED');
+    else {
+      assert.equal(result.receipts[0].kind, 'opened');
+      // A tab acknowledgement is not evidence that a privileged browser page
+      // was usable. Record the actual result without escalating permission.
+      const tab = await native(
+        'return await api.tabs.get(arguments[0]);',
+        result.receipts[0].tabId,
+      );
+      report.restrictedTabUrl = tab.url;
+      await native('await api.tabs.remove(arguments[0]); return true;', tab.id);
+    }
+    report.restrictedResult = result.run.status;
+    report.assertions.push(
+      'unsafe schemes blocked and privileged destination result visible',
+    );
+  },
+);
+
+test(
+  'a UTF-8 JSON file is inspected before replacement and retains the draft and jobs',
+  { timeout: 60_000 },
+  async () => {
+    await page('data.html');
+    const before = await rpc({ type: 'buo:service/library.read' });
+    const draft = (await rpc({ type: 'buo:service/workspace.read' })).draft;
+    const jobs = await rpc({ type: 'buo:service/jobs.list' });
+    const exported = JSON.parse(
+      await rpc({ type: 'buo:service/data.export', legacy: false }),
+    );
+    const imported = structuredClone(exported);
+    imported.lists[0].name = 'Synthetic café <img src=x onerror=alert(1)>';
+    const file = resolve(evidence, 'synthetic-import.json');
+    await writeFile(file, JSON.stringify(imported));
+    await driver.findElement(By.id('import-file')).sendKeys(file);
+    await driver.wait(until.elementLocated(By.id('transfer-title')), 20_000);
+    assert.deepEqual(
+      (await rpc({ type: 'buo:service/library.read' })).head,
+      before.head,
+    );
+    assert.equal(
+      await driver.executeScript(
+        'return Boolean(document.querySelector(".transfer-review img"));',
+      ),
+      false,
+    );
+    await audit('file-import-review');
+    await driver
+      .findElement(By.css('.transfer-review input[type=checkbox]'))
+      .click();
+    await clickText('Replace lists and settings');
+    await driver.wait(
+      async () =>
+        (await rpc({ type: 'buo:service/library.read' })).data.lists[0].name ===
+        imported.lists[0].name,
+      25_000,
+    );
+    assert.deepEqual(
+      JSON.parse(await rpc({ type: 'buo:service/data.export', legacy: false })),
+      imported,
+    );
+    assert.deepEqual(
+      (await rpc({ type: 'buo:service/workspace.read' })).draft,
+      draft,
+    );
+    assert.deepEqual(await rpc({ type: 'buo:service/jobs.list' }), jobs);
+    report.assertions.push(
+      'real UTF-8 file import, escaped review, explicit replacement and retained draft/jobs',
+    );
   },
 );
 

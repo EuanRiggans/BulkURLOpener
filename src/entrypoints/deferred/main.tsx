@@ -6,6 +6,7 @@ import { pageUrl } from '../../infrastructure/browser/pages';
 import { PageLayout } from '../../ui/PageLayout';
 import { mount } from '../../ui/mount';
 import { serviceError } from '../../ui/services/errors';
+import { scopedKeys } from '../../shared/storage-events';
 
 const parameters = new URLSearchParams(location.search);
 const job = parameters.get('job'),
@@ -35,7 +36,8 @@ function Deferred() {
       void load();
     };
     const changed = (changes: Record<string, unknown>, area: string) => {
-      if (area === 'local' && changes['buo:v2:job:' + String(job)]) trigger();
+      if (scopedKeys(changes, area).includes('buo:v2:job:' + String(job)))
+        trigger();
     };
     window.addEventListener('focus', trigger);
     document.addEventListener('visibilitychange', trigger);
