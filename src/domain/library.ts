@@ -51,7 +51,11 @@ export function applyLibraryCommand(
       ...data.settings,
       ...command.patch,
     });
-  else data.draftLines = command.lines;
+  else if (command.kind === 'draft.update') data.draftLines = command.lines;
+  else {
+    data.lists = command.lists;
+    data.settings = command.settings;
+  }
   const result = v.safeParse(dataSchema, data);
   requireCondition(result.success, 'INVALID_DATA_REFERENCE');
   return result.output;

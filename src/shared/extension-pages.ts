@@ -6,6 +6,9 @@ export const extensionPages = [
   '/edit-list.html',
   '/opening.html',
   '/deferred.html',
+  '/data.html',
+  '/tools.html',
+  '/help.html',
 ] as const;
 
 export type ExtensionPage = (typeof extensionPages)[number];

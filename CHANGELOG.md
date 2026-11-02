@@ -1,5 +1,13 @@
 ## Unreleased Changes
 
+### 2.0.0 redevelopment preview — Phase 4
+
+- Restored the simple popup, separate list editors, all 17 preferences and settings autosave on the modern browser-only services.
+- Added reviewed JSON import/export, manual browser-account sync with quota feedback, optional snapshots and legacy-archive inspection.
+- Added standalone extraction/reversal tools, help, privacy-conscious diagnostics and remaining-destination copy/download.
+- Kept the basic `Bulk URL Opener > Open Lists > [saved lists]` menu. Preserved legacy data and verified history; added concurrent-draft and stale-edit protection.
+- This branch remains an unreleased preview. Real browser/accessibility/private-session and signed-upgrade checks are still outstanding.
+
 ## 1.12.0
 
 - Migrated app to work with Manifest V3

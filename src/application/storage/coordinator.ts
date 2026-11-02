@@ -3,6 +3,8 @@ import { MigrationError, requireCondition } from '../../domain/storage/errors';
 import { digest, jsonObjectSchema } from '../../domain/storage/json';
 import { applyLibraryCommand } from '../../domain/library';
 import { JobJournal } from './job-journal';
+import { WorkspaceStore } from './workspace-store';
+import { transferRecordSchema } from '../../domain/workspace-schema';
 import {
   analyzeSources,
   createCandidate,
@@ -35,6 +37,8 @@ export interface StoragePort {
   readLocal(): Promise<Record<string, unknown>>;
   readSync(): Promise<Record<string, unknown>>;
   writeLocal(values: Record<string, unknown>): Promise<void>;
+  removeLocal?(keys: string[]): Promise<void>;
+  writeSync?(values: Record<string, unknown>): Promise<void>;
 }
 export type Exclusive = <T>(work: () => Promise<T>) => Promise<T>;
 type Store = Record<string, unknown>;
@@ -58,7 +62,8 @@ function knownKeys(store: Store) {
   ))
     requireCondition(
       key === headKey ||
-        /^buo:v2:(backup|stage|state|job|job-plan|job-state):[a-f0-9]{64}$/.test(
+        key === storagePrefix + 'draft' ||
+        /^buo:v2:(backup|stage|state|job|job-plan|job-state|draft-state|snapshot|transfer|sync-backup):[a-f0-9]{64}$/.test(
           key,
         ) ||
         /^buo:v2:job-result:[a-f0-9]{64}:(0|[1-9]\d*)$/.test(key),
@@ -79,6 +84,15 @@ async function verifiedBackup(hash: string, store: Store): Promise<Backup> {
     'INTEGRITY_CHECK_FAILED',
   );
   return backup;
+}
+
+async function verifiedTransfer(hash: string, store: Store) {
+  const record = decoded(
+    transferRecordSchema,
+    store[storagePrefix + 'transfer:' + hash],
+  );
+  requireCondition((await digest(record)) === hash, 'INTEGRITY_CHECK_FAILED');
+  return record;
 }
 
 async function verify(store: Store): Promise<Verified> {
@@ -126,6 +140,17 @@ async function verify(store: Store): Promise<Verified> {
     );
     const previous = state.previous ? await stateAt(state.previous) : null;
     if (state.kind === 'mutation') {
+      if (state.operation.command.kind === 'library.replace') {
+        const record = await verifiedTransfer(
+          state.operation.command.sourceDigest,
+          store,
+        );
+        requireCondition(
+          sameContent(record.baseHead, state.previous) &&
+            record.source !== 'sync-upload',
+          'INTEGRITY_CHECK_FAILED',
+        );
+      }
       requireCondition(
         previous?.data &&
           state.restoreTarget === null &&
@@ -202,6 +227,13 @@ async function verify(store: Store): Promise<Verified> {
     state,
     reachable,
   };
+}
+
+// Recovery imports use the same verifier as the live store, without writing it.
+export async function readRecoveryStore(
+  store: Store,
+): Promise<CanonicalData | null> {
+  return (await verify(store)).status.data;
 }
 
 export class StorageCoordinator {
@@ -312,63 +344,160 @@ export class StorageCoordinator {
   }
 
   mutate(raw: MutationInput): Promise<StorageStatus> {
-    return this.run(async () => {
-      const input = decoded(mutationInputSchema, raw);
-      const store = await this.local();
-      const current = await verify(store);
+    return this.run(() => this.mutateLocked(raw));
+  }
+  private async mutateLocked(raw: MutationInput): Promise<StorageStatus> {
+    const input = decoded(mutationInputSchema, raw);
+    const store = await this.local();
+    const current = await verify(store);
+    requireCondition(
+      current.status.head && current.status.data && current.state,
+      'MIGRATION_REQUIRED',
+    );
+    const requestDigest = await digest({
+      expectedHead: input.expectedHead,
+      command: input.command,
+    });
+    for (const hash of current.reachable) {
+      const ancestor = decoded(stateSchema, store[recordKey('state', hash)]);
+      if (ancestor.kind === 'mutation' && ancestor.operation.id === input.id) {
+        requireCondition(
+          ancestor.operation.requestDigest === requestDigest,
+          'OPERATION_ID_REUSED',
+        );
+        return current.status;
+      }
+    }
+    requireCondition(
+      sameContent(current.status.head, input.expectedHead),
+      'REVISION_CONFLICT',
+    );
+    if (input.command.kind === 'library.replace') {
+      const transfer = await verifiedTransfer(
+        input.command.sourceDigest,
+        store,
+      );
       requireCondition(
-        current.status.head && current.status.data && current.state,
+        sameContent(transfer.baseHead, input.expectedHead) &&
+          transfer.source !== 'sync-upload',
+        'INTEGRITY_CHECK_FAILED',
+      );
+    }
+    const state: StoredState = {
+      schemaVersion: 2,
+      kind: 'mutation',
+      revision: input.expectedHead.revision + 1,
+      previous: input.expectedHead,
+      backupDigest: current.state.backupDigest,
+      stageDigest: current.state.stageDigest,
+      restoreTarget: null,
+      data: applyLibraryCommand(current.status.data, input.command, input.id),
+      operation: { id: input.id, command: input.command, requestDigest },
+    };
+    const stateDigest = await digest(state);
+    for (const key of Object.keys(store).filter((key) =>
+      key.startsWith(storagePrefix + 'state:'),
+    ))
+      requireCondition(
+        key === recordKey('state', stateDigest) ||
+          current.reachable.has(key.slice((storagePrefix + 'state:').length)),
+        'PENDING_MUTATION',
+      );
+    const head: Head = {
+      schemaVersion: 1,
+      revision: state.revision,
+      stateDigest,
+    };
+    if (
+      !current.status.data.settings.disableSnapshots &&
+      input.command.kind !== 'draft.update'
+    )
+      await this.workspaceStore().capture(
+        current.status.head,
+        current.status.data,
+        this.now(),
+      );
+    await this.append(recordKey('state', stateDigest), state);
+    await verify({ ...(await this.local()), [headKey]: head });
+    return this.publish(head, input.expectedHead);
+  }
+
+  private workspaceStore(): WorkspaceStore {
+    return new WorkspaceStore({
+      read: () => this.local(),
+      append: (key, value) => this.append(key, value),
+      write: (key, value) => this.write(key, value),
+      removeSnapshots: async (keys) => {
+        requireCondition(
+          keys.every((key) => /^buo:v2:snapshot:[a-f0-9]{64}$/.test(key)),
+          'INVALID_STORAGE_KEY',
+        );
+        requireCondition(
+          typeof this.port.removeLocal === 'function',
+          'STORAGE_WRITE_FAILED',
+        );
+        try {
+          await this.port.removeLocal(keys);
+        } catch {
+          throw new MigrationError('STORAGE_WRITE_FAILED');
+        }
+        const stored = await this.local();
+        requireCondition(
+          keys.every((key) => !Object.hasOwn(stored, key)),
+          'WRITE_VERIFICATION_FAILED',
+        );
+      },
+    });
+  }
+
+  withWorkspace<T>(
+    work: (
+      store: WorkspaceStore,
+      active: { head: Head; data: CanonicalData },
+      commit: (input: MutationInput) => Promise<StorageStatus>,
+      sync: {
+        read: () => Promise<Store>;
+        write: (values: Store) => Promise<void>;
+        backup: (values: Store) => Promise<void>;
+      },
+    ) => Promise<T>,
+  ): Promise<T> {
+    return this.run(async () => {
+      const current = await verify(await this.local());
+      requireCondition(
+        current.status.head && current.status.data,
         'MIGRATION_REQUIRED',
       );
-      const requestDigest = await digest({
-        expectedHead: input.expectedHead,
-        command: input.command,
-      });
-      for (const hash of current.reachable) {
-        const ancestor = decoded(stateSchema, store[recordKey('state', hash)]);
-        if (
-          ancestor.kind === 'mutation' &&
-          ancestor.operation.id === input.id
-        ) {
-          requireCondition(
-            ancestor.operation.requestDigest === requestDigest,
-            'OPERATION_ID_REUSED',
-          );
-          return current.status;
-        }
-      }
-      requireCondition(
-        sameContent(current.status.head, input.expectedHead),
-        'REVISION_CONFLICT',
+      return work(
+        this.workspaceStore(),
+        { head: current.status.head, data: current.status.data },
+        (input) => this.mutateLocked(input),
+        {
+          read: async () => {
+            try {
+              return await this.port.readSync();
+            } catch {
+              throw new MigrationError('SYNC_READ_FAILED');
+            }
+          },
+          write: async (values) => {
+            requireCondition(
+              typeof this.port.writeSync === 'function',
+              'SYNC_WRITE_FAILED',
+            );
+            try {
+              await this.port.writeSync(values);
+            } catch {
+              throw new MigrationError('SYNC_WRITE_FAILED');
+            }
+          },
+          backup: async (values) =>
+            this.append(
+              storagePrefix + 'sync-backup:' + (await digest(values)),
+              values,
+            ),
+        },
       );
-      const state: StoredState = {
-        schemaVersion: 2,
-        kind: 'mutation',
-        revision: input.expectedHead.revision + 1,
-        previous: input.expectedHead,
-        backupDigest: current.state.backupDigest,
-        stageDigest: current.state.stageDigest,
-        restoreTarget: null,
-        data: applyLibraryCommand(current.status.data, input.command, input.id),
-        operation: { id: input.id, command: input.command, requestDigest },
-      };
-      const stateDigest = await digest(state);
-      for (const key of Object.keys(store).filter((key) =>
-        key.startsWith(storagePrefix + 'state:'),
-      ))
-        requireCondition(
-          key === recordKey('state', stateDigest) ||
-            current.reachable.has(key.slice((storagePrefix + 'state:').length)),
-          'PENDING_MUTATION',
-        );
-      const head: Head = {
-        schemaVersion: 1,
-        revision: state.revision,
-        stateDigest,
-      };
-      await this.append(recordKey('state', stateDigest), state);
-      await verify({ ...(await this.local()), [headKey]: head });
-      return this.publish(head, input.expectedHead);
     });
   }
 

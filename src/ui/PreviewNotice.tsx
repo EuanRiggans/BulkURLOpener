@@ -1,7 +1,8 @@
 export function PreviewNotice() {
   return (
     <p class="preview-notice" role="status">
-      Preview build. The popup and list editors are still being rebuilt.
+      Redevelopment preview. Browser and upgrade verification is still in
+      progress.
     </p>
   );
 }

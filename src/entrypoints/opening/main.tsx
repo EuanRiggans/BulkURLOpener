@@ -11,6 +11,7 @@ import { pageUrl } from '../../infrastructure/browser/pages';
 import { PageLayout } from '../../ui/PageLayout';
 import { mount } from '../../ui/mount';
 import { serviceError } from '../../ui/services/errors';
+import { copyText, downloadText } from '../../ui/services/workspace';
 
 const labels = {
   queued: 'Waiting',
@@ -115,6 +116,57 @@ function Jobs() {
             value={job.run.cursor}
             aria-label="Entry progress"
           />
+          <p>
+            {job.plan.destinations.length - job.run.cursor} entries remain.
+            Cancelling keeps tabs that have already opened.
+          </p>
+          <details>
+            <summary>Remaining destinations</summary>
+            <label for={'remaining-' + job.plan.id}>
+              Pending or unconfirmed destinations
+            </label>
+            <textarea
+              id={'remaining-' + job.plan.id}
+              readOnly
+              rows={6}
+              value={job.plan.destinations
+                .slice(job.run.cursor)
+                .map((entry) => entry.url)
+                .join('\n')}
+            />
+            <div class="actions">
+              <button
+                onClick={() => {
+                  void copyText(
+                    job.plan.destinations
+                      .slice(job.run.cursor)
+                      .map((entry) => entry.url)
+                      .join('\n'),
+                  ).catch(() =>
+                    setError(
+                      'Copy was unavailable. Select the remaining text or download it.',
+                    ),
+                  );
+                }}
+              >
+                Copy remaining
+              </button>
+              <button
+                onClick={() =>
+                  downloadText(
+                    job.plan.destinations
+                      .slice(job.run.cursor)
+                      .map((entry) => entry.url)
+                      .join('\n'),
+                    'bulk-url-opener-remaining.txt',
+                    'text/plain',
+                  )
+                }
+              >
+                Download remaining
+              </button>
+            </div>
+          </details>
           {job.run.error && (
             <p role="status">{serviceError(new Error(job.run.error))}</p>
           )}

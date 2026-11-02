@@ -48,7 +48,7 @@ export function isRecoveryPage(
       ['chrome-extension:', 'moz-extension:'].includes(extension.protocol) &&
       page.protocol === extension.protocol &&
       page.host === extension.host &&
-      page.pathname === '/options.html' &&
+      ['/options.html', '/data.html'].includes(page.pathname) &&
       !page.username &&
       !page.password
     );

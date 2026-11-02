@@ -5,11 +5,57 @@ import {
   mutationInputSchema,
 } from '../domain/storage/schema';
 import { controlSchema, targetWindowSchema } from '../domain/opening/schema';
+import {
+  draftSaveSchema,
+  transferApplySchema,
+} from '../domain/workspace-schema';
 
 const type = <A extends string>(action: A) =>
   v.literal(('buo:service/' + action) as `buo:service/${A}`);
 const windowId = v.optional(targetWindowSchema, null);
 export const serviceRequestSchema = v.variant('type', [
+  v.strictObject({ type: type('workspace.read'), windowId }),
+  v.strictObject({
+    type: type('draft.save'),
+    input: draftSaveSchema,
+    windowId,
+  }),
+  v.strictObject({
+    type: type('draft.freeze'),
+    input: draftSaveSchema,
+    windowId,
+  }),
+  v.strictObject({ type: type('appearance.read') }),
+  v.strictObject({ type: type('draft.read'), id: hashSchema }),
+  v.strictObject({ type: type('data.recovered') }),
+  v.strictObject({ type: type('data.export'), legacy: v.boolean() }),
+  v.strictObject({
+    type: type('data.preview'),
+    text: v.string(),
+    source: v.picklist(['paste', 'file']),
+  }),
+  v.strictObject({ type: type('data.apply'), input: transferApplySchema }),
+  v.strictObject({ type: type('snapshots.list') }),
+  v.strictObject({ type: type('snapshots.capture') }),
+  v.strictObject({
+    type: type('snapshots.purge'),
+    acknowledge: v.literal(true),
+  }),
+  v.strictObject({
+    type: type('snapshots.preview'),
+    id: hashSchema,
+    legacy: v.boolean(),
+  }),
+  v.strictObject({ type: type('archives.list') }),
+  v.strictObject({ type: type('sync.download'), legacy: v.boolean() }),
+  v.strictObject({ type: type('sync.preview-upload') }),
+  v.strictObject({
+    type: type('sync.upload'),
+    id: hashSchema,
+    acknowledge: v.literal(true),
+  }),
+  v.strictObject({ type: type('diagnostics') }),
+  v.strictObject({ type: type('main.open'), windowId }),
   v.strictObject({ type: type('library.read') }),
   v.strictObject({ type: type('library.mutate'), input: mutationInputSchema }),
   v.strictObject({ type: type('library.pending') }),
@@ -86,11 +132,29 @@ export function allowedRequest(page: string, request: ServiceRequest): boolean {
       '/new-list.html',
       '/edit-list.html',
       '/opening.html',
+      '/data.html',
+      '/tools.html',
+      '/help.html',
     ].includes(page)
   )
     return false;
+  if (request.type === 'buo:service/workspace.read')
+    return !['/opening.html', '/help.html'].includes(page);
+  if (
+    request.type === 'buo:service/draft.save' ||
+    request.type === 'buo:service/draft.freeze'
+  )
+    return ['/popup.html', '/data.html', '/tools.html'].includes(page);
+  if (request.type === 'buo:service/appearance.read') return true;
+  if (request.type === 'buo:service/draft.read')
+    return ['/new-list.html', '/popup.html'].includes(page);
+  if (request.type === 'buo:service/diagnostics') return page === '/help.html';
+  if (request.type === 'buo:service/main.open') return page === '/popup.html';
+  if (/^buo:service\/(data\.|snapshots\.|archives\.|sync\.)/.test(request.type))
+    return page === '/data.html';
   if (request.type === 'buo:service/library.mutate') {
     const kind = request.input.command.kind;
+    if (kind === 'library.replace') return false;
     return kind === 'list.create'
       ? page === '/new-list.html'
       : kind === 'list.update'

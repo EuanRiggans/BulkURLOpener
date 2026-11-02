@@ -2,9 +2,9 @@
 
 A browser extension for opening URLs and searches in batches and managing saved lists.
 
-**The `redevelopment` branch is a development preview.** Phase 3 adds shared data/opening services, recoverable jobs, startup handling and the basic saved-list context menu. The full popup/editor/settings rebuild follows in Phase 4. Use an isolated development browser profile; it is not a replacement for your installed extension.
+**The `redevelopment` branch is a development preview.** Phase 4 connects the simple popup, separate list editors, all preferences, transfer/sync, snapshots, tools and help to the verified shared services. Use an isolated development browser profile; real browser hardening and signed-upgrade verification are still required before a release.
 
-The popup stays focused on URL entry and simple actions. Creating and editing lists use separate pages. The context menu is `Bulk URL Opener → Open Lists → [saved lists]`; enable it explicitly in Settings for an existing profile. Popup opening and editor Save buttons remain disabled until the functional UI phase.
+The popup stays focused on URL entry and simple actions. Creating and editing lists use separate pages. The context menu is `Bulk URL Opener → Open Lists → [saved lists]`; enable it in Settings for an existing profile. Fresh installations enable the basic menu. Settings, Data & recovery, Tools, Help and Opening jobs have full pages.
 
 ## Development
 
@@ -42,14 +42,15 @@ The Phase 1 capability floors are Chromium 120 and Firefox 142. The release test
 ## Project layout
 
 ```text
-src/entrypoints/              Background, popup, options, editors, progress and held tabs
+src/entrypoints/              Background and nine bundled extension pages
 src/infrastructure/browser/  Browser API adapters
 src/application/storage/     Serialized migration/recovery coordinator and protocol
 src/application/opening/     Shared planning, execution and startup services
+src/application/workspace.ts Drafts, reviewed transfer/sync and snapshots
 src/domain/storage/          Typed schemas and pure legacy reconciliation
 src/domain/opening/          URL policy and typed job model
 src/shared/                  Pure internal navigation helpers
-src/ui/                      Shared Preact components and local CSS
+src/ui/                      Preact pages/components, form flows and local CSS
 public/icon/                 Existing extension icons
 test/unit/                   Modern Vitest checks
 test/characterization/       Executable legacy behaviour baseline
@@ -62,11 +63,17 @@ docs/                        Baseline, decisions, phases and validation evidence
 
 ## Data and privacy
 
-The popup and editors keep typed text in memory. In Settings, **Data protection and recovery** captures exact legacy sources, shows conflicts and migrates reviewed data. Nothing migrates on startup. Originals, snapshots and sync copies remain unchanged; new records are verified before activation. Existing sync data is read for recovery, never uploaded by this phase. Migration undo is closed after normal edits or jobs exist so later work cannot be discarded.
+In Settings or Data & recovery, **Data protection and recovery** captures exact legacy sources, shows conflicts and migrates reviewed data. Nothing migrates on startup. Original legacy stores stay unchanged; new records are verified before activation. Migration undo is closed after normal edits or jobs exist so later work cannot be discarded.
 
-**Shared services** in Settings enables the basic context menu and links to opening-job progress/recovery. Saved-list startup preferences use the same opening policy. Jobs retain a settings snapshot and durable acknowledgements; interrupted/unconfirmed tab creation needs review instead of blind replay. Pending work from a new browser session needs an explicit target window.
+The popup saves working text promptly to a separate verified record; conflicts and new-list handoffs are retained as immutable copies. Initial loading never auto-opens a list. Auto-load and auto-open remain separate preferences, with a temporary popup override. List saves and settings autosave use revision checks; stale edits stay visible for review. Select **Save settings** to save immediately.
 
-Jobs retain URLs/search input locally and navigate to user-chosen destinations/providers. Firefox declares and checks the corresponding data consent. Private-window jobs/capture are temporarily unavailable until session-only handling is implemented. See the [privacy policy](privacy-policy.md) and [Phase 3 contracts and limits](docs/PHASE_3_SERVICES.md).
+Data & recovery supports portable 2.x and legacy 1.x JSON exports, paste/file import, reviewed replacement, five optional snapshots and inspection of retained legacy archives. Recovery-file imports restore lists/settings while keeping current drafts/jobs; other imported records remain in the retained original. Raw recovery downloads include all retained records and may be much larger than a normal export.
+
+Manual browser-account sync uploads only explicitly reviewed lists/settings to a new key, preserving the legacy sync key and a local copy of previous sync contents. A conservative 8 KB item limit applies; larger libraries use JSON transfer. Read-back verifies the local sync area, not remote delivery. Chrome-family and Firefox accounts do not share a sync service.
+
+Saved-list startup preferences use the same opening policy. Jobs retain a settings snapshot and durable acknowledgements; interrupted/unconfirmed tab creation needs review instead of blind replay. Pending work from a new browser session needs an explicit target window. Settings links to staged-change and opening-job recovery.
+
+Jobs retain URLs/search input locally and navigate to user-chosen destinations/providers. Firefox declares and checks corresponding consent before opening or uploading sync data. Private-window jobs/capture are temporarily unavailable until session-only handling is implemented. See the [privacy policy](privacy-policy.md), [Phase 3 service contracts](docs/PHASE_3_SERVICES.md) and [Phase 4 flows and limits](docs/PHASE_4_FLOWS.md).
 
 Download a recovery file first, then choose **Inspect and back up data**. Conflicting preferences and ambiguous historical comma records require explicit choices. Storage errors block activation rather than deleting data to make room. Recovery downloads contain private data; keep them private. See [the Phase 2 contract and limits](docs/PHASE_2_DATA.md).
 
@@ -79,6 +86,7 @@ This is a public repository. Never commit personal exports, browser profiles, pr
 - [Phase 1 tooling and validation](docs/PHASE_1_TOOLING.md)
 - [Phase 2 data protection and migration](docs/PHASE_2_DATA.md)
 - [Phase 3 shared services and job recovery](docs/PHASE_3_SERVICES.md)
+- [Phase 4 functional flows and feature parity](docs/PHASE_4_FLOWS.md)
 - [Historical storage fixtures](test/fixtures/legacy/README.md)
 
 Completed phases are committed, pushed to `redevelopment` and verified against GitHub. Source/build checks do not replace real browser, accessibility, cross-device sync or genuine signed-upgrade testing.

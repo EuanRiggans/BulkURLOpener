@@ -75,8 +75,13 @@ export class MemoryStorage implements StoragePort {
   sync: Record<string, unknown>;
   writes: string[] = [];
   failAt = 0;
+  failKey: string | null = null;
   failure: 'before' | 'after' | 'drop' | 'corrupt' = 'before';
   readFailure = false;
+  syncFailure: 'before' | 'after' | 'drop' | 'corrupt' | null = null;
+  removeFailure = false;
+  removed: string[] = [];
+  syncWrites = 0;
   constructor(source: Sources = empty) {
     this.local = structuredClone(source.storageLocal);
     this.sync = structuredClone(source.storageSync);
@@ -91,7 +96,9 @@ export class MemoryStorage implements StoragePort {
   }
   writeLocal(values: Record<string, unknown>): Promise<void> {
     this.writes.push(...Object.keys(values));
-    const fail = this.failAt === this.writes.length;
+    const fail =
+      this.failAt === this.writes.length ||
+      (this.failKey !== null && Object.hasOwn(values, this.failKey));
     if (fail && this.failure === 'before')
       return Promise.reject(new Error('QUOTA_BYTES'));
     if (fail && this.failure === 'drop') return Promise.resolve();
@@ -100,6 +107,26 @@ export class MemoryStorage implements StoragePort {
       for (const key of Object.keys(values)) this.local[key] = null;
     if (fail && this.failure === 'after')
       return Promise.reject(new Error('Interrupted after write'));
+    return Promise.resolve();
+  }
+  removeLocal(keys: string[]): Promise<void> {
+    if (this.removeFailure) return Promise.reject(new Error('remove failed'));
+    for (const key of keys) {
+      delete this.local[key];
+      this.removed.push(key);
+    }
+    return Promise.resolve();
+  }
+  writeSync(values: Record<string, unknown>): Promise<void> {
+    this.syncWrites++;
+    if (this.syncFailure === 'before')
+      return Promise.reject(new Error('quota'));
+    if (this.syncFailure === 'drop') return Promise.resolve();
+    Object.assign(this.sync, structuredClone(values));
+    if (this.syncFailure === 'corrupt')
+      for (const key of Object.keys(values)) this.sync[key] = null;
+    if (this.syncFailure === 'after')
+      return Promise.reject(new Error('interrupted'));
     return Promise.resolve();
   }
 }

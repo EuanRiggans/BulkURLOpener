@@ -12,6 +12,7 @@ import {
 } from './service-protocol';
 import { MigrationError, requireCondition } from '../domain/storage/errors';
 import { destinationUrl } from '../domain/opening/urls';
+import { WorkspaceService } from './workspace';
 
 export interface ServicePlatform {
   targetWindow(id: number | null): Promise<number>;
@@ -29,9 +30,11 @@ export interface ServicePlatform {
   }>;
   navigate(id: number, url: string): Promise<void>;
   deferredLock<T>(id: number, work: () => Promise<T>): Promise<T>;
+  mainWindow?(targetWindow: number): Promise<void>;
 }
 
 export class SharedServices {
+  private readonly workspace: WorkspaceService;
   constructor(
     readonly storage: StorageCoordinator,
     readonly opening: OpeningService,
@@ -39,7 +42,9 @@ export class SharedServices {
     private readonly platform: ServicePlatform,
     private readonly identity: { id: string; root: string },
     private readonly kick: () => void,
-  ) {}
+  ) {
+    this.workspace = new WorkspaceService(storage);
+  }
 
   async dispatch(raw: unknown, sender: ServiceSender): Promise<unknown> {
     const page = servicePage(sender, this.identity);
@@ -47,7 +52,80 @@ export class SharedServices {
     const request = v.parse(serviceRequestSchema, raw);
     requireCondition(allowedRequest(page, request), 'UNAUTHORIZED_PAGE');
     requireCondition(!sender.tab?.incognito, 'PRIVATE_WINDOW_UNSUPPORTED');
+    // Action popups do not always have sender.tab. Resolve their browser
+    // window before exposing editable data or accepting working-draft writes.
+    if (
+      page === '/popup.html' &&
+      [
+        'buo:service/workspace.read',
+        'buo:service/draft.save',
+        'buo:service/draft.freeze',
+      ].includes(request.type)
+    )
+      await this.platform.targetWindow(
+        ('windowId' in request ? request.windowId : null) ??
+          sender.tab?.windowId ??
+          null,
+      );
     switch (request.type) {
+      case 'buo:service/workspace.read':
+        return this.workspace.read();
+      case 'buo:service/draft.save':
+        return this.workspace.saveDraft(request.input);
+      case 'buo:service/draft.freeze':
+        return this.workspace.saveDraft(request.input, true);
+      case 'buo:service/appearance.read': {
+        const { settings } = (await this.storage.requireActiveData()).data;
+        return {
+          nightMode: settings.nightMode,
+          customTheme: settings.customTheme,
+          buttonLook: settings.buttonLook,
+        };
+      }
+      case 'buo:service/draft.read':
+        return this.workspace.draft(request.id);
+      case 'buo:service/data.recovered':
+        return this.workspace.recovered();
+      case 'buo:service/data.export':
+        return this.workspace.export(request.legacy);
+      case 'buo:service/data.preview':
+        return this.workspace.preview(request.text, request.source);
+      case 'buo:service/data.apply': {
+        const result = await this.workspace.apply(request.input);
+        await this.menus.refresh();
+        return result;
+      }
+      case 'buo:service/snapshots.list':
+        return this.workspace.snapshots();
+      case 'buo:service/snapshots.capture':
+        return this.workspace.captureSnapshot();
+      case 'buo:service/snapshots.purge':
+        return this.workspace.purgeSnapshots();
+      case 'buo:service/snapshots.preview':
+        return this.workspace.previewSnapshot(request.id, request.legacy);
+      case 'buo:service/archives.list':
+        return this.workspace.archives();
+      case 'buo:service/sync.download':
+        return this.workspace.previewDownload(request.legacy);
+      case 'buo:service/sync.preview-upload':
+        return this.workspace.previewUpload();
+      case 'buo:service/sync.upload':
+        await this.platform.allowTransmission();
+        return this.workspace.upload(request.id);
+      case 'buo:service/diagnostics':
+        return this.workspace.diagnostics();
+      case 'buo:service/main.open': {
+        await this.storage.requireActiveData();
+        const target = await this.platform.targetWindow(
+          request.windowId ?? sender.tab?.windowId ?? null,
+        );
+        requireCondition(
+          typeof this.platform.mainWindow === 'function',
+          'WINDOW_OPEN_FAILED',
+        );
+        await this.platform.mainWindow(target);
+        return true;
+      }
       case 'buo:service/library.read':
         return this.storage.requireActiveData();
       case 'buo:service/library.mutate': {

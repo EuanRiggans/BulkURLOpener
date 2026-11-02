@@ -8,6 +8,8 @@ Storage invariants and recovery limits are recorded in
 [Phase 2](docs/PHASE_2_DATA.md).
 Shared services and opening invariants are recorded in
 [Phase 3](docs/PHASE_3_SERVICES.md).
+Functional flows, transfer/draft contracts and the parity checklist are recorded
+in [Phase 4](docs/PHASE_4_FLOWS.md).
 
 - Work on `redevelopment`. Its fresh starting commit is
   `4eb346d3bca8a12e6fa0f7e5ba891fcb711d9bf7`.
@@ -72,3 +74,15 @@ user-data writes still belong to the coordinator. Private senders/targets are
 blocked before persistence until session-only execution is implemented/tested.
 Mozilla validation has one narrowly source-mapped, version-pinned Preact vendor
 warning exception; new application warnings must not be silently added to it.
+
+Working drafts use one verified mutable record separate from full library
+history; conflict copies and editor handoffs are immutable. Do not debounce
+popup text into a save that only runs after its document closes. Keep stale
+editor/settings input visible and reuse an uncertain request's original ID.
+Replacement imports use a retained, immutable preview and its expected head,
+never a fresh sync fetch at acceptance. Only the Data page can accept transfer.
+Manual sync writes only the new `bulk-url-opener-v2` key after explicit review,
+consent, local backup and a visible-change check. Its original legacy keys stay
+read-only; never clear the sync area. Optional snapshot cleanup can remove only
+verified `buo:v2:snapshot:` records after a new copy is verified. Mandatory
+history, original legacy snapshots and damaged records remain intact.

@@ -14,6 +14,9 @@ const pages = [
   'edit-list.html',
   'opening.html',
   'deferred.html',
+  'data.html',
+  'tools.html',
+  'help.html',
 ];
 
 function filesWithin(directory) {

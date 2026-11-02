@@ -105,6 +105,15 @@ export function destinationUrl(
 }
 
 export function extractFirstUrl(text: string): string | null {
+  for (const url of extractedUrls(text)) return url;
+  return null;
+}
+
+export function extractUrls(text: string): string[] {
+  return [...extractedUrls(text)];
+}
+
+function* extractedUrls(text: string): Generator<string, void> {
   const matches = text.matchAll(
     /(?:https?|ftp|file):\/\/[^\s<>"']+|www\.[^\s<>"']+|localhost(?::\d+)?(?:[/?#][^\s<>"']*)?/gi,
   );
@@ -117,9 +126,8 @@ export function extractFirstUrl(text: string): string | null {
       closes--;
     }
     const result = destinationUrl(candidate);
-    if ('url' in result) return result.url;
+    if ('url' in result) yield result.url;
   }
-  return null;
 }
 
 export function planOpening(

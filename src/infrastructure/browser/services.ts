@@ -2,8 +2,17 @@ import { browser } from 'wxt/browser';
 import type { ServicePlatform } from '../../application/services';
 import { MigrationError, requireCondition } from '../../domain/storage/errors';
 import { normalWindow, requireTransmissionConsent } from './opening';
+import { pageUrl } from './pages';
 
 export const browserServicePlatform: ServicePlatform = {
+  mainWindow: async (targetWindow) => {
+    await browser.windows.create({
+      url: pageUrl('/popup.html', { window: targetWindow }),
+      type: 'popup',
+      width: 660,
+      height: 640,
+    });
+  },
   targetWindow: normalWindow,
   allowTransmission: requireTransmissionConsent,
   capture: async (scope, windowId) => {

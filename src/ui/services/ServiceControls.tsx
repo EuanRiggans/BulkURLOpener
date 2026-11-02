@@ -10,7 +10,6 @@ import {
 } from '../../domain/storage/schema';
 import { extensionRequest } from '../../infrastructure/browser/client';
 import { pageUrl } from '../../infrastructure/browser/pages';
-import { newRequestId } from '../../shared/ids';
 import { serviceError } from './errors';
 
 const activeSchema = v.strictObject({ head: headSchema, data: dataSchema });
@@ -86,41 +85,13 @@ export function ServiceControls() {
   }
   return (
     <section aria-labelledby="services-title">
-      <h2 id="services-title">Shared services</h2>
+      <h2 id="services-title">Saved-change recovery</h2>
       <p>
         <a href={pageUrl('/opening.html')}>Opening jobs and recovery</a>
       </p>
       {error && <p role="alert">{error}</p>}
-      {active && (
-        <label class="check-label">
-          <input
-            type="checkbox"
-            checked={active.data.settings.contextMenuEnabled}
-            disabled={busy || pending.length > 0}
-            onChange={(event) => {
-              const enabled = event.currentTarget.checked;
-              void perform(async () => {
-                const result = await extensionRequest(
-                  {
-                    type: 'buo:service/library.mutate',
-                    input: {
-                      id: newRequestId(),
-                      expectedHead: active.head,
-                      command: {
-                        kind: 'settings.update',
-                        patch: { contextMenuEnabled: enabled },
-                      },
-                    },
-                  },
-                  statusSchema,
-                );
-                if (result.head && result.data)
-                  setActive({ head: result.head, data: result.data });
-              });
-            }}
-          />
-          Show saved lists in the context menu
-        </label>
+      {active && !pending.length && (
+        <p>No staged library changes need recovery.</p>
       )}
       {pending.length > 0 && (
         <div role="status">

@@ -183,6 +183,12 @@ export const libraryCommandSchema = v.variant('kind', [
     patch: v.partial(settingsSchema),
   }),
   v.strictObject({ kind: v.literal('draft.update'), lines: v.nullable(lines) }),
+  v.strictObject({
+    kind: v.literal('library.replace'),
+    lists: v.array(listSchema),
+    settings: settingsSchema,
+    sourceDigest: hashSchema,
+  }),
 ]);
 export type LibraryCommand = v.InferOutput<typeof libraryCommandSchema>;
 export const operationSchema = v.strictObject({

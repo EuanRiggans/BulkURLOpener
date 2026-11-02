@@ -13,12 +13,14 @@ export function MigrationReviewForm({
   onDecisions,
   onCommit,
   busy,
+  transfer = false,
 }: {
   review: MigrationReview;
   decisions: Decisions;
   onDecisions: (value: Decisions) => void;
   onCommit: () => void;
   busy: boolean;
+  transfer?: boolean;
 }) {
   const { plan } = review;
   let valid = false;
@@ -40,7 +42,11 @@ export function MigrationReviewForm({
       }}
     >
       <fieldset disabled={busy}>
-        <legend>Review before migration</legend>
+        <legend>
+          {transfer
+            ? 'Review legacy data before replacing the library'
+            : 'Review before migration'}
+        </legend>
         {review.resumeDecisions && (
           <p role="status">
             An interrupted migration was found. Your previous choices are
@@ -49,8 +55,9 @@ export function MigrationReviewForm({
           </p>
         )}
         <p>
-          The raw backup was read back and verified. All readable list versions
-          are shown below. No source is assumed to be newest.
+          The raw {transfer ? 'import' : 'backup'} was read back and verified.
+          All readable list versions are shown below. No source is assumed to be
+          newest.
         </p>
         <h3>Saved lists ({plan.lists.length})</h3>
         {plan.lists.length === 0 && (
@@ -159,8 +166,10 @@ export function MigrationReviewForm({
           sync or snapshot archives.
         </p>
         <p>
-          Previous draft lines and readable staged inputs are preserved. Staged
-          URLs will not open automatically. Sync copies, snapshots and
+          {transfer
+            ? 'The current working draft is kept. Imported staged inputs remain in the retained raw import.'
+            : 'Previous draft lines and readable staged inputs are preserved.'}{' '}
+          Staged URLs will not open automatically. Sync copies, snapshots and
           unreadable records stay in the recovery backup.
         </p>
         {plan.archives.length > 0 && (
@@ -216,7 +225,9 @@ export function MigrationReviewForm({
           disabled={!valid}
           aria-describedby={guidance ? 'migration-guidance' : undefined}
         >
-          Migrate reviewed data
+          {transfer
+            ? 'Replace lists and settings with reviewed data'
+            : 'Migrate reviewed data'}
         </button>
       </fieldset>
     </form>

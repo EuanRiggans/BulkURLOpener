@@ -164,12 +164,12 @@ describe('serialized library mutations', () => {
           lines: ['https://pending.example.test/'],
         },
       };
-      port.failAt = port.writes.length + 2;
+      port.failKey = headKey;
       port.failure = failure;
       await expect(storage.mutate(input)).rejects.toThrow(
         /STORAGE_WRITE_FAILED|WRITE_VERIFICATION_FAILED/,
       );
-      port.failAt = 0;
+      port.failKey = null;
       const restarted = new StorageCoordinator(port, lock);
       if (failure !== 'after') {
         expect((await restarted.pendingMutations())[0]?.input).toEqual(input);

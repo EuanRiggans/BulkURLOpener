@@ -60,7 +60,9 @@ Phase 2. [Phase 2's implementation](PHASE_2_DATA.md) uses Valibot, verified raw
 backups, reviewed reconciliation and a serialized local publication/undo protocol.
 Migration is explicit on the options page. [Phase 3](PHASE_3_SERVICES.md) adds
 gated shared mutations, a URL policy, recoverable opening jobs, startup and basic
-menus. The functional popup/editor/settings/transfer rebuild remains Phase 4.
+menus. [Phase 4](PHASE_4_FLOWS.md) connects the functional popup, editors,
+settings, transfer/sync, snapshots, tools and help. Phase 5 remains the real
+browser/accessibility/private-window hardening gate.
 
 Keep entrypoints thin. Separate pure URL/list/settings models from browser APIs,
 storage, scheduling and UI. Use a validated, versioned canonical store in

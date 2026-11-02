@@ -14,7 +14,7 @@
   color: var(--foreground);
 }
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-mode='light']) {
     --background: #242830;
     --foreground: #f4f6fa;
     --surface: #303641;
@@ -24,6 +24,28 @@
     --on-primary: #172033;
   }
 }
+:root[data-mode='dark'] {
+  color-scheme: dark;
+  --background: #242830;
+  --foreground: #f4f6fa;
+  --surface: #303641;
+  --border: #8794a8;
+  --muted: #bcc7d8;
+  --primary: #a9c7ff;
+  --on-primary: #172033;
+}
+:root[data-mode='light'] {
+  color-scheme: light;
+}
+:root[data-theme='fluentDesignBootstrap'] {
+  --primary: #0067b8;
+  --surface: #f3f3f3;
+}
+:root[data-theme='fluentDesignBootstrap'][data-mode='dark'] {
+  --primary: #83caff;
+  --surface: #323232;
+  --background: #202020;
+}
 * {
   box-sizing: border-box;
 }
@@ -32,7 +54,7 @@ body {
 }
 .popup {
   width: min(36rem, 100vw);
-  min-width: 20rem;
+  min-width: min(20rem, 100vw);
   padding: 1.25rem;
 }
 .popup-header,
@@ -115,6 +137,28 @@ select:disabled {
   color: var(--on-primary);
   border-color: var(--primary);
 }
+:root[data-buttons='alwaysOutline'] .primary,
+:root[data-buttons='filledNight'][data-mode='light'] .primary,
+:root[data-buttons='filledLight'][data-mode='dark'] .primary {
+  background: var(--surface);
+  color: var(--primary);
+}
+:root[data-buttons='alwaysFilled'] button:not(:disabled),
+:root[data-buttons='alwaysFilled'] .button,
+:root[data-buttons='filledNight'][data-mode='dark'] button:not(:disabled),
+:root[data-buttons='filledLight'][data-mode='light'] button:not(:disabled) {
+  background: var(--primary);
+  color: var(--on-primary);
+  border-color: var(--primary);
+}
+:root[data-theme='fluentDesignBootstrap']
+  :is(input, textarea, button, select, .button) {
+  border-radius: 0.2rem;
+}
+button:hover:not(:disabled),
+.button:hover {
+  filter: brightness(0.94);
+}
 :focus-visible {
   outline: 3px solid var(--primary);
   outline-offset: 3px;
@@ -138,6 +182,78 @@ select:disabled {
 .full-page nav,
 .full-page .preview-notice {
   margin: 0 0 1.5rem;
+}
+.full-page nav,
+.compact-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+.full-page > section {
+  margin: 2rem 0;
+}
+.full-page section h2 {
+  margin-top: 1.5rem;
+}
+.setting-row {
+  margin: 1rem 0;
+}
+.list-index {
+  list-style: none;
+  padding: 0;
+}
+.list-index li {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.transfer-review {
+  padding: 1rem;
+  border: 2px solid var(--primary);
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+}
+dt {
+  font-weight: 600;
+}
+dd {
+  margin: 0 0 0.75rem;
+  overflow-wrap: anywhere;
+}
+.popup-status {
+  margin: 0.75rem 0 0;
+  min-height: 1.25rem;
+}
+.popup-more {
+  margin-bottom: 0;
+  font-size: 0.875rem;
+}
+.popup-more button,
+.popup-more a {
+  margin: 0.5rem 0.5rem 0 0;
+}
+li {
+  overflow-wrap: anywhere;
+}
+progress {
+  width: 100%;
+  accent-color: var(--primary);
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto;
+  }
+}
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
+  }
+  button,
+  .button {
+    border-color: ButtonText;
+  }
 }
 form {
   display: grid;
