@@ -127,7 +127,7 @@ export function Help() {
       </section>
       <section aria-labelledby="links-title">
         <h2 id="links-title">Project and release information</h2>
-        <ul>
+        <ul class="resource-links">
           <li>
             <a
               href="https://github.com/EuanRiggans/BulkURLOpener"

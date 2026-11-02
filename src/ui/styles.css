@@ -189,6 +189,11 @@ button:hover:not(:disabled),
   min-width: 0;
   overflow-wrap: anywhere;
 }
+.resource-links a {
+  display: inline-block;
+  min-height: 2rem;
+  padding: 0.25rem 0;
+}
 .session-notice {
   max-width: 48rem;
   padding: 0.75rem 1.25rem;

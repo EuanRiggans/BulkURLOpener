@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { after, before, test } from 'node:test';
+import { after, afterEach, before, test } from 'node:test';
 import { createServer } from 'node:http';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
@@ -25,6 +25,8 @@ const axeSource = await readFile(
   'utf8',
 );
 let driver, root, server, destination;
+let normalRootHandle;
+const requests = [];
 const report = {
   browser: target,
   source: process.env.GITHUB_SHA || 'local',
@@ -49,6 +51,7 @@ before(
       }
     }
     server = createServer((_request, response) => {
+      requests.push(_request.url);
       response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       response.end(
         '<!doctype html><html lang="en"><title>Synthetic destination</title><h1>Synthetic destination</h1></html>',
@@ -85,6 +88,16 @@ before(
         15_000,
         'Unpacked extension must load.',
       );
+      const granted = await driver.executeAsyncScript(function (
+        extensionId,
+        done,
+      ) {
+        chrome.developerPrivate.updateExtensionConfiguration(
+          { extensionId, incognitoAccess: true },
+          () => done({ error: chrome.runtime?.lastError?.message ?? null }),
+        );
+      }, root);
+      assert.equal(granted.error, null);
       root = 'chrome-extension://' + root + '/';
     } else {
       const options = new firefox.Options()
@@ -108,6 +121,11 @@ before(
         addonId,
       );
       await driver.setContext(firefox.Context.CHROME);
+      const granted = await driver.executeAsyncScript(
+        `const id = arguments[0], done = arguments[1]; (async () => { const {ExtensionPermissions} = ChromeUtils.importESModule('resource://gre/modules/ExtensionPermissions.sys.mjs'); await ExtensionPermissions.add(id, {permissions: ['internal:privateBrowsingAllowed'], origins: []}); const {AddonManager} = ChromeUtils.importESModule('resource://gre/modules/AddonManager.sys.mjs'); await (await AddonManager.getAddonByID(id)).reload(); return true; })().then(() => done({ok: true}), error => done({error: String(error)}));`,
+        addonId,
+      );
+      assert(granted.ok, granted.error);
       root = await driver.executeScript(
         'return WebExtensionPolicy.getByID(arguments[0]).getURL("/");',
         addonId,
@@ -120,6 +138,13 @@ before(
     report.platform = capabilities.get('platformName');
     await navigate(root + 'options.html');
     await driver.wait(until.elementLocated(By.css('h1')), 15_000);
+    assert.equal(
+      await native('return await api.extension.isAllowedIncognitoAccess();'),
+      true,
+      'Private access must be an actual browser grant in this disposable profile.',
+    );
+    report.privateGrant = true;
+    normalRootHandle = await driver.getWindowHandle();
   },
   { timeout: 120_000 },
 );
@@ -141,6 +166,15 @@ after(async () => {
   await writeFile(
     resolve(evidence, 'summary.json'),
     JSON.stringify(report, null, 2),
+  );
+});
+afterEach(async (context) => {
+  if (!driver || !normalRootHandle || !context.name.startsWith('private pages'))
+    return;
+  await driver.switchTo().window(normalRootHandle);
+  await page('popup.html');
+  await native(
+    'for (const window of await api.windows.getAll()) if (window.incognito) await api.windows.remove(window.id); return true;',
   );
 });
 
@@ -239,6 +273,49 @@ async function clickText(text) {
   await driver
     .findElement(By.xpath(`//button[normalize-space(.)='${text}']`))
     .click();
+}
+async function findPage(prefix, privateMode) {
+  for (const handle of await driver.getAllWindowHandles()) {
+    await driver.switchTo().window(handle);
+    if (!(await driver.getCurrentUrl()).startsWith(root + prefix)) continue;
+    if (
+      (await rpc({ type: 'buo:service/context.read' })).private === privateMode
+    )
+      return handle;
+  }
+  return null;
+}
+async function stopBackground() {
+  if (target === 'chrome') {
+    const before = await driver.sendAndGetDevToolsCommand(
+      'Target.getTargets',
+      {},
+    );
+    const worker = before.targetInfos.find(
+      (item) => item.type === 'service_worker' && item.url.startsWith(root),
+    );
+    assert(worker, 'The extension worker must be running before termination.');
+    await driver.sendDevToolsCommand('ServiceWorker.stopAllWorkers', {});
+    await driver.wait(
+      async () =>
+        !(
+          await driver.sendAndGetDevToolsCommand('Target.getTargets', {})
+        ).targetInfos.some((item) => item.targetId === worker.targetId),
+      15_000,
+    );
+    return { kind: 'service-worker', previous: worker.targetId };
+  }
+  await driver.setContext(firefox.Context.CHROME);
+  try {
+    const result = await driver.executeAsyncScript(
+      `const id = arguments[0], done = arguments[1]; const extension = WebExtensionPolicy.getByID(id).extension; extension.terminateBackground({ignoreDevToolsAttached: true, disableResetIdleForTest: true}).then(() => done({state: extension.backgroundState}), error => done({error: String(error)}));`,
+      addonId,
+    );
+    assert.equal(result.state, 'stopped', JSON.stringify(result));
+    return { kind: 'event-background', previous: 'running' };
+  } finally {
+    await driver.setContext(firefox.Context.CONTENT);
+  }
 }
 
 test(
@@ -514,6 +591,220 @@ test(
 );
 
 test(
+  'private pages, drafts, edits, jobs and recovery stay session-only across background restart',
+  { timeout: 180_000 },
+  async () => {
+    await settings({ currentlyOpenedTabsDisplay: 'allOpenedTabs' });
+    await page('popup.html');
+    const normalHandle = await driver.getWindowHandle();
+    const beforeLocal = await native(
+      'return await api.storage.local.get(null);',
+    );
+    const beforeSync = await native('return await api.storage.sync.get(null);');
+    const privateWindow = await native(
+      'const window = await api.windows.create({incognito: true, url: api.runtime.getURL("/popup.html")}); return {id: window.id};',
+    );
+    await driver.wait(() => findPage('popup.html', true), 20_000);
+    await driver.wait(
+      until.elementIsEnabled(
+        await driver.wait(until.elementLocated(By.id('entries')), 20_000),
+      ),
+      30_000,
+    );
+    const marker =
+      destination + '/private/café?q=%2526&token=synthetic-private';
+    const area = await driver.findElement(By.id('entries'));
+    await area.clear();
+    await area.sendKeys(marker);
+    await driver.wait(
+      async () =>
+        (await rpc({ type: 'buo:service/workspace.read' })).draft.lines?.[0] ===
+        marker,
+      30_000,
+    );
+    const original = await rpc({ type: 'buo:service/workspace.read' });
+    assert.equal(original.private, true);
+    await clickText('New');
+    await driver.wait(
+      () => findPage('new-list.html', true),
+      20_000,
+      'The editor must open inside a private window.',
+    );
+    const name = await driver.wait(
+      until.elementLocated(By.id('list-name')),
+      20_000,
+    );
+    await driver.wait(until.elementIsEnabled(name), 30_000);
+    assert.equal(
+      await driver.findElement(By.id('list-entries')).getAttribute('value'),
+      marker,
+    );
+    await name.sendKeys('Private café example');
+    await clickText('Save list');
+    await driver.wait(until.urlContains('edit-list.html'), 30_000);
+    const saved = await rpc({ type: 'buo:service/workspace.read' });
+    assert(
+      saved.data.lists.some(
+        (list) =>
+          list.name === 'Private café example' && list.lines[0] === marker,
+      ),
+    );
+    await settings({ tabCreationDelay: 3 });
+    await page('popup.html');
+    const active = await rpc({ type: 'buo:service/library.read' });
+    const job = await rpc({
+      type: 'buo:service/open.lines',
+      id: id(),
+      expectedHead: active.head,
+      lines: [marker],
+    });
+    assert(
+      (await native('return await api.alarms.getAll();')).some(
+        (alarm) => alarm.name === 'buo-private-opening-recovery',
+      ),
+    );
+    await page('opening.html?job=' + job.plan.id);
+    await driver.wait(
+      async () =>
+        (await rpc({ type: 'buo:service/jobs.list' })).find(
+          (item) => item.plan.id === job.plan.id,
+        )?.run.status === 'completed',
+      45_000,
+    );
+    const complete = (await rpc({ type: 'buo:service/jobs.list' })).find(
+      (item) => item.plan.id === job.plan.id,
+    );
+    const opened = await native(
+      'return await api.tabs.get(arguments[0]);',
+      complete.receipts[0].tabId,
+    );
+    assert.equal(opened.incognito, true);
+    assert.equal(opened.windowId, privateWindow.id);
+    assert.equal(opened.url, new URL(marker).href);
+    await page('data.html');
+    const blocked = await native(
+      'return await api.runtime.sendMessage({type: "buo:service/sync.preview-upload"});',
+    );
+    assert.equal(blocked.error, 'PRIVATE_SYNC_UNAVAILABLE');
+    await stopBackground();
+    await page('popup.html');
+    const resumed = await rpc({ type: 'buo:service/workspace.read' });
+    assert(
+      resumed.data.lists.some((list) => list.name === 'Private café example'),
+    );
+    assert.equal(resumed.draft.lines[0], marker);
+    const sessionData = await native(
+      'return await api.storage.session.get(null);',
+    );
+    assert(JSON.stringify(sessionData).includes('synthetic-private'));
+    const second = await native(
+      'const window = await api.windows.create({incognito: true, url: api.runtime.getURL("/popup.html")}); return {id: window.id};',
+    );
+    await driver.switchTo().window(normalHandle);
+    await native(
+      'await api.windows.remove(arguments[0]); return true;',
+      privateWindow.id,
+    );
+    await driver.wait(() => findPage('popup.html', true), 20_000);
+    assert(
+      (await rpc({ type: 'buo:service/workspace.read' })).data.lists.some(
+        (list) => list.name === 'Private café example',
+      ),
+    );
+    const captured = await rpc({ type: 'buo:service/capture' });
+    assert(captured.lines.every((url) => !url.includes('/batch-')));
+    await driver.switchTo().window(normalHandle);
+    const normalCaptured = await rpc({ type: 'buo:service/capture' });
+    assert(
+      normalCaptured.lines.every((url) => !url.includes('synthetic-private')),
+    );
+    await native(
+      'await api.windows.remove(arguments[0]); return true;',
+      second.id,
+    );
+    await driver.wait(
+      async () =>
+        Object.keys(
+          await native('return await api.storage.session.get(null);'),
+        ).every((key) => !key.startsWith('buo:private:v1:')),
+      30_000,
+    );
+    assert.deepEqual(
+      await native('return await api.storage.local.get(null);'),
+      beforeLocal,
+    );
+    assert.deepEqual(
+      await native('return await api.storage.sync.get(null);'),
+      beforeSync,
+    );
+    report.assertions.push(
+      'private grant, private editor handoff/CRUD/job, scope isolation, background restart, joined window and final cleanup',
+    );
+  },
+);
+
+test(
+  'a suspended background resumes acknowledged work from its recovery alarm',
+  { timeout: 100_000 },
+  async () => {
+    await settings({
+      tabCreationDelay: 6,
+      loadOnFocus: false,
+      newTabsActive: false,
+    });
+    await page('popup.html');
+    const active = await rpc({ type: 'buo:service/library.read' });
+    const prefix = '/worker-' + id().slice(0, 8);
+    const paths = [prefix + '/one', prefix + '/two', prefix + '/three'];
+    const job = await rpc({
+      type: 'buo:service/open.lines',
+      id: id(),
+      expectedHead: active.head,
+      lines: paths.map((path) => destination + path),
+    });
+    await page('opening.html?job=' + job.plan.id);
+    await driver.wait(
+      async () =>
+        (await rpc({ type: 'buo:service/jobs.list' })).find(
+          (item) => item.plan.id === job.plan.id,
+        )?.run.cursor === 1,
+      25_000,
+    );
+    const stopped = await stopBackground();
+    // No runtime messages or page navigation during this wait: recovery must
+    // come from the browser alarm, rather than an artificial test RPC wakeup.
+    const deadline = Date.now() + 60_000;
+    while (
+      !paths.every((path) => requests.includes(path)) &&
+      Date.now() < deadline
+    )
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    assert(
+      paths.every((path) => requests.includes(path)),
+      'Alarm recovery must open every remaining destination.',
+    );
+    for (const path of paths)
+      assert.equal(
+        requests.filter((item) => item === path).length,
+        1,
+        'Acknowledged work must not repeat.',
+      );
+    await driver.wait(
+      async () =>
+        (await rpc({ type: 'buo:service/jobs.list' })).find(
+          (item) => item.plan.id === job.plan.id,
+        )?.run.status === 'completed',
+      15_000,
+    );
+    report.assertions.push(
+      'real background termination and alarm-only recovery without replaying acknowledged tabs',
+    );
+    report.backgroundRecovery = stopped.kind;
+    await settings({ tabCreationDelay: 0.125 });
+  },
+);
+
+test(
   'a 5000-entry list saves and exports exactly; an oversized sync copy preserves local data',
   { timeout: 120_000 },
   async () => {
@@ -557,5 +848,52 @@ test(
     report.assertions.push(
       '5000 exact saved/exported entries and oversized-sync rejection',
     );
+  },
+);
+
+test(
+  'real Chrome storage quota failure preserves the active library and existing recovery records',
+  { skip: target !== 'chrome', timeout: 90_000 },
+  async () => {
+    await page('new-list.html');
+    const before = await rpc({ type: 'buo:service/library.read' });
+    const filled = await native(
+      'const bytes = await api.storage.local.getBytesInUse(null); const limit = api.storage.local.QUOTA_BYTES; if (!Number.isSafeInteger(limit)) throw new Error("Missing quota constant"); const length = limit - bytes - 65536; if (length < 1) throw new Error("Profile is already at quota"); await api.storage.local.set({"buo-test:quota": "q".repeat(length)}); return {bytes, limit};',
+    );
+    try {
+      const response = await native(
+        'return await api.runtime.sendMessage(arguments[0]);',
+        {
+          type: 'buo:service/library.mutate',
+          input: {
+            id: id(),
+            expectedHead: before.head,
+            command: {
+              kind: 'list.create',
+              name: 'Quota must not replace the library',
+              lines: [destination + '/quota?' + 'q'.repeat(128 * 1024)],
+            },
+          },
+        },
+      );
+      assert.equal(response.ok, false);
+      assert.equal(response.error, 'STORAGE_WRITE_FAILED');
+      const after = await rpc({ type: 'buo:service/library.read' });
+      assert.deepEqual(after, before);
+      assert.equal(
+        (await native('return await api.storage.local.get("buo-test:quota");'))[
+          'buo-test:quota'
+        ].length,
+        filled.limit - filled.bytes - 65536,
+      );
+      report.quotaBytes = filled.limit;
+      report.assertions.push(
+        'real local quota failure leaves active head/data and test filler intact',
+      );
+    } finally {
+      await native(
+        'await api.storage.local.remove("buo-test:quota"); return true;',
+      );
+    }
   },
 );
