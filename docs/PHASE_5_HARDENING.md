@@ -39,12 +39,17 @@ Sources: [page authentication and routing](../src/application/page-router.ts#L43
 [epoch-bound storage adapter](../src/application/storage/session-workspace.ts#L220),
 [window membership and cleanup](../src/application/storage/session-workspace.ts#L261),
 [browser session adapter](../src/infrastructure/browser/private-workspace.ts#L12),
+[Chromium private database](../src/infrastructure/browser/incognito-store.ts#L12),
 [scope-bound tab effects](../src/infrastructure/browser/opening.ts#L124) and
 [private background services](../src/entrypoints/background.ts#L113).
 `test/unit/private-workspace.test.ts` covers namespace isolation, publication
 faults, interruption, joined/disjoint windows, stale callbacks, cleanup and
 authorization. Private sync/global-preference restrictions are enforced in
 the background, as well as displayed in the UI.
+The IndexedDB adapter also refuses malformed root records instead of treating
+them as an empty store; its regression test verifies that no replacement write
+occurs. UI change notifications carry keys only through context-local runtime
+messages; private values are never copied into shared session storage.
 
 ## Accessibility and browser fixes
 
@@ -77,6 +82,7 @@ the background, as well as displayed in the UI.
   now removes only the current context's `buo-root` subtree, accepting the
   expected missing-root case and surfacing other failures. Each context mirrors
   regular saved lists; private-only names never become menu entries.
+  See [the browser menu adapter](../src/infrastructure/browser/opening.ts#L187).
 
 ## Browser test setup
 
@@ -90,6 +96,9 @@ absent. The harness refuses the managed Chromium installation; testing uses
 unmanaged CI browsers. Chrome uses its matching SUID sandbox helper on Ubuntu;
 the sandbox is not disabled. Firefox's driver receives explicit system access
 for extension-page navigation in the controlled test profile.
+The fresh Chrome profile enables Developer mode before changing the private
+grant, and ChromeDriver's `enableExtensionTargets` capability exposes newly
+opened extension pages. Neither setting changes the managed local browser.
 
 Each artifact records the source SHA, actual browser/OS versions, assertion
 summary, axe results, screenshots and the synthetic volume-save duration.
@@ -113,7 +122,8 @@ The runtime suite checks:
    private windows, capture isolation and final-window session cleanup. Entire
    local/sync stores must be identical before and after private work.
 5. Forced background termination after an acknowledged tab, followed by alarm
-   recovery. During the wait the harness sends no extension RPC or navigation;
+   recovery. The progress document is closed first, including its pending UI
+   refresh timer. During the wait the harness sends no extension RPC or navigation;
    its HTTP server observes remaining destinations once each. This proves
    recovery of acknowledged work, not exactly-once effects at a crash boundary.
 6. Held tabs: opaque helper URLs, no initial destination request, destination
@@ -133,7 +143,24 @@ The runtime suite checks:
 
 ## Validation and remaining release gates
 
-Local validation covers 266 modern and 49 frozen legacy checks, strict
+The complete Linux matrix passed on source
+[`6fc3b4a7d9db7b98d97a477281b8b1ccf3392e14`](https://github.com/EuanRiggans/BulkURLOpener/commit/6fc3b4a7d9db7b98d97a477281b8b1ccf3392e14),
+including the recovery check with the UI closed:
+[browser run 41516448590](https://github.com/EuanRiggans/BulkURLOpener/actions/runs/41516448590).
+
+| Browser        | Actual version | Runtime checks                       | Axe scans / violations | 5,000-entry save |
+| -------------- | -------------- | ------------------------------------ | ---------------------- | ---------------- |
+| Chrome stable  | 156.0.8078.80  | 14 passed                            | 27 / 0                 | 479 ms           |
+| Firefox stable | 159.0          | 13 passed; Chrome quota test skipped | 27 / 0                 | 467 ms           |
+| Firefox ESR    | 153.6.0        | 13 passed; Chrome quota test skipped | 27 / 0                 | 669 ms           |
+
+These save times are individual synthetic CI measurements, not performance
+guarantees. Chrome's real local-quota check used 10,485,760 bytes. Firefox refused
+`about:config` with a visible job requiring review; Chrome acknowledged a tab
+rewritten to `chrome://config/`. A tab acknowledgement does not prove usable
+privileged-page contents. No browser restriction was bypassed.
+
+Local validation covers 267 modern and 49 frozen legacy checks, strict
 TypeScript, lint/formatting, both builds, generated-resource checks and Mozilla
 validation with the existing single reviewed Preact warning exception.
 

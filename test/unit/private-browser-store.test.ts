@@ -12,6 +12,7 @@ import { createIncognitoStore } from '../../src/infrastructure/browser/incognito
 import { observeWorkspace } from '../../src/infrastructure/browser/change-events';
 
 afterEach(() => {
+  native.extension.inIncognitoContext = false;
   vi.clearAllMocks();
   vi.unstubAllGlobals();
 });
@@ -28,6 +29,54 @@ it('refuses every private database operation before opening a regular partition'
     'PRIVATE_ACCESS_REQUIRED',
   );
   expect(open).not.toHaveBeenCalled();
+});
+
+it('retains a malformed private database root instead of initializing over it', async () => {
+  native.extension.inIncognitoContext = true;
+  const put = vi.fn();
+  type Request = { result: unknown; onsuccess?: () => void };
+  type Transaction = {
+    onabort?: () => void;
+    oncomplete?: () => void;
+    abort(): void;
+    objectStore(): unknown;
+  };
+  const db = {
+    transaction: () => {
+      let aborted = false;
+      const transaction: Transaction = {
+        abort: () => {
+          aborted = true;
+          queueMicrotask(() => transaction.onabort?.());
+        },
+        objectStore: () => ({
+          put,
+          get: () => {
+            const request: Request = { result: null };
+            queueMicrotask(() => {
+              request.onsuccess?.();
+              if (!aborted) transaction.oncomplete?.();
+            });
+            return request;
+          },
+        }),
+      };
+      return transaction;
+    },
+  };
+  vi.stubGlobal('indexedDB', {
+    open: () => {
+      const request: Request = { result: db };
+      queueMicrotask(() => request.onsuccess?.());
+      return request;
+    },
+  });
+  const store = createIncognitoStore();
+  await expect(store.read()).rejects.toThrow('PRIVATE_SESSION_INVALID');
+  await expect(
+    store.write({ 'buo:private:v1:replacement': 'must not overwrite' }),
+  ).rejects.toThrow('PRIVATE_SESSION_INVALID');
+  expect(put).not.toHaveBeenCalled();
 });
 
 it('accepts authenticated private change keys without copying message values and unsubscribes', () => {

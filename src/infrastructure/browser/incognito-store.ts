@@ -42,7 +42,12 @@ export function createIncognitoStore() {
       request.onsuccess = () => {
         try {
           const raw: unknown = request.result;
-          const store = v.parse(jsonObjectSchema, raw ?? {});
+          const parsed = v.safeParse(
+            jsonObjectSchema,
+            raw === undefined ? {} : raw,
+          );
+          requireCondition(parsed.success, 'PRIVATE_SESSION_INVALID');
+          const store = parsed.output;
           result = work(store);
           if (mode === 'readwrite') objectStore.put(store, 'records');
         } catch (error) {
