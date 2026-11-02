@@ -212,6 +212,25 @@ afterEach(async (context) => {
     return;
   await driver.switchTo().window(normalRootHandle);
   await page('popup.html');
+  if (target === 'chrome') {
+    const { targetInfos } = await driver.sendAndGetDevToolsCommand(
+      'Target.getTargets',
+      {},
+    );
+    const normal = targetInfos.find(
+      (item) => item.targetId === normalRootHandle.replace(/^CDwindow-/, ''),
+    );
+    assert(normal, 'The regular test tab must still exist.');
+    for (const item of targetInfos)
+      if (
+        item.type === 'page' &&
+        item.browserContextId !== normal.browserContextId
+      )
+        await driver.sendDevToolsCommand('Target.closeTarget', {
+          targetId: item.targetId,
+        });
+    return;
+  }
   await native(
     'for (const window of await api.windows.getAll()) if (window.incognito) await api.windows.remove(window.id); return true;',
   );
@@ -313,12 +332,16 @@ async function clickText(text) {
     .findElement(By.xpath(`//button[normalize-space(.)='${text}']`))
     .click();
 }
-async function findPage(prefix, privateMode) {
+async function findPage(prefix, privateMode, windowId) {
   for (const handle of await driver.getAllWindowHandles()) {
     await driver.switchTo().window(handle);
     if (!(await driver.getCurrentUrl()).startsWith(root + prefix)) continue;
     if (
-      (await rpc({ type: 'buo:service/context.read' })).private === privateMode
+      (await rpc({ type: 'buo:service/context.read' })).private ===
+        privateMode &&
+      (windowId === undefined ||
+        (await native('return (await api.tabs.getCurrent()).windowId;')) ===
+          windowId)
     )
       return handle;
   }
@@ -330,10 +353,18 @@ async function stopBackground() {
       'Target.getTargets',
       {},
     );
+    const handle = (await driver.getWindowHandle()).replace(/^CDwindow-/, '');
+    const context = before.targetInfos.find(
+      (item) => item.targetId === handle,
+    )?.browserContextId;
     const worker = before.targetInfos.find(
-      (item) => item.type === 'service_worker' && item.url.startsWith(root),
+      (item) =>
+        item.type === 'service_worker' &&
+        item.url.startsWith(root) &&
+        item.browserContextId === context,
     );
     assert(worker, 'The extension worker must be running before termination.');
+    await driver.sendDevToolsCommand('ServiceWorker.enable', {});
     await driver.sendDevToolsCommand('ServiceWorker.stopAllWorkers', {});
     await driver.wait(
       async () =>
@@ -732,19 +763,24 @@ test(
       resumed.data.lists.some((list) => list.name === 'Private café example'),
     );
     assert.equal(resumed.draft.lines[0], marker);
-    const sessionData = await native(
-      'return await api.storage.session.get(null);',
-    );
+    const sessionData =
+      target === 'firefox'
+        ? await native('return await api.storage.session.get(null);')
+        : await native(
+            'return await new Promise((resolve, reject) => { const request = indexedDB.open("bulk-url-opener-private", 1); request.onerror = () => reject(request.error); request.onsuccess = () => { const db = request.result; const read = db.transaction("state").objectStore("state").get("records"); read.onsuccess = () => { resolve(read.result); db.close(); }; read.onerror = () => reject(read.error); }; });',
+          );
     assert(JSON.stringify(sessionData).includes('synthetic-private'));
     const second = await native(
       'const window = await api.windows.create({incognito: true, url: api.runtime.getURL("/popup.html")}); return {id: window.id};',
     );
-    await driver.switchTo().window(normalHandle);
+    const secondHandle = await driver.wait(
+      () => findPage('popup.html', true, second.id),
+      20_000,
+    );
     await native(
       'await api.windows.remove(arguments[0]); return true;',
       privateWindow.id,
     );
-    await driver.wait(() => findPage('popup.html', true), 20_000);
     assert(
       (await rpc({ type: 'buo:service/workspace.read' })).data.lists.some(
         (list) => list.name === 'Private café example',
@@ -757,10 +793,9 @@ test(
     assert(
       normalCaptured.lines.every((url) => !url.includes('synthetic-private')),
     );
-    await native(
-      'await api.windows.remove(arguments[0]); return true;',
-      second.id,
-    );
+    await driver.switchTo().window(secondHandle);
+    await driver.close();
+    await driver.switchTo().window(normalHandle);
     await driver.wait(
       async () =>
         Object.keys(
@@ -768,6 +803,32 @@ test(
         ).every((key) => !key.startsWith('buo:private:v1:')),
       30_000,
     );
+    if (target === 'chrome') {
+      assert.equal(
+        (await native('return await indexedDB.databases();')).some(
+          (database) => database.name === 'bulk-url-opener-private',
+        ),
+        false,
+        'Private IndexedDB must not exist in the regular partition.',
+      );
+      const freshWindow = await native(
+        'const window = await api.windows.create({incognito: true, url: api.runtime.getURL("/popup.html")}); return {id: window.id};',
+      );
+      await driver.wait(
+        () => findPage('popup.html', true, freshWindow.id),
+        20_000,
+      );
+      const fresh = await rpc({ type: 'buo:service/workspace.read' });
+      assert(
+        !fresh.data.lists.some((list) => list.name === 'Private café example'),
+      );
+      assert(!JSON.stringify(fresh.draft).includes('synthetic-private'));
+      await driver.close();
+      await driver.switchTo().window(normalHandle);
+      report.privateStorage =
+        'isolated incognito IndexedDB; new private context starts fresh';
+    } else
+      report.privateStorage = 'storage.session; final-window namespace cleared';
     assert.deepEqual(
       await native('return await api.storage.local.get(null);'),
       beforeLocal,

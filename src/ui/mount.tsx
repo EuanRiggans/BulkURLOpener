@@ -1,7 +1,7 @@
 import { render } from 'preact';
 import type { ComponentChildren } from 'preact';
 import { useEffect, useState } from 'preact/hooks';
-import { browser } from 'wxt/browser';
+import { observeWorkspace } from '../infrastructure/browser/change-events';
 import { extensionRequest } from '../infrastructure/browser/client';
 import { appearanceSchema, contextSchema } from '../domain/workspace-schema';
 import { scopedKeys } from '../shared/storage-events';
@@ -35,11 +35,11 @@ function Appearance({ children }: { children: ComponentChildren }) {
     const changed = (changes: Record<string, unknown>, area: string) => {
       if (scopedKeys(changes, area).includes('buo:v2:head')) void read();
     };
-    browser.storage.onChanged.addListener(changed);
+    const stopObserving = observeWorkspace(changed);
     void read();
     return () => {
       alive = false;
-      browser.storage.onChanged.removeListener(changed);
+      stopObserving();
     };
   }, []);
   return (

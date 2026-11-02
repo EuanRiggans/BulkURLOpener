@@ -1,12 +1,19 @@
 ## Unreleased Changes
 
+### 2.0.0 redevelopment preview — Phase 5
+
+- Added browser-granted private workspaces with temporary session-only lists, drafts, snapshots and jobs; regular data and account sync remain separate.
+- Improved keyboard focus, busy-state announcements, contrast, long-text wrapping and high-zoom layout while keeping the popup simple.
+- Added real Chrome/Firefox/Firefox ESR checks for accessibility, private isolation, background alarm recovery, held tabs, transfers and large lists.
+- Documented remaining manual account-sync, assistive-technology, platform and signed-upgrade release checks. This remains an unreleased preview.
+
 ### 2.0.0 redevelopment preview — Phase 4
 
 - Restored the simple popup, separate list editors, all 17 preferences and settings autosave on the modern browser-only services.
 - Added reviewed JSON import/export, manual browser-account sync with quota feedback, optional snapshots and legacy-archive inspection.
 - Added standalone extraction/reversal tools, help, privacy-conscious diagnostics and remaining-destination copy/download.
 - Kept the basic `Bulk URL Opener > Open Lists > [saved lists]` menu. Preserved legacy data and verified history; added concurrent-draft and stale-edit protection.
-- This branch remains an unreleased preview. Real browser/accessibility/private-session and signed-upgrade checks are still outstanding.
+- At this checkpoint, real browser/accessibility/private-session and signed-upgrade checks remained outstanding.
 
 ## 1.12.0
 

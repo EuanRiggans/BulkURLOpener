@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'preact/hooks';
-import { browser } from 'wxt/browser';
+import { observeWorkspace } from '../../infrastructure/browser/change-events';
+import { scopedKeys } from '../../shared/storage-events';
 import { digest } from '../../domain/storage/json';
 import { requireCondition } from '../../domain/storage/errors';
 import {
@@ -51,11 +52,8 @@ export function RecoveryPanel() {
       area: string,
     ) => {
       if (
-        area !== 'local' ||
-        !Object.entries(changes).some(
-          ([key, change]) =>
-            key === 'buo:v2:head' ||
-            (key.startsWith('buo:v2:job:') && change.oldValue === undefined),
+        !scopedKeys(changes, area).some(
+          (key) => key === 'buo:v2:head' || key.startsWith('buo:v2:job:'),
         )
       )
         return;
@@ -73,7 +71,7 @@ export function RecoveryPanel() {
           });
       }, 150);
     };
-    browser.storage.onChanged.addListener(changed);
+    const stopObserving = observeWorkspace(changed);
     void migrationRequest({ type: 'buo:migration/status' }, statusSchema)
       .then((value) => {
         if (mounted) setStatus(value);
@@ -87,7 +85,7 @@ export function RecoveryPanel() {
     return () => {
       mounted = false;
       clearTimeout(timer);
-      browser.storage.onChanged.removeListener(changed);
+      stopObserving();
     };
   }, []);
 

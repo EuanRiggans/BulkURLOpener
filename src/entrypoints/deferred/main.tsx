@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { browser } from 'wxt/browser';
+import { observeWorkspace } from '../../infrastructure/browser/change-events';
 import * as v from 'valibot';
 import { extensionRequest } from '../../infrastructure/browser/client';
 import { pageUrl } from '../../infrastructure/browser/pages';
@@ -41,12 +41,12 @@ function Deferred() {
     };
     window.addEventListener('focus', trigger);
     document.addEventListener('visibilitychange', trigger);
-    browser.storage.onChanged.addListener(changed);
+    const stopObserving = observeWorkspace(changed);
     trigger();
     return () => {
       window.removeEventListener('focus', trigger);
       document.removeEventListener('visibilitychange', trigger);
-      browser.storage.onChanged.removeListener(changed);
+      stopObserving();
     };
   }, []);
   return (

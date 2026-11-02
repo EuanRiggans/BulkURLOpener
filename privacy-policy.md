@@ -49,14 +49,15 @@ archives.
 Private access requires the browser's extension permission for private windows.
 The private workspace starts with a copy of regular saved lists/preferences,
 excluding regular drafts and staging. Its edits, inputs, snapshots and jobs use
-only browser session storage. They clear when the last private window closes;
+temporary browser storage: Firefox session storage or Chromium's isolated
+incognito IndexedDB partition. They clear when the last private window closes;
 browser restart or extension reload can also clear that temporary storage.
 Private and regular capture are separated. Private data does not automatically
 enter local storage or account sync. Startup and global context-menu preferences
 are managed from regular windows; the global menu lists regular saved lists.
 Private sessions cannot upload sync data or perform persistent migration.
 Explicit copy/download actions can create files or clipboard content that outlast
-the private session. Private-session runtime coverage remains part of Phase 5.
+the private session.
 
 Recovery downloads are user-requested local JSON files. They can contain list
 names, URLs, searches, preferences, unsaved input and other retained extension
@@ -74,7 +75,8 @@ Uninstalling an extension or clearing its browser data can remove that storage;
 keep an independent recovery file or backed-up profile before upgrade testing.
 No recovery files or browser profiles are sent to this public source repository.
 
-Browser runtime, cross-device delivery, private-session handling and genuine
-same-identity upgrades still require verification before release. Store
-declarations require final review. The Phase 4 preview requests
+Phase 5 includes Linux browser checks for private isolation and cleanup. Other
+platforms, remote cross-device delivery and genuine same-identity upgrades still
+require verification before release. Store declarations require final review.
+The Phase 5 preview requests
 `storage`, `tabs`, `alarms` and `contextMenus`, with no broad host access.

@@ -61,8 +61,10 @@ backups, reviewed reconciliation and a serialized local publication/undo protoco
 Migration is explicit on the options page. [Phase 3](PHASE_3_SERVICES.md) adds
 gated shared mutations, a URL policy, recoverable opening jobs, startup and basic
 menus. [Phase 4](PHASE_4_FLOWS.md) connects the functional popup, editors,
-settings, transfer/sync, snapshots, tools and help. Phase 5 remains the real
-browser/accessibility/private-window hardening gate.
+settings, transfer/sync, snapshots, tools and help. [Phase 5](PHASE_5_HARDENING.md)
+adds private session isolation, accessibility improvements and Linux browser
+automation. Its [remaining manual checks](PHASE_5_MANUAL_CHECKS.md) stay explicit
+release gates; remote account delivery and signed upgrades are separate evidence.
 
 Keep entrypoints thin. Separate pure URL/list/settings models from browser APIs,
 storage, scheduling and UI. Use a validated, versioned canonical store in

@@ -8,7 +8,7 @@ export default defineConfig({
   manifest: ({ browser }) => ({
     name: 'Bulk URL Opener',
     description: 'Open URLs in batches and manage saved lists.',
-    incognito: 'spanning',
+    incognito: browser === 'firefox' ? 'spanning' : 'split',
     action: { default_title: 'Bulk URL Opener' },
     permissions: ['storage', 'tabs', 'alarms', 'contextMenus'],
     icons: {

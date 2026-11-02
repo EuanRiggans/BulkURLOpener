@@ -3,6 +3,7 @@ import { SessionWorkspace } from '../../application/storage/session-workspace';
 import type { StorageCoordinator } from '../../application/storage/coordinator';
 import { requireCondition } from '../../domain/storage/errors';
 import { newRequestId } from '../../shared/ids';
+import { createIncognitoStore } from './incognito-store';
 import {
   ensureRecoveryAlarm,
   privateRecoveryAlarm,
@@ -12,11 +13,17 @@ import {
 export function createPrivateWorkspace(
   regular: StorageCoordinator,
 ): SessionWorkspace {
+  const store = import.meta.env.FIREFOX
+    ? {
+        read: () => browser.storage.session.get(null),
+        write: (values: Record<string, unknown>) =>
+          browser.storage.session.set(values),
+        remove: (keys: string[]) => browser.storage.session.remove(keys),
+      }
+    : createIncognitoStore();
   return new SessionWorkspace(
     {
-      read: () => browser.storage.session.get(null),
-      write: (values) => browser.storage.session.set(values),
-      remove: (keys) => browser.storage.session.remove(keys),
+      ...store,
       windows: async () =>
         (await browser.windows.getAll())
           .filter((window) => window.incognito && window.id !== undefined)

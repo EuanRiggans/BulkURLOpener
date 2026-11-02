@@ -9,6 +9,8 @@ export function serviceError(error: unknown): string {
       'Allow this extension in private windows using the browser extension settings first.',
     PRIVATE_SETUP_REQUIRED:
       'Open extension Settings in a regular window and migrate your data first. Private windows cannot perform persistent migration.',
+    PRIVATE_STORAGE_UNAVAILABLE:
+      'Temporary private storage is unavailable. Try reopening the private workspace.',
     PRIVATE_SYNC_UNAVAILABLE:
       'Browser-account sync is unavailable in a private session. Use a regular window for sync.',
     PRIVATE_MIGRATION_UNAVAILABLE:

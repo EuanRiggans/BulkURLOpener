@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import { browser } from 'wxt/browser';
+import { observeWorkspace } from '../../infrastructure/browser/change-events';
 import * as v from 'valibot';
 import {
   jobViewSchema,
@@ -51,12 +51,12 @@ function Jobs() {
         void read();
       }, 150);
     }
-    browser.storage.onChanged.addListener(changed);
+    const stopObserving = observeWorkspace(changed);
     void read();
     return () => {
       mounted = false;
       clearTimeout(timer);
-      browser.storage.onChanged.removeListener(changed);
+      stopObserving();
     };
   }, []);
   async function control(job: JobView, action: JobControl) {

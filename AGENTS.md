@@ -10,6 +10,9 @@ Shared services and opening invariants are recorded in
 [Phase 3](docs/PHASE_3_SERVICES.md).
 Functional flows, transfer/draft contracts and the parity checklist are recorded
 in [Phase 4](docs/PHASE_4_FLOWS.md).
+Private-session isolation and real-browser/accessibility evidence are recorded
+in [Phase 5](docs/PHASE_5_HARDENING.md), with remaining manual release checks in
+[the test protocol](docs/PHASE_5_MANUAL_CHECKS.md).
 
 - Work on `redevelopment`. Its fresh starting commit is
   `4eb346d3bca8a12e6fa0f7e5ba891fcb711d9bf7`.
@@ -71,7 +74,11 @@ automatically replay unconfirmed tab creation or reuse window/tab IDs across
 browser sessions without explicit retargeting. Helper URLs carry opaque refs.
 Opaque startup/runtime metadata uses storage.session with its named locks;
 user-data writes still belong to the coordinator. Private requests must use the
-separate session adapter and epoch-bound coordinator. Never route their drafts,
+separate ephemeral adapter and epoch-bound coordinator: Firefox storage.session,
+Chromium split-mode incognito IndexedDB. Chromium shares storage.session across
+split contexts; do not put private contents there. Its private background must
+never execute regular startup/jobs, nor may the regular background open the
+private database. Never route private drafts,
 list edits, snapshots, imports or jobs to local/sync storage. Ended-session
 callbacks must fail, and final-window cleanup must share the private writer lock
 with publication and alarm signalling. Global menus and startup stay regular.

@@ -54,7 +54,10 @@ for (const browser of ['chrome', 'firefox']) {
   }
 
   assert.equal(manifest.manifest_version, 3);
-  assert.equal(manifest.incognito, 'spanning');
+  assert.equal(
+    manifest.incognito,
+    browser === 'firefox' ? 'spanning' : 'split',
+  );
   assert.equal(manifest.version, packageJson.version);
   assert.equal(manifest.name, 'Bulk URL Opener');
   assert.equal(manifest.action.default_popup, 'popup.html');

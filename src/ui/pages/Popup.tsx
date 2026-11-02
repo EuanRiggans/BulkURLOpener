@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import * as v from 'valibot';
-import { browser } from 'wxt/browser';
+import { observeWorkspace } from '../../infrastructure/browser/change-events';
 import { scopedKeys } from '../../shared/storage-events';
 import { pageUrl } from '../../infrastructure/browser/pages';
 import { extensionRequest } from '../../infrastructure/browser/client';
@@ -114,10 +114,10 @@ export function Popup() {
           if (alive) setError(serviceError(reason));
         });
     };
-    browser.storage.onChanged.addListener(changed);
+    const stopObserving = observeWorkspace(changed);
     return () => {
       alive = false;
-      browser.storage.onChanged.removeListener(changed);
+      stopObserving();
     };
   }, []);
 

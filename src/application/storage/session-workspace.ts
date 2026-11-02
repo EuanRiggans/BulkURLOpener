@@ -43,7 +43,7 @@ export interface SessionPort {
 export type PrivateWorkspace = { id: string; storage: StorageCoordinator };
 
 // An explicit session baseline reuses the canonical verifier and command/job
-// services. Its entire namespace is mapped to storage.session by the adapter.
+// services. Its namespace is mapped to the browser's ephemeral private store.
 export async function sessionSeed(
   raw: CanonicalData,
   sessionId: string,

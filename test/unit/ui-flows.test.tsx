@@ -23,6 +23,7 @@ const fake = vi.hoisted(() => ({
 vi.mock('wxt/browser', () => ({
   browser: {
     runtime: {
+      onMessage: { addListener: vi.fn(), removeListener: vi.fn() },
       sendMessage: fake.sendMessage,
       getURL: (page: string) => 'chrome-extension://synthetic-extension' + page,
       getManifest: () => ({ version: '2.0.0', manifest_version: 3 }),

@@ -37,6 +37,9 @@ import { newRequestId } from '../shared/ids';
 import * as v from 'valibot';
 
 export default defineBackground(() => {
+  const privateProcess =
+    !import.meta.env.FIREFOX && browser.extension.inIncognitoContext;
+  const managesPrivate = import.meta.env.FIREFOX || privateProcess;
   const storage = createStorageCoordinator(ensureRecoveryAlarm);
   const privateWorkspaces = createPrivateWorkspace(storage);
   const opening = new OpeningService(
@@ -111,6 +114,7 @@ export default defineBackground(() => {
     return privateBundle;
   }
   async function privateBootstrap() {
+    if (!managesPrivate) return;
     const workspace = await privateWorkspaces.existing();
     if (workspace) await bundle(workspace).runner.kick();
     else privateBundle = null;
@@ -124,6 +128,11 @@ export default defineBackground(() => {
             ? await browser.windows.getLastFocused()
             : await browser.windows.get(id);
         requireCondition(window.id !== undefined, 'NO_TARGET_WINDOW');
+        if (!import.meta.env.FIREFOX)
+          requireCondition(
+            Boolean(window.incognito) === privateProcess,
+            'WINDOW_SCOPE_MISMATCH',
+          );
         if (sender.tab?.incognito !== undefined)
           requireCondition(
             sender.tab.incognito === Boolean(window.incognito),
@@ -156,6 +165,7 @@ export default defineBackground(() => {
   async function bootstrap(force = false) {
     safe(menus.refresh(force));
     safe(privateBootstrap());
+    if (privateProcess) return;
     try {
       await storage.requireActiveData();
     } catch {
@@ -201,6 +211,7 @@ export default defineBackground(() => {
     safe(
       (async () => {
         safe(menus.refresh(true));
+        if (privateProcess) return;
         await startup.event();
         await runner.kick();
       })(),
@@ -208,16 +219,21 @@ export default defineBackground(() => {
   );
   browser.runtime.onInstalled.addListener(() => safe(bootstrap(true)));
   browser.alarms.onAlarm.addListener((alarm) => {
-    if ([recoveryAlarm, dueAlarm].includes(alarm.name)) safe(bootstrap());
+    if (!privateProcess && [recoveryAlarm, dueAlarm].includes(alarm.name))
+      safe(bootstrap());
     if ([privateRecoveryAlarm, privateDueAlarm].includes(alarm.name))
       safe(privateBootstrap());
   });
   browser.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && changes[headKey]) safe(bootstrap());
+    if (area === 'local' && changes[headKey]) {
+      if (privateProcess) safe(menus.refresh());
+      else safe(bootstrap());
+    }
   });
   browser.windows.onCreated.addListener((window) => {
-    if (window.incognito && window.id !== undefined)
+    if (managesPrivate && window.incognito && window.id !== undefined)
       safe(privateWorkspaces.noteWindow(window.id));
+    if (privateProcess) return;
     safe(
       (async () => {
         await startup.recover();
