@@ -77,6 +77,19 @@ before(
         );
       driver = await builder.build();
       await driver.get('chrome://extensions');
+      await driver.executeScript(
+        'chrome.developerPrivate.updateProfileConfiguration({inDeveloperMode: true});',
+      );
+      await driver.wait(
+        () =>
+          driver.executeAsyncScript(function (done) {
+            chrome.developerPrivate.getProfileConfiguration((configuration) =>
+              done(configuration.inDeveloperMode),
+            );
+          }),
+        15_000,
+        'A fresh unpacked test profile must enable Developer mode.',
+      );
       await driver.wait(
         async () => {
           root = await driver.executeScript(
@@ -1023,14 +1036,22 @@ test(
     await driver
       .findElement(By.css('.transfer-review input[type=checkbox]'))
       .click();
-    await clickText('Upload reviewed copy');
     await driver.wait(
-      async () =>
-        (await driver.findElement(By.css('[role=status]')).getText()).includes(
-          'verified locally',
+      until.elementIsEnabled(
+        await driver.findElement(
+          By.xpath('//button[normalize-space(.)="Upload reviewed copy"]'),
         ),
-      20_000,
+      ),
+      10_000,
     );
+    await clickText('Upload reviewed copy');
+    await driver.wait(async () => {
+      const state = await driver.executeScript(
+        'return {alerts: Array.from(document.querySelectorAll("[role=alert]")).map(element => element.textContent), status: Array.from(document.querySelectorAll("[role=status]")).map(element => element.textContent)};',
+      );
+      assert.deepEqual(state.alerts, [], JSON.stringify(state));
+      return state.status.some((text) => text.includes('verified locally'));
+    }, 20_000);
     const remote = await native('return await api.storage.sync.get(null);');
     assert.equal(remote.user_settings, JSON.stringify(legacy));
     assert.deepEqual(remote['bulk-url-opener-v2'].data, portable);
