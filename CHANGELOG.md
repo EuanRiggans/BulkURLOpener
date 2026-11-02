@@ -1,5 +1,7 @@
 ## Unreleased Changes
 
+- Set the popup's preferred width to 540px while retaining narrow-screen and high-zoom reflow.
+
 ### 2.0.0 redevelopment preview — Phase 6
 
 - Removed Electron runtime/CLI/icons, the replaced legacy extension, vendored UI assets and the old desktop build/test scripts.

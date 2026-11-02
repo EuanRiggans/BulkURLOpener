@@ -10,6 +10,7 @@
   --muted: #505d70;
   --primary: #1d4ed8;
   --on-primary: #ffffff;
+  --popup-width: 540px;
   background: var(--background);
   color: var(--foreground);
 }
@@ -53,7 +54,7 @@ body {
   margin: 0;
 }
 .popup {
-  width: min(36rem, 100vw);
+  width: var(--popup-width);
   max-width: 100%;
   min-width: 0;
   padding: 1.25rem;
@@ -202,7 +203,7 @@ button:hover:not(:disabled),
   font-size: 0.875rem;
 }
 .popup-session-notice {
-  max-width: 36rem;
+  max-width: var(--popup-width);
 }
 .full-page nav,
 .full-page .preview-notice {
