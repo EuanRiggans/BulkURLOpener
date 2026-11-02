@@ -55,7 +55,7 @@ body {
 .popup {
   width: min(36rem, 100vw);
   max-width: 100%;
-  min-width: min(20rem, 100vw);
+  min-width: 0;
   padding: 1.25rem;
 }
 .popup-header,
