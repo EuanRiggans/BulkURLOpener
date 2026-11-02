@@ -65,6 +65,9 @@ settings, transfer/sync, snapshots, tools and help. [Phase 5](PHASE_5_HARDENING.
 adds private session isolation, accessibility improvements and Linux browser
 automation. Its [remaining manual checks](PHASE_5_MANUAL_CHECKS.md) stay explicit
 release gates; remote account delivery and signed upgrades are separate evidence.
+[Phase 6](PHASE_6_CLEANUP.md) removes the retired runtime/vendor code and its
+characterizations while retaining historical fixtures and migration. It adds
+verified source/browser packages, bundled licences and clean reproduction checks.
 
 Keep entrypoints thin. Separate pure URL/list/settings models from browser APIs,
 storage, scheduling and UI. Use a validated, versioned canonical store in

@@ -13,6 +13,8 @@ in [Phase 4](docs/PHASE_4_FLOWS.md).
 Private-session isolation and real-browser/accessibility evidence are recorded
 in [Phase 5](docs/PHASE_5_HARDENING.md), with remaining manual release checks in
 [the test protocol](docs/PHASE_5_MANUAL_CHECKS.md).
+Browser-only cleanup and source/package reproduction are recorded in
+[Phase 6](docs/PHASE_6_CLEANUP.md) and [the build guide](docs/BUILD_AND_PACKAGE.md).
 
 - Work on `redevelopment`. Its fresh starting commit is
   `4eb346d3bca8a12e6fa0f7e5ba891fcb711d9bf7`.
@@ -33,9 +35,9 @@ in [Phase 5](docs/PHASE_5_HARDENING.md), with remaining manual release checks in
 - The basic context menu is exactly:
   `Bulk URL Opener > Open Lists > [saved lists]`.
   Use stable internal list IDs; do not add tools/settings/selection menus to it.
-- Legacy characterization tests document observed behaviour, including defects.
-  Tests labelled `legacy defect:` are not requirements to retain those bugs.
-  Replacement modules need tests for the corrected behaviour.
+- Retired legacy characterizations remain in Git at the Phase 5 checkpoint.
+  Their `legacy defect:` cases are not requirements to retain those bugs.
+  Maintain the modern tests for corrected behaviour and historical data formats.
 - Keep raw migration sources and verified recovery data. Do not silently choose
   between conflicting storage copies or erase malformed records.
 - This repository is public. Never commit user-provided exports, browser
@@ -51,13 +53,14 @@ in [Phase 5](docs/PHASE_5_HARDENING.md), with remaining manual release checks in
 - Proceed within the phase authorized in the current conversation. Publishing,
   merging to the default branch and store releases are separate actions.
 
-Phase 0 changes documentation, fixtures, tests and their execution setup only.
-The legacy `app/`, desktop source and dependency versions remain unchanged in
-that phase. Use Node.js 24 and `npm run test:baseline` for its tests.
-
-The Phase 1 toolchain is browser-only. Use `npm ci` and `npm run validate` on
-Node.js 24; `npm run dev` / `npm run dev:firefox` run the preview. The legacy
-application remains a frozen reference until replacement coverage is complete.
+Historical phase records describe their own checkpoints, including commands and
+paths retired in Phase 6. The current source has no Electron or replaced `app/`
+implementation. Keep the historical migration fixtures and converters; removing
+obsolete code must never delete existing browser data or legacy-format support.
+Use `npm ci` and `npm run validate` on Node.js 24; `npm run dev` /
+`npm run dev:firefox` run the preview. Packaging includes only intended tracked
+source, or the exported source manifest. Keep notices for every bundled runtime
+helper current, and verify source/archive reproduction before phase publication.
 New runtime writes belong to the background storage coordinator and its shared
 Web Lock. Keep legacy document/local/sync sources read-only. Preserve immutable
 backups/stages/history, verify full content and expected revisions, and publish

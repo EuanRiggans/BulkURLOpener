@@ -2,7 +2,7 @@
 
 A browser extension for opening URLs and searches in batches and managing saved lists.
 
-**The `redevelopment` branch is a development preview.** Phase 5 adds session-only private workspaces, accessibility improvements and automated real-browser checks to the functional extension. Use an isolated development browser profile; manual release checks and signed-upgrade verification remain required.
+**The `redevelopment` branch is a development preview.** Phase 6 removes the retired desktop/legacy implementation and adds verified browser/source packages to the functional extension. Use an isolated development browser profile; manual release checks and signed-upgrade verification remain required.
 
 The popup stays focused on URL entry and simple actions. Creating and editing lists use separate pages. The context menu is `Bulk URL Opener → Open Lists → [saved lists]`; enable it in Settings for an existing profile. Fresh installations enable the basic menu. Settings, Data & recovery, Tools, Help and Opening jobs have full pages.
 
@@ -24,17 +24,20 @@ Use WXT's isolated development profile or a separate disposable profile. Never u
 
 ## Builds and checks
 
-| Command                 | Purpose                                                                                     |
-| ----------------------- | ------------------------------------------------------------------------------------------- |
-| `npm run build`         | Production-mode Chromium MV3 preview in `.output/chrome-mv3/`.                              |
-| `npm run build:firefox` | Production-mode Firefox MV3 preview in `.output/firefox-mv3/`.                              |
-| `npm run build:all`     | Build both browsers.                                                                        |
-| `npm run check`         | Strict TypeScript, ESLint, formatting, Vitest and legacy characterization.                  |
-| `npm run check:build`   | Check generated manifests, resources, CSP, icons and build contents. Run after both builds. |
-| `npm run lint:firefox`  | Mozilla validation of the generated Firefox extension.                                      |
-| `npm run validate`      | All of the above checks and both builds.                                                    |
-| `npm run test:baseline` | Legacy behaviour tests using Node's built-in runner; no dependency installation required.   |
-| `npm run test:browser`  | Real-browser suite; requires configured disposable Selenium browsers as in browser CI.      |
+| Command                         | Purpose                                                                                     |
+| ------------------------------- | ------------------------------------------------------------------------------------------- |
+| `npm run build`                 | Production-mode Chromium MV3 preview in `.output/chrome-mv3/`.                              |
+| `npm run build:firefox`         | Production-mode Firefox MV3 preview in `.output/firefox-mv3/`.                              |
+| `npm run build:all`             | Build both browsers.                                                                        |
+| `npm run check`                 | Strict TypeScript, ESLint, formatting, modern service/UI tests and packaging tests.         |
+| `npm run check:build`           | Check generated manifests, resources, CSP, icons and build contents. Run after both builds. |
+| `npm run lint:firefox`          | Mozilla validation of the generated Firefox extension.                                      |
+| `npm run validate`              | All of the above checks and both builds.                                                    |
+| `npm run test:packaging`        | Archive safety, source selection and deterministic packaging checks.                        |
+| `npm run test:browser`          | Real-browser suite; requires configured disposable Selenium browsers as in browser CI.      |
+| `npm run package`               | Build verified Chrome/Firefox/source ZIPs and SHA-256 checksums in `dist/`.                 |
+| `npm run check:packages`        | Verify every archive member, its bytes and checksums against the current source/build.      |
+| `npm run check:reproducibility` | Install/build/test the source ZIP in a fresh directory and compare output bytes.            |
 
 WXT generates browser-specific background configuration: a Chromium service worker and Firefox background scripts. Source version `2.0.0` comes from `package.json`; this is an unreleased redevelopment version, not a store submission.
 
@@ -55,13 +58,22 @@ src/ui/                      Preact pages/components, form flows and local CSS
 public/icon/                 Existing extension icons
 test/unit/                   Modern Vitest checks
 test/browser/                Real extension/runtime and axe accessibility checks
-test/characterization/       Executable legacy behaviour baseline
+test/packaging/              Archive safety and reproducibility contracts
 test/fixtures/legacy/        Synthetic historical storage examples
-scripts/                     Generated-build verification
+scripts/                     Source/build/package/licence verification and packaging
+licenses/                    Reviewed upstream licence missing from published WXT packages
 docs/                        Baseline, decisions, phases and validation evidence
 ```
 
-`app/` remains the untouched legacy extension reference. Desktop files (`main.js`, `utilities/`, `build/`, `test/spec.js`, and `unstable-build-script.sh`) remain historical source pending cleanup. Electron, Spectron, Mocha and desktop build/start commands are removed from the active npm toolchain. The old shell script and desktop instructions from Git history do not apply to this toolchain.
+The retired `app/`, Electron runtime/CLI/icons, vendored UI assets and executable legacy tests have been removed. Their final reference is [the Phase 5 checkpoint](https://github.com/EuanRiggans/BulkURLOpener/tree/daaf7b0ccbf0381a33ff566f7d565a98c2f1b10a). Historical data fixtures and the active migration/recovery implementation remain. The old desktop build commands do not apply to this browser-only project.
+
+## Preview packages
+
+After validation, use `npm run package` and `npm run check:packages`. They produce Chrome, Firefox and source ZIPs plus `dist/SHA256SUMS`. These are unsigned development previews. They are not uploaded to an extension store.
+
+Source packages include Git-tracked maintained files, tests, fixtures, documentation, licences and the lockfile. Stage or commit intended new files before packaging; untracked files are excluded. Exported source packages contain an explicit file manifest so they can rebuild without a `.git` directory. Full validation also requires Git for the checkout-selection packaging test. `npm run check:reproducibility` verifies a clean install from that archive, both browser builds and all package bytes, including exclusion of synthetic private files.
+
+See [build and package instructions](docs/BUILD_AND_PACKAGE.md) for archive contents, licence updates and reproduction. Keep `dist/` dedicated to the current version's generated packages; verification rejects unexpected files there.
 
 ## Data and privacy
 
@@ -93,6 +105,7 @@ This is a public repository. Never commit personal exports, browser profiles, pr
 - [Phase 4 functional flows and feature parity](docs/PHASE_4_FLOWS.md)
 - [Phase 5 accessibility, private sessions and browser evidence](docs/PHASE_5_HARDENING.md)
 - [Remaining manual release checks](docs/PHASE_5_MANUAL_CHECKS.md)
+- [Phase 6 cleanup and package evidence](docs/PHASE_6_CLEANUP.md)
 - [Historical storage fixtures](test/fixtures/legacy/README.md)
 
 Completed phases are committed, pushed to `redevelopment` and verified against GitHub. Linux automation exercises Chrome stable, Firefox stable and Firefox ESR with synthetic data. It does not establish screen-reader listening, other operating systems, remote account-sync delivery or genuine signed upgrades; those remain separate release gates.

@@ -26,13 +26,16 @@ What did you expect to happen?
 **Screenshots**
 If you have any relevant screenshots, please add them.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. Windows 10, Ubuntu 18.04]
- - Browser / Desktop version of app. Are you running the app as a browser extension / addon, or are you running it as a desktop app.
- - Browser (If applicable) [e.g. chrome, firefox]
- - Version [e.g. 1.7.0]
+**Browser extension environment:**
+ - OS and version:
+ - Browser and version (include ESR if applicable):
+ - Extension version or redevelopment commit:
+ - Regular or private window:
 
-**Debug Info (If you are on version 1.10.0 or newer, please go to settings => Debug info and copy that data here):**
+**Reviewed diagnostics (optional):**
+For the redevelopment preview, use Help & about → Prepare report and review it
+before sharing. Keep personal exports, browser profiles, destinations and list
+names out of this public issue. Use synthetic examples to reproduce data problems.
 
 **Additional context**
 Add any other context about the problem here.

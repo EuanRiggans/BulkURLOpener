@@ -6,17 +6,7 @@ import tseslint from 'typescript-eslint';
 const typescriptFiles = ['**/*.ts', '**/*.tsx'];
 
 export default defineConfig([
-  globalIgnores([
-    'node_modules/**',
-    '.wxt/**',
-    '.output/**',
-    'app/**',
-    'build/**',
-    'dist/**',
-    'main.js',
-    'utilities/**',
-    'test/spec.js',
-  ]),
+  globalIgnores(['node_modules/**', '.wxt/**', '.output/**', 'dist/**']),
   {
     ...js.configs.recommended,
     files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
@@ -60,10 +50,6 @@ export default defineConfig([
         },
       ],
     },
-  },
-  {
-    files: ['test/characterization/**/*.js'],
-    languageOptions: { sourceType: 'commonjs' },
   },
   {
     files: ['test/browser/**/*.mjs'],

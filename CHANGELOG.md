@@ -1,5 +1,13 @@
 ## Unreleased Changes
 
+### 2.0.0 redevelopment preview — Phase 6
+
+- Removed Electron runtime/CLI/icons, the replaced legacy extension, vendored UI assets and the old desktop build/test scripts.
+- Retired 49 executable legacy characterizations; kept their Git reference, all historical JSON fixtures and the maintained migration/recovery tests.
+- Added deterministic Chrome/Firefox/source ZIPs, checksums, archive-content checks, bundled licence notices and clean source reproduction.
+- Updated compatible test tooling, pinned the stale-issue action and added grouped weekly dependency/action updates.
+- Preserved the Phase 5 browser functionality and data contracts. This remains an unreleased preview awaiting the separate release gates.
+
 ### 2.0.0 redevelopment preview — Phase 5
 
 - Added browser-granted private workspaces with temporary session-only lists, drafts, snapshots and jobs; regular data and account sync remain separate.

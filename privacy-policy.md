@@ -1,6 +1,6 @@
 # Bulk URL Opener Privacy Policy
 
-This policy describes the unreleased `redevelopment` preview through Phase 5 implementation.
+This policy describes the unreleased `redevelopment` preview through Phase 6 cleanup.
 It is not a statement that the preview has replaced a published store version.
 
 The preview stores extension data locally and sends no saved lists, preferences,
@@ -78,5 +78,5 @@ No recovery files or browser profiles are sent to this public source repository.
 Phase 5 includes Linux browser checks for private isolation and cleanup. Other
 platforms, remote cross-device delivery and genuine same-identity upgrades still
 require verification before release. Store declarations require final review.
-The Phase 5 preview requests
+The preview requests
 `storage`, `tabs`, `alarms` and `contextMenus`, with no broad host access.

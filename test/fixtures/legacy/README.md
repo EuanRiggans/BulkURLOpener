@@ -44,16 +44,17 @@ historic origins also need settings/default/startup reference remapping.
 
 ## How the fixtures are checked
 
-`npm run test:baseline` executes the current legacy code against in-memory
-storage and API/element doubles. It checks readable JSON/export round trips,
-snapshots, current defaults and the shape/provenance of historical fixture data.
-Tests labelled `legacy defect:` demonstrate current breakage. Old comma-string
-fixtures are deliberately not asserted to load successfully in current code.
+The executable legacy baseline was retired with the replaced implementation in
+Phase 6. Its 49 observations remain at
+[the Phase 5 checkpoint](https://github.com/EuanRiggans/BulkURLOpener/tree/daaf7b0ccbf0381a33ff566f7d565a98c2f1b10a/test/characterization),
+including defects that the replacement deliberately corrects.
 
-Future migration tests must consume these same raw values and verify recovery,
-conflict handling and preservation, rather than assuming that baseline fixture
-shape checks establish a working converter. Add fixtures for newly discovered
-installed-profile representations and keep their provenance explicit.
+`npm run test:unit` exercises the maintained migration/recovery, transfer and
+service tests against these raw values. Those tests verify reconciliation,
+explicit choices for ambiguous comma records, zero-ID references, quota/fault
+recovery and retained original records. The JSON fixtures remain unchanged by
+cleanup. Add fixtures for newly discovered installed-profile representations
+and keep their provenance explicit; do not reintroduce the retired runtime.
 
 Do not copy actual user exports or their list names/URLs into public fixtures.
 The zero-ID case tests valid legacy semantics without retaining personal content;

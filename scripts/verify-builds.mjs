@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { verifyLicenses } from './licenses.mjs';
 
 const project = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const packageJson = JSON.parse(
@@ -32,6 +33,7 @@ for (const browser of ['chrome', 'firefox']) {
     readFileSync(join(output, 'manifest.json'), 'utf8'),
   );
   const files = filesWithin(output);
+  const bundledPackages = new Set();
 
   function resource(reference, from = 'manifest.json') {
     const base = new URL(from, 'https://extension.invalid/');
@@ -139,7 +141,7 @@ for (const browser of ['chrome', 'firefox']) {
       `Unexpected packaged source: ${name}`,
     );
     assert(
-      /\.(html|js|css|json|png|map)$/.test(name),
+      name === 'LICENSES.txt' || /\.(html|js|css|json|png|map)$/.test(name),
       `Unexpected packaged file: ${name}`,
     );
     if (file.endsWith('.js')) {
@@ -159,7 +161,18 @@ for (const browser of ['chrome', 'firefox']) {
         `External CSS/font request in ${name}`,
       );
     }
+    if (file.endsWith('.js.map')) {
+      const map = JSON.parse(readFileSync(file, 'utf8'));
+      for (const source of map.sources) {
+        const name = /node_modules\/((?:@[^/]+\/)?[^/]+)/.exec(source)?.[1];
+        if (name) bundledPackages.add(name);
+      }
+    }
   }
+  verifyLicenses(
+    bundledPackages,
+    readFileSync(resource('LICENSES.txt'), 'utf8'),
+  );
 
   const bytes = files.reduce((total, file) => total + statSync(file).size, 0);
   console.log(
