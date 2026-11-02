@@ -69,7 +69,10 @@ export function ListEditor({ mode }: { mode: 'create' | 'edit' }) {
     setNotice('');
   }
   return (
-    <PageLayout title={mode === 'create' ? 'New list' : 'Edit list'}>
+    <PageLayout
+      title={mode === 'create' ? 'New list' : 'Edit list'}
+      busy={busy}
+    >
       {error && (
         <p role="alert" class="error-message">
           {error}

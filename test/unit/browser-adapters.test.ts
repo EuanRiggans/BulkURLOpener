@@ -121,4 +121,13 @@ describe('native browser API adapters', () => {
       periodInMinutes: 0.5,
     });
   });
+  it('supports the native alarm API when creation returns void instead of a Promise', async () => {
+    vi.stubEnv('FIREFOX', 'true');
+    native.permissions.getAll.mockResolvedValue({
+      data_collection: ['browsingActivity', 'searchTerms'],
+    });
+    native.alarms.get.mockResolvedValueOnce(undefined);
+    native.alarms.create.mockReturnValueOnce(undefined);
+    await expect(prepareOpeningRecovery()).resolves.toBeUndefined();
+  });
 });

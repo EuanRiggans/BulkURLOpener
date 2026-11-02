@@ -5,12 +5,14 @@ import { PreviewNotice } from './PreviewNotice';
 export function PageLayout({
   title,
   children,
+  busy = false,
 }: {
   title: string;
   children: ComponentChildren;
+  busy?: boolean;
 }) {
   return (
-    <main class="full-page">
+    <main class="full-page" aria-busy={busy}>
       <nav aria-label="Main navigation">
         <a href={pageUrl('/popup.html')}>Opener</a>
         <a href={pageUrl('/options.html')}>Settings</a>

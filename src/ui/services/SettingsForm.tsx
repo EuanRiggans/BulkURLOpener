@@ -152,14 +152,14 @@ export function SettingsForm() {
   }, [settings, delay, dirty, busy, conflict, error]);
   if (!settings || !active)
     return (
-      <section aria-labelledby="preferences-heading">
+      <section aria-labelledby="preferences-heading" aria-busy={busy}>
         <h2 id="preferences-heading">Preferences</h2>
         <p role="status">{busy ? 'Loading preferences…' : error}</p>
         {!busy && <button onClick={() => void load()}>Load preferences</button>}
       </section>
     );
   return (
-    <section aria-labelledby="preferences-heading">
+    <section aria-labelledby="preferences-heading" aria-busy={busy}>
       <h2 id="preferences-heading">Preferences</h2>
       <p>
         Valid changes save automatically after a short pause. You can also save

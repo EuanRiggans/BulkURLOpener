@@ -120,7 +120,7 @@ export function DataPage() {
     await reload();
   }
   return (
-    <PageLayout title="Data & recovery">
+    <PageLayout title="Data & recovery" busy={busy}>
       <p>
         These pages contain your saved destinations. Share exports only with
         people you intend to give them to.

@@ -31,6 +31,7 @@ export function Popup() {
   const [notice, setNotice] = useState('');
   const [job, setJob] = useState<JobView | null>(null);
   const textarea = useRef<HTMLTextAreaElement>(null);
+  const initialFocus = useRef(false);
   const writer = useRef({
     client: newRequestId(),
     sequence: 0,
@@ -89,6 +90,12 @@ export function Popup() {
       alive = false;
     };
   }, []);
+  useEffect(() => {
+    if (!busy && workspace && !initialFocus.current) {
+      initialFocus.current = true;
+      if (document.activeElement === document.body) textarea.current?.focus();
+    }
+  }, [busy, workspace]);
   useEffect(() => {
     let alive = true;
     const changed = (changes: Record<string, unknown>, area: string) => {
@@ -179,7 +186,7 @@ export function Popup() {
   const pageParameters =
     targetWindow() === null ? {} : { window: targetWindow()! };
   return (
-    <main class="popup">
+    <main class="popup" aria-busy={busy}>
       <header class="popup-header">
         <h1>Bulk URL Opener</h1>
         <div class="compact-links">
@@ -251,6 +258,17 @@ export function Popup() {
           Clear
         </button>
       </div>
+      {workspace?.data.settings.autoOpenLists && (
+        <label class="check-label">
+          <input
+            id="pause-auto-open"
+            type="checkbox"
+            checked={override}
+            onChange={(event) => setOverride(event.currentTarget.checked)}
+          />
+          Pause automatic opening for this popup
+        </label>
+      )}
       <label for="saved-lists">Saved lists</label>
       <div class="saved-list-controls">
         <select
@@ -356,16 +374,6 @@ export function Popup() {
           Delete
         </button>
       </div>
-      {workspace?.data.settings.autoOpenLists && (
-        <label class="check-label">
-          <input
-            type="checkbox"
-            checked={override}
-            onChange={(event) => setOverride(event.currentTarget.checked)}
-          />
-          Pause automatic opening for this popup
-        </label>
-      )}
       <p class="hint popup-status" role="status">
         {busy ? 'Working…' : notice}{' '}
         {job && (
