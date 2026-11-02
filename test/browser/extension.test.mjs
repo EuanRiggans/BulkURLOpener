@@ -84,7 +84,7 @@ before(
       root = 'chrome-extension://' + root + '/';
     } else {
       const options = new firefox.Options()
-        .addArguments('-headless', '--allow-system-access')
+        .addArguments('-headless', '-remote-allow-system-access')
         .setPreference(
           'extensions.webextensions.uuids',
           JSON.stringify({ [addonId]: uuid }),

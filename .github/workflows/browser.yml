@@ -42,6 +42,18 @@ jobs:
           chrome-version: stable
           install-dependencies: true
           install-chromedriver: true
+      - if: matrix.browser == 'chrome'
+        name: Configure the matching Chrome sandbox helper
+        env:
+          BUO_BROWSER_BIN: ${{ steps.chrome.outputs.chrome-path }}
+        shell: bash
+        run: |
+          buo_browser_dir="$(dirname "$BUO_BROWSER_BIN")"
+          buo_sandbox="$buo_browser_dir/chrome_sandbox"
+          test -f "$buo_sandbox"
+          sudo chown root:root "$buo_sandbox"
+          sudo chmod 4755 "$buo_sandbox"
+          printf 'CHROME_DEVEL_SANDBOX=%s\n' "$buo_sandbox" >> "$GITHUB_ENV"
       - if: matrix.browser == 'firefox'
         id: firefox
         uses: browser-actions/setup-firefox@0bc507ddf224827e3b1af68e014d5e42ab93e795 # v1
@@ -61,6 +73,7 @@ jobs:
           BUO_TEST_LABEL: ${{ matrix.label }}
           BUO_BROWSER_BIN: ${{ steps.chrome.outputs.chrome-path || steps.firefox.outputs.firefox-path }}
           BUO_DRIVER_BIN: ${{ steps.chrome.outputs.chromedriver-path || format('{0}/geckodriver', runner.temp) }}
+          MOZ_REMOTE_ALLOW_SYSTEM_ACCESS: '1'
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
