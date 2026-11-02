@@ -65,7 +65,9 @@ before(
       builder.setChromeOptions(options);
       if (process.env.BUO_DRIVER_BIN)
         builder.setChromeService(
-          new chrome.ServiceBuilder(process.env.BUO_DRIVER_BIN),
+          new chrome.ServiceBuilder(process.env.BUO_DRIVER_BIN)
+            .enableVerboseLogging()
+            .loggingTo(resolve(evidence, 'driver.log')),
         );
       driver = await builder.build();
       await driver.get('chrome://extensions');
@@ -82,7 +84,7 @@ before(
       root = 'chrome-extension://' + root + '/';
     } else {
       const options = new firefox.Options()
-        .addArguments('-headless')
+        .addArguments('-headless', '--allow-system-access')
         .setPreference(
           'extensions.webextensions.uuids',
           JSON.stringify({ [addonId]: uuid }),
@@ -99,13 +101,18 @@ before(
         await driver.installAddon(resolve('.output/firefox-mv3'), true),
         addonId,
       );
-      root = 'moz-extension://' + uuid + '/';
+      await driver.setContext(firefox.Context.CHROME);
+      root = await driver.executeScript(
+        'return WebExtensionPolicy.getByID(arguments[0]).getURL("/");',
+        addonId,
+      );
+      await driver.setContext(firefox.Context.CONTENT);
     }
     await driver.manage().setTimeouts({ script: 30_000, pageLoad: 30_000 });
     const capabilities = await driver.getCapabilities();
     report.version = capabilities.get('browserVersion');
     report.platform = capabilities.get('platformName');
-    await driver.get(root + 'options.html');
+    await navigate(root + 'options.html');
     await driver.wait(until.elementLocated(By.css('h1')), 15_000);
   },
   { timeout: 120_000 },
@@ -142,8 +149,20 @@ async function rpc(request) {
   return response.value;
 }
 async function page(path) {
-  await driver.get(root + path);
+  await navigate(root + path);
   await driver.wait(until.elementLocated(By.css('h1')), 15_000);
+}
+async function navigate(url) {
+  if (target === 'chrome') return driver.get(url);
+  await driver.setContext(firefox.Context.CHROME);
+  try {
+    await driver.executeScript(
+      'gBrowser.selectedBrowser.loadURI(Services.io.newURI(arguments[0]), {triggeringPrincipal: Services.scriptSecurityManager.getSystemPrincipal()});',
+      url,
+    );
+  } finally {
+    await driver.setContext(firefox.Context.CONTENT);
+  }
 }
 async function clickText(text) {
   await driver
