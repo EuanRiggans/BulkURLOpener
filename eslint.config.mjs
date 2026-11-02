@@ -65,4 +65,8 @@ export default defineConfig([
     files: ['test/characterization/**/*.js'],
     languageOptions: { sourceType: 'commonjs' },
   },
+  {
+    files: ['test/browser/**/*.mjs'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
 ]);

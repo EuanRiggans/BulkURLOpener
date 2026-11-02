@@ -75,4 +75,5 @@ dist
 /work/
 /private/
 /browser-profiles/
+/test-results/
 .env.*
