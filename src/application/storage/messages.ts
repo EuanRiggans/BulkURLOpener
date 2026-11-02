@@ -9,14 +9,24 @@ type Reply = { ok: true; value: unknown } | { ok: false; error: string };
 export function createMigrationListener(
   storage: StorageCoordinator,
   identity: { id: string; root: string },
+  privateMode = false,
 ) {
   async function handle(message: unknown, sender: Sender): Promise<Reply> {
     try {
       if (!isRecoveryPage(sender, identity.id, identity.root))
         throw new MigrationError('UNAUTHORIZED_PAGE');
-      if (sender.tab?.incognito)
+      if (Boolean(sender.tab?.incognito) !== privateMode)
         throw new MigrationError('PRIVATE_WINDOW_UNSUPPORTED');
       const request = v.parse(requestSchema, message);
+      if (
+        privateMode &&
+        [
+          'buo:migration/prepare',
+          'buo:migration/commit',
+          'buo:migration/rollback',
+        ].includes(request.type)
+      )
+        throw new MigrationError('PRIVATE_MIGRATION_UNAVAILABLE');
       let value: unknown;
       switch (request.type) {
         case 'buo:migration/status':
@@ -36,7 +46,9 @@ export function createMigrationListener(
           value = await storage.rollback(request.expected);
           break;
         case 'buo:migration/export':
-          value = await storage.exportRecovery(request.document);
+          value = await storage.exportRecovery(
+            privateMode ? {} : request.document,
+          );
           break;
         case 'buo:migration/backup':
           value = await storage.backup(request.digest);

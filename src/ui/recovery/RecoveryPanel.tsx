@@ -251,7 +251,9 @@ export function RecoveryPanel() {
                 );
                 setStatus(value);
                 setReview(null);
-                setNotice('Opening and list editing arrive in later phases.');
+                setNotice(
+                  'Data migrated and verified. Reload preferences or return to the opener.',
+                );
               });
             }}
           />

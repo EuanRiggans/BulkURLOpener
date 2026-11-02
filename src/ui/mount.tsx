@@ -1,17 +1,24 @@
 import { render } from 'preact';
 import type { ComponentChildren } from 'preact';
-import { useEffect } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import { browser } from 'wxt/browser';
 import { extensionRequest } from '../infrastructure/browser/client';
-import { appearanceSchema } from '../domain/workspace-schema';
+import { appearanceSchema, contextSchema } from '../domain/workspace-schema';
+import { scopedKeys } from '../shared/storage-events';
 import './styles.css';
 
 function Appearance({ children }: { children: ComponentChildren }) {
+  const [privateMode, setPrivateMode] = useState(false);
   useEffect(() => {
     let alive = true;
     async function read() {
-      if (location.pathname === '/deferred.html') return;
       try {
+        const context = await extensionRequest(
+          { type: 'buo:service/context.read' },
+          contextSchema,
+        );
+        if (alive) setPrivateMode(context.private);
+        if (location.pathname === '/deferred.html') return;
         const settings = await extensionRequest(
           { type: 'buo:service/appearance.read' },
           appearanceSchema,
@@ -26,8 +33,7 @@ function Appearance({ children }: { children: ComponentChildren }) {
       }
     }
     const changed = (changes: Record<string, unknown>, area: string) => {
-      if (area === 'local' && Object.hasOwn(changes, 'buo:v2:head'))
-        void read();
+      if (scopedKeys(changes, area).includes('buo:v2:head')) void read();
     };
     browser.storage.onChanged.addListener(changed);
     void read();
@@ -36,7 +42,25 @@ function Appearance({ children }: { children: ComponentChildren }) {
       browser.storage.onChanged.removeListener(changed);
     };
   }, []);
-  return <>{children}</>;
+  return (
+    <>
+      {privateMode && (
+        <aside
+          class={
+            location.pathname === '/popup.html'
+              ? 'session-notice popup-session-notice'
+              : 'session-notice'
+          }
+          aria-label="Private session"
+        >
+          <strong>Private session.</strong> Lists, edits and jobs here are
+          temporary and clear when the last private window closes. Sync is
+          unavailable.
+        </aside>
+      )}
+      {children}
+    </>
+  );
 }
 export function mount(content: ComponentChildren): void {
   const root = document.getElementById('app');

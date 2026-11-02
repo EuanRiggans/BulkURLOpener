@@ -176,6 +176,13 @@ export function SettingsForm() {
           saveSettings();
         }}
       >
+        {active.private && (
+          <p class="hint">
+            Private preferences last for this session. Browser startup and the
+            global context menu are managed in a regular window; that menu uses
+            regular saved lists.
+          </p>
+        )}
         {groups.map((group) => (
           <fieldset key={group.title} disabled={busy}>
             <legend>{group.title}</legend>
@@ -190,6 +197,9 @@ export function SettingsForm() {
                       id={id}
                       type="checkbox"
                       checked={value}
+                      disabled={
+                        Boolean(active.private) && key === 'contextMenuEnabled'
+                      }
                       onChange={(event) =>
                         change(key, event.currentTarget.checked)
                       }
@@ -242,6 +252,7 @@ export function SettingsForm() {
                   <label for={id}>{label}</label>
                   <select
                     id={id}
+                    disabled={Boolean(active.private) && key === 'openOnLaunch'}
                     value={value ?? ''}
                     onChange={(event) =>
                       change(
@@ -254,7 +265,11 @@ export function SettingsForm() {
                   >
                     {options.map(([option, text]) => (
                       <option key={option} value={option}>
-                        {text}
+                        {active.private &&
+                        key === 'currentlyOpenedTabsDisplay' &&
+                        option === 'allOpenedTabs'
+                          ? 'All private windows'
+                          : text}
                       </option>
                     ))}
                   </select>

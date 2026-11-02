@@ -4,6 +4,7 @@ import { extensionRequest } from '../../infrastructure/browser/client';
 import { pageUrl } from '../../infrastructure/browser/pages';
 import {
   archiveSummarySchema,
+  contextSchema,
   draftResultSchema,
   recoveredInputSchema,
   snapshotListSchema,
@@ -49,6 +50,12 @@ export function DataPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [privateMode, setPrivateMode] = useState<boolean | null>(null);
+  useEffect(() => {
+    void extensionRequest({ type: 'buo:service/context.read' }, contextSchema)
+      .then((context) => setPrivateMode(context.private))
+      .catch(() => setPrivateMode(true));
+  }, []);
   useEffect(() => {
     if (review) setUpload(null);
   }, [review]);
@@ -259,6 +266,12 @@ export function DataPage() {
       </section>
       <section aria-labelledby="sync-title">
         <h2 id="sync-title">Manual browser-account sync</h2>
+        {privateMode && (
+          <p>
+            Browser-account sync is disabled in private sessions. Lists and
+            preferences here remain temporary.
+          </p>
+        )}
         <p>
           Upload and download are explicit. Enable extension sync in your
           browser account. Chrome-family and Firefox accounts do not share data;
@@ -274,14 +287,14 @@ export function DataPage() {
           <input
             type="checkbox"
             checked={legacySync}
-            disabled={busy}
+            disabled={busy || privateMode !== false}
             onChange={(event) => setLegacySync(event.currentTarget.checked)}
           />
           Read the legacy sync copy even if a modern copy exists
         </label>
         <div class="actions">
           <button
-            disabled={busy}
+            disabled={busy || privateMode !== false}
             onClick={() =>
               void perform(async () => {
                 setReview(
@@ -297,7 +310,7 @@ export function DataPage() {
             Inspect sync download
           </button>
           <button
-            disabled={busy}
+            disabled={busy || privateMode !== false}
             onClick={() =>
               void perform(async () => {
                 setUpload(

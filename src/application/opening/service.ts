@@ -30,6 +30,7 @@ export const openInputSchema = v.variant('kind', [
     ...common,
     kind: v.literal('lines'),
     lines: v.array(v.string()),
+    trigger: v.optional(v.picklist(['popup', 'context-menu'])),
   }),
   v.strictObject({
     ...common,
@@ -128,7 +129,7 @@ export class OpeningService {
         origin: active.head,
         trigger:
           request.kind === 'lines'
-            ? 'popup'
+            ? (request.trigger ?? 'popup')
             : request.kind === 'startup'
               ? 'startup'
               : request.trigger,

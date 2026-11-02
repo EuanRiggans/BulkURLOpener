@@ -11,6 +11,7 @@ import {
 import { extensionRequest } from '../../infrastructure/browser/client';
 import { pageUrl } from '../../infrastructure/browser/pages';
 import { serviceError } from './errors';
+import { scopedKeys } from '../../shared/storage-events';
 
 const activeSchema = v.strictObject({ head: headSchema, data: dataSchema });
 const pendingSchema = v.array(
@@ -53,8 +54,7 @@ export function ServiceControls() {
     }
     function changed(changes: Record<string, unknown>, area: string) {
       if (
-        area !== 'local' ||
-        !Object.keys(changes).some(
+        !scopedKeys(changes, area).some(
           (key) => key === 'buo:v2:head' || key.startsWith('buo:v2:state:'),
         )
       )

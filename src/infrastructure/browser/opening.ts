@@ -12,6 +12,8 @@ import * as v from 'valibot';
 
 export const recoveryAlarm = 'buo-opening-recovery';
 export const dueAlarm = 'buo-opening-due';
+export const privateRecoveryAlarm = 'buo-private-opening-recovery';
+export const privateDueAlarm = 'buo-private-opening-due';
 const startupKey = 'buo:v2:startup-session';
 const runtimeSessionKey = 'buo:v2:runtime-session';
 
@@ -44,22 +46,29 @@ export async function requireTransmissionConsent(): Promise<void> {
       'DATA_CONSENT_REQUIRED',
     );
 }
-export async function prepareOpeningRecovery(): Promise<void> {
+export async function prepareOpeningRecovery(
+  privateMode = false,
+): Promise<void> {
   await requireTransmissionConsent();
-  await ensureRecoveryAlarm();
+  await ensureRecoveryAlarm(privateMode);
 }
-export async function ensureRecoveryAlarm(): Promise<void> {
+export async function ensureRecoveryAlarm(privateMode = false): Promise<void> {
+  const name = privateMode ? privateRecoveryAlarm : recoveryAlarm;
   try {
-    const alarm = await deadline(browser.alarms.get(recoveryAlarm));
+    const alarm = await deadline(browser.alarms.get(name));
     if (!alarm || alarm.periodInMinutes !== 0.5)
-      await deadline(
-        browser.alarms.create(recoveryAlarm, { periodInMinutes: 0.5 }),
-      );
+      await deadline(browser.alarms.create(name, { periodInMinutes: 0.5 }));
   } catch {
     throw new MigrationError('RECOVERY_ALARM_FAILED');
   }
 }
 export async function normalWindow(id: number | null): Promise<number> {
+  return scopedWindow(id, false);
+}
+export async function scopedWindow(
+  id: number | null,
+  privateMode: boolean,
+): Promise<number> {
   let window;
   try {
     window =
@@ -69,7 +78,10 @@ export async function normalWindow(id: number | null): Promise<number> {
   } catch {
     throw new MigrationError('NO_TARGET_WINDOW');
   }
-  requireCondition(!window.incognito, 'PRIVATE_WINDOW_UNSUPPORTED');
+  requireCondition(
+    Boolean(window.incognito) === privateMode,
+    'WINDOW_SCOPE_MISMATCH',
+  );
   requireCondition(
     typeof window.id === 'number' && window.id >= 0,
     'NO_TARGET_WINDOW',
@@ -86,47 +98,66 @@ export async function startupWindow(id: number | null): Promise<number> {
   return window.id;
 }
 
-function deadline<T>(work: Promise<T>): Promise<T> {
+function deadline<T>(work: Promise<T> | T): Promise<T> {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(
       () => reject(new MigrationError('BROWSER_OPERATION_TIMEOUT')),
       10_000,
     );
-    void work.then(resolve, reject).finally(() => clearTimeout(timer));
+    void Promise.resolve(work)
+      .then(resolve, reject)
+      .finally(() => clearTimeout(timer));
   });
 }
 
-export function browserRunnerPort(kick: () => void): RunnerPort {
+export function browserRunnerPort(
+  kick: () => void,
+  options: {
+    private?: boolean;
+    guard?: () => Promise<void>;
+    sessionId?: () => Promise<string>;
+  } = {},
+): RunnerPort {
+  const privateMode = options.private ?? false;
+  const guard = options.guard ?? (() => Promise.resolve());
+  const recovery = privateMode ? privateRecoveryAlarm : recoveryAlarm;
+  const due = privateMode ? privateDueAlarm : dueAlarm;
   let timer: ReturnType<typeof setTimeout> | undefined;
   return {
     now: Date.now,
-    sessionId: browserSessionId,
+    sessionId: options.sessionId ?? browserSessionId,
     sleep: (milliseconds) =>
       new Promise((resolve) => setTimeout(resolve, milliseconds)),
     own: async (work) => {
       requireCondition(navigator.locks, 'LOCK_UNAVAILABLE');
       await navigator.locks.request(
-        'buo-v2-opening-runner',
+        'buo-v2-opening-runner' + (privateMode ? '-private' : ''),
         { ifAvailable: true },
         async (lock) => {
           if (lock) await work();
         },
       );
     },
-    ensureAlarm: prepareOpeningRecovery,
+    ensureAlarm: async () => {
+      await guard();
+      await prepareOpeningRecovery(privateMode);
+    },
     wake: (milliseconds) => {
       if (timer) clearTimeout(timer);
       timer = setTimeout(
         kick,
         Math.min(Math.max(0, milliseconds), 2_147_483_647),
       );
-      void browser.alarms
-        .create(dueAlarm, { when: Date.now() + Math.max(30_000, milliseconds) })
-        .catch(() => undefined);
+      void Promise.resolve(
+        browser.alarms.create(due, {
+          when: Date.now() + Math.max(30_000, milliseconds),
+        }),
+      ).catch(() => undefined);
     },
     createTab: async (url, windowId) => {
       await requireTransmissionConsent();
-      const target = await normalWindow(windowId);
+      await guard();
+      const target = await scopedWindow(windowId, privateMode);
       const tab = await deadline(
         browser.tabs.create({ url, windowId: target, active: false }),
       );
@@ -134,16 +165,23 @@ export function browserRunnerPort(kick: () => void): RunnerPort {
       return tab.id;
     },
     idle: async () => {
+      await guard();
       if (timer) clearTimeout(timer);
       timer = undefined;
       await deadline(
         Promise.all([
-          browser.alarms.clear(recoveryAlarm),
-          browser.alarms.clear(dueAlarm),
+          browser.alarms.clear(recovery),
+          browser.alarms.clear(due),
         ]),
       );
     },
     activateTab: async (tabId) => {
+      await guard();
+      const tab = await browser.tabs.get(tabId);
+      requireCondition(
+        Boolean(tab.incognito) === privateMode,
+        'WINDOW_SCOPE_MISMATCH',
+      );
       await deadline(browser.tabs.update(tabId, { active: true }));
     },
     deferredUrl: (job, index) => pageUrl('/deferred.html', { job, index }),

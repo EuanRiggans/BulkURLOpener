@@ -28,6 +28,7 @@ vi.mock('wxt/browser', () => ({
       getManifest: () => ({ version: '2.0.0', manifest_version: 3 }),
     },
     tabs: { create: fake.create },
+    windows: { getCurrent: () => Promise.resolve({ id: 1 }) },
     storage: {
       onChanged: {
         addListener: fake.addListener,
@@ -40,8 +41,19 @@ let app: HTMLDivElement;
 let services: SharedServices;
 let from = 'popup.html';
 let context: Awaited<ReturnType<typeof sharedSetup>>;
+let pendingRequests = 0;
+function unwrap(raw: unknown): unknown {
+  return raw &&
+    typeof raw === 'object' &&
+    'type' in raw &&
+    raw.type === 'buo:page' &&
+    'request' in raw
+    ? raw.request
+    : raw;
+}
 beforeEach(async () => {
   vi.clearAllMocks();
+  pendingRequests = 0;
   context = await sharedSetup();
   services = context.services;
   from = 'popup.html';
@@ -49,28 +61,34 @@ beforeEach(async () => {
   app = document.createElement('div');
   document.body.append(app);
   fake.sendMessage.mockImplementation(async (message) => {
-    if (
-      typeof message === 'object' &&
-      message !== null &&
-      'type' in message &&
-      String(message.type).startsWith('buo:migration/')
-    )
-      return new Promise((resolve) => {
-        createMigrationListener(context.storage, {
-          id: sender(from).id,
-          root: 'chrome-extension://synthetic-extension/',
-        })(message, sender(from), resolve);
-      });
+    pendingRequests++;
     try {
-      return {
-        ok: true,
-        value: await services.dispatch(message, sender(from)),
-      };
-    } catch (reason) {
-      return {
-        ok: false,
-        error: reason instanceof Error ? reason.message : 'REQUEST_FAILED',
-      };
+      message = unwrap(message);
+      if (
+        typeof message === 'object' &&
+        message !== null &&
+        'type' in message &&
+        String(message.type).startsWith('buo:migration/')
+      )
+        return await new Promise((resolve) => {
+          createMigrationListener(context.storage, {
+            id: sender(from).id,
+            root: 'chrome-extension://synthetic-extension/',
+          })(message, sender(from), resolve);
+        });
+      try {
+        return {
+          ok: true,
+          value: await services.dispatch(message, sender(from)),
+        };
+      } catch (reason) {
+        return {
+          ok: false,
+          error: reason instanceof Error ? reason.message : 'REQUEST_FAILED',
+        };
+      }
+    } finally {
+      pendingRequests--;
     }
   });
 });
@@ -81,9 +99,18 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 async function settle() {
-  await act(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 15));
-  });
+  await vi.waitFor(
+    async () => {
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+      expect(pendingRequests).toBe(0);
+      expect(app.textContent).not.toMatch(
+        /Working…|Loading preferences…|Saving…/,
+      );
+    },
+    { timeout: 3000, interval: 10 },
+  );
 }
 function node<T extends Element>(selector: string): T {
   const result = app.querySelector<T>(selector);
@@ -137,13 +164,15 @@ async function createList() {
   return 'list-' + token(1);
 }
 const opens = () =>
-  fake.sendMessage.mock.calls.filter(
-    ([message]) =>
-      typeof message === 'object' &&
-      message !== null &&
-      'type' in message &&
-      String(message.type).startsWith('buo:service/open.'),
-  );
+  fake.sendMessage.mock.calls
+    .map(([message]) => [unwrap(message)] as const)
+    .filter(
+      ([message]) =>
+        typeof message === 'object' &&
+        message !== null &&
+        'type' in message &&
+        String(message.type).startsWith('buo:service/open.'),
+    );
 
 describe('simple popup flows', () => {
   it('captures the initial tab scope without automatically opening or exposing inline list editors', async () => {
@@ -227,6 +256,7 @@ describe('simple popup flows', () => {
     let interrupted = false;
     fake.sendMessage.mockImplementation(async (message) => {
       const reply = await dispatch(message);
+      message = unwrap(message);
       if (
         !interrupted &&
         typeof message === 'object' &&

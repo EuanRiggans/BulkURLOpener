@@ -70,8 +70,11 @@ the separate runner lock for tab effects. Never
 automatically replay unconfirmed tab creation or reuse window/tab IDs across
 browser sessions without explicit retargeting. Helper URLs carry opaque refs.
 Opaque startup/runtime metadata uses storage.session with its named locks;
-user-data writes still belong to the coordinator. Private senders/targets are
-blocked before persistence until session-only execution is implemented/tested.
+user-data writes still belong to the coordinator. Private requests must use the
+separate session adapter and epoch-bound coordinator. Never route their drafts,
+list edits, snapshots, imports or jobs to local/sync storage. Ended-session
+callbacks must fail, and final-window cleanup must share the private writer lock
+with publication and alarm signalling. Global menus and startup stay regular.
 Mozilla validation has one narrowly source-mapped, version-pinned Preact vendor
 warning exception; new application warnings must not be silently added to it.
 

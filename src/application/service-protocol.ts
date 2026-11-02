@@ -14,6 +14,7 @@ const type = <A extends string>(action: A) =>
   v.literal(('buo:service/' + action) as `buo:service/${A}`);
 const windowId = v.optional(targetWindowSchema, null);
 export const serviceRequestSchema = v.variant('type', [
+  v.strictObject({ type: type('context.read') }),
   v.strictObject({ type: type('workspace.read'), windowId }),
   v.strictObject({
     type: type('draft.save'),
@@ -122,6 +123,18 @@ export function servicePage(
   }
 }
 export function allowedRequest(page: string, request: ServiceRequest): boolean {
+  if (request.type === 'buo:service/context.read')
+    return [
+      '/popup.html',
+      '/options.html',
+      '/new-list.html',
+      '/edit-list.html',
+      '/opening.html',
+      '/data.html',
+      '/tools.html',
+      '/help.html',
+      '/deferred.html',
+    ].includes(page);
   if (request.type === 'buo:service/deferred.load')
     return page === '/deferred.html';
   if (page === '/deferred.html') return false;

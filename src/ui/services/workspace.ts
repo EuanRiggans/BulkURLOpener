@@ -28,8 +28,9 @@ export const captureTabs = () =>
     { type: 'buo:service/capture', windowId: targetWindow() },
     captureSchema,
   );
-export function openPage(url: string): Promise<unknown> {
-  const windowId = targetWindow();
+export async function openPage(url: string): Promise<unknown> {
+  const windowId =
+    targetWindow() ?? (await browser.windows.getCurrent()).id ?? null;
   return browser.tabs.create({
     url,
     ...(windowId === null ? {} : { windowId }),

@@ -177,7 +177,7 @@ async function verify(store: Store): Promise<Verified> {
         ),
         'INTEGRITY_CHECK_FAILED',
       );
-    } else if (state.kind === 'migration') {
+    } else if (state.kind === 'migration' || state.kind === 'session') {
       requireCondition(
         state.restoreTarget === null &&
           state.data !== null &&
@@ -253,7 +253,14 @@ export class StorageCoordinator {
   private async local(): Promise<Store> {
     try {
       return await this.port.readLocal();
-    } catch {
+    } catch (reason) {
+      if (
+        reason instanceof MigrationError &&
+        ['PRIVATE_SESSION_ENDED', 'PRIVATE_SESSION_INVALID'].includes(
+          reason.code,
+        )
+      )
+        throw reason;
       throw new MigrationError('STORAGE_READ_FAILED');
     }
   }
@@ -284,7 +291,14 @@ export class StorageCoordinator {
     requireCondition(key.startsWith(storagePrefix), 'INVALID_STORAGE_KEY');
     try {
       await this.port.writeLocal({ [key]: value });
-    } catch {
+    } catch (reason) {
+      if (
+        reason instanceof MigrationError &&
+        ['PRIVATE_SESSION_ENDED', 'PRIVATE_SESSION_INVALID'].includes(
+          reason.code,
+        )
+      )
+        throw reason;
       throw new MigrationError('STORAGE_WRITE_FAILED');
     }
     requireCondition(

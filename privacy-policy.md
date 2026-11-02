@@ -1,6 +1,6 @@
 # Bulk URL Opener Privacy Policy
 
-This policy describes the unreleased `redevelopment` preview through Phase 4.
+This policy describes the unreleased `redevelopment` preview through Phase 5 implementation.
 It is not a statement that the preview has replaced a published store version.
 
 The preview stores extension data locally and sends no saved lists, preferences,
@@ -46,10 +46,17 @@ extra copies; damaged snapshots are kept for recovery. Explicit snapshot purge
 removes verified optional copies, not mandatory history or original legacy
 archives.
 
-Private-window jobs and capture are unavailable in this preview. Private
-senders/targets are refused before persistent job creation, private tab URLs are
-omitted from capture, and private-document migration is refused. Session-only
-private handling requires further implementation/testing before release.
+Private access requires the browser's extension permission for private windows.
+The private workspace starts with a copy of regular saved lists/preferences,
+excluding regular drafts and staging. Its edits, inputs, snapshots and jobs use
+only browser session storage. They clear when the last private window closes;
+browser restart or extension reload can also clear that temporary storage.
+Private and regular capture are separated. Private data does not automatically
+enter local storage or account sync. Startup and global context-menu preferences
+are managed from regular windows; the global menu lists regular saved lists.
+Private sessions cannot upload sync data or perform persistent migration.
+Explicit copy/download actions can create files or clipboard content that outlast
+the private session. Private-session runtime coverage remains part of Phase 5.
 
 Recovery downloads are user-requested local JSON files. They can contain list
 names, URLs, searches, preferences, unsaved input and other retained extension

@@ -6,7 +6,7 @@
   --background: #ffffff;
   --foreground: #172033;
   --surface: #f6f7f9;
-  --border: #a5afbf;
+  --border: #778497;
   --muted: #505d70;
   --primary: #1d4ed8;
   --on-primary: #ffffff;
@@ -178,6 +178,25 @@ button:hover:not(:disabled),
   width: min(100%, 48rem);
   margin: 0 auto;
   padding: 2rem 1.25rem;
+}
+.full-page :is(button, .button) {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.list-index a {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.session-notice {
+  max-width: 48rem;
+  padding: 0.75rem 1.25rem;
+  margin: 0 auto;
+  border-bottom: 2px solid var(--primary);
+  font-size: 0.875rem;
+}
+.popup-session-notice {
+  max-width: 36rem;
 }
 .full-page nav,
 .full-page .preview-notice {

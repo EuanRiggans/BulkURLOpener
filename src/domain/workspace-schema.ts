@@ -49,7 +49,9 @@ export const workspaceSchema = v.strictObject({
   head: headSchema,
   data: dataSchema,
   draft: draftViewSchema,
+  private: v.optional(v.boolean(), false),
 });
+export const contextSchema = v.strictObject({ private: v.boolean() });
 export type Workspace = v.InferOutput<typeof workspaceSchema>;
 export const snapshotSchema = v.strictObject({
   schemaVersion: v.literal(1),

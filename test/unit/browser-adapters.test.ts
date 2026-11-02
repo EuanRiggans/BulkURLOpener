@@ -11,11 +11,15 @@ vi.mock('wxt/browser', () => ({ browser: native }));
 import {
   browserMenuPort,
   normalWindow,
+  scopedWindow,
   startupWindow,
   requireTransmissionConsent,
   prepareOpeningRecovery,
 } from '../../src/infrastructure/browser/opening';
-import { browserServicePlatform } from '../../src/infrastructure/browser/services';
+import {
+  browserServicePlatform,
+  createBrowserServicePlatform,
+} from '../../src/infrastructure/browser/services';
 
 describe('native browser API adapters', () => {
   beforeEach(() => {
@@ -28,7 +32,7 @@ describe('native browser API adapters', () => {
   });
   it('refuses a private or missing target instead of falling back to another window', async () => {
     native.windows.get.mockResolvedValueOnce({ id: 5, incognito: true });
-    await expect(normalWindow(5)).rejects.toThrow('PRIVATE_WINDOW_UNSUPPORTED');
+    await expect(normalWindow(5)).rejects.toThrow('WINDOW_SCOPE_MISMATCH');
     native.windows.get.mockRejectedValueOnce(new Error('window closed'));
     await expect(normalWindow(5)).rejects.toThrow('NO_TARGET_WINDOW');
     expect(native.windows.getLastFocused).not.toHaveBeenCalled();
@@ -43,6 +47,21 @@ describe('native browser API adapters', () => {
       { id: 1, incognito: true, focused: true },
     ]);
     await expect(startupWindow(null)).rejects.toThrow('NO_TARGET_WINDOW');
+  });
+  it('allows a private target only in private scope and captures only private tab URLs', async () => {
+    native.windows.get.mockResolvedValueOnce({ id: 5, incognito: true });
+    expect(await scopedWindow(5, true)).toBe(5);
+    native.windows.get.mockResolvedValueOnce({ id: 6, incognito: false });
+    await expect(scopedWindow(6, true)).rejects.toThrow(
+      'WINDOW_SCOPE_MISMATCH',
+    );
+    native.tabs.query.mockResolvedValueOnce([
+      { url: 'https://regular.example.test/', incognito: false },
+      { url: 'https://private.example.test/', incognito: true },
+    ]);
+    expect(
+      await createBrowserServicePlatform(true).capture('allOpenedTabs', 5),
+    ).toEqual({ urls: ['https://private.example.test/'], skipped: 1 });
   });
   it('omits private and inaccessible tab URLs and reports their count', async () => {
     native.tabs.query.mockResolvedValue([

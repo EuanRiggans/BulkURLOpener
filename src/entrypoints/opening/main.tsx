@@ -12,6 +12,7 @@ import { PageLayout } from '../../ui/PageLayout';
 import { mount } from '../../ui/mount';
 import { serviceError } from '../../ui/services/errors';
 import { copyText, downloadText } from '../../ui/services/workspace';
+import { scopedKeys } from '../../shared/storage-events';
 
 const labels = {
   queued: 'Waiting',
@@ -42,8 +43,7 @@ function Jobs() {
     }
     function changed(changes: Record<string, unknown>, area: string) {
       if (
-        area !== 'local' ||
-        !Object.keys(changes).some((key) => key.startsWith('buo:v2:job:'))
+        !scopedKeys(changes, area).some((key) => key.startsWith('buo:v2:job:'))
       )
         return;
       clearTimeout(timer);

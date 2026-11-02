@@ -100,9 +100,11 @@ export function Help() {
         <details>
           <summary>Can I use private windows?</summary>
           <p>
-            Private-window capture and jobs are unavailable in this preview
-            pending session-only support and browser tests. No private tab URLs
-            are persisted by those services.
+            Allow the extension in private windows using your browser's
+            extension settings. A private workspace starts with a copy of
+            regular saved lists and preferences. Its drafts, edits, snapshots
+            and opening jobs stay in session storage and clear when the last
+            private window closes. Startup and sync use regular windows.
           </p>
         </details>
         <details>

@@ -38,10 +38,11 @@ export class SharedServices {
   constructor(
     readonly storage: StorageCoordinator,
     readonly opening: OpeningService,
-    readonly menus: SavedListMenus,
+    readonly menus: Pick<SavedListMenus, 'refresh'>,
     private readonly platform: ServicePlatform,
     private readonly identity: { id: string; root: string },
     private readonly kick: () => void,
+    private readonly privateMode = false,
   ) {
     this.workspace = new WorkspaceService(storage);
   }
@@ -51,7 +52,12 @@ export class SharedServices {
     requireCondition(page, 'UNAUTHORIZED_PAGE');
     const request = v.parse(serviceRequestSchema, raw);
     requireCondition(allowedRequest(page, request), 'UNAUTHORIZED_PAGE');
-    requireCondition(!sender.tab?.incognito, 'PRIVATE_WINDOW_UNSUPPORTED');
+    requireCondition(
+      Boolean(sender.tab?.incognito) === this.privateMode,
+      'PRIVATE_WINDOW_UNSUPPORTED',
+    );
+    if (this.privateMode && request.type.startsWith('buo:service/sync.'))
+      throw new MigrationError('PRIVATE_SYNC_UNAVAILABLE');
     // Action popups do not always have sender.tab. Resolve their browser
     // window before exposing editable data or accepting working-draft writes.
     if (
@@ -68,8 +74,10 @@ export class SharedServices {
           null,
       );
     switch (request.type) {
+      case 'buo:service/context.read':
+        return { private: this.privateMode };
       case 'buo:service/workspace.read':
-        return this.workspace.read();
+        return { ...(await this.workspace.read()), private: this.privateMode };
       case 'buo:service/draft.save':
         return this.workspace.saveDraft(request.input);
       case 'buo:service/draft.freeze':
@@ -129,6 +137,21 @@ export class SharedServices {
       case 'buo:service/library.read':
         return this.storage.requireActiveData();
       case 'buo:service/library.mutate': {
+        if (
+          this.privateMode &&
+          request.input.command.kind === 'settings.update'
+        ) {
+          const current = (await this.storage.requireActiveData()).data
+            .settings;
+          const patch = request.input.command.patch;
+          requireCondition(
+            (patch.openOnLaunch === undefined ||
+              patch.openOnLaunch === current.openOnLaunch) &&
+              (patch.contextMenuEnabled === undefined ||
+                patch.contextMenuEnabled === current.contextMenuEnabled),
+            'PRIVATE_PREFERENCE_UNAVAILABLE',
+          );
+        }
         const result = await this.storage.mutate(request.input);
         if (request.input.command.kind !== 'draft.update')
           await this.menus.refresh();
@@ -270,7 +293,7 @@ export class SharedServices {
       const tab = await this.platform.tab(tabId);
       const actual = this.helper(tab.url);
       requireCondition(
-        !tab.incognito &&
+        tab.incognito === this.privateMode &&
           actual &&
           actual.job === request.job &&
           actual.index === request.index,
@@ -328,7 +351,7 @@ export class SharedServices {
         if (
           current.active &&
           current.focused &&
-          !current.incognito &&
+          current.incognito === this.privateMode &&
           helper &&
           helper.job === request.job &&
           helper.index === request.index

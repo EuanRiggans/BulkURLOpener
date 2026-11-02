@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import * as v from 'valibot';
 import { browser } from 'wxt/browser';
+import { scopedKeys } from '../../shared/storage-events';
 import { pageUrl } from '../../infrastructure/browser/pages';
 import { extensionRequest } from '../../infrastructure/browser/client';
 import {
@@ -91,7 +92,7 @@ export function Popup() {
   useEffect(() => {
     let alive = true;
     const changed = (changes: Record<string, unknown>, area: string) => {
-      if (area !== 'local' || !Object.hasOwn(changes, 'buo:v2:head')) return;
+      if (!scopedKeys(changes, area).includes('buo:v2:head')) return;
       void readWorkspace()
         .then((state) => {
           if (!alive) return;

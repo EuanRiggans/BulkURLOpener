@@ -3,6 +3,22 @@ import { recoveryError } from '../recovery/labels';
 export function serviceError(error: unknown): string {
   const code = error instanceof Error ? error.message : '';
   const messages: Record<string, string> = {
+    WINDOW_SCOPE_MISMATCH:
+      'This action must stay within the same regular or private workspace. Refresh the opener in the intended window.',
+    PRIVATE_ACCESS_REQUIRED:
+      'Allow this extension in private windows using the browser extension settings first.',
+    PRIVATE_SETUP_REQUIRED:
+      'Open extension Settings in a regular window and migrate your data first. Private windows cannot perform persistent migration.',
+    PRIVATE_SYNC_UNAVAILABLE:
+      'Browser-account sync is unavailable in a private session. Use a regular window for sync.',
+    PRIVATE_MIGRATION_UNAVAILABLE:
+      'Persistent migration and migration undo are available only from a regular window.',
+    PRIVATE_PREFERENCE_UNAVAILABLE:
+      'Startup and global context-menu preferences are managed from a regular window.',
+    PRIVATE_SESSION_ENDED:
+      'That private session ended. Its temporary data was cleared. Open a new private workspace to continue.',
+    PRIVATE_SESSION_INVALID:
+      'The private workspace could not be verified. Regular saved data is unchanged. Close every private window to end this temporary session.',
     CLIPBOARD_UNAVAILABLE:
       'Clipboard access was unavailable. Select and copy the displayed text, or use Download.',
     WORKSPACE_INTEGRITY_FAILED:
@@ -40,7 +56,7 @@ export function serviceError(error: unknown): string {
     DATA_CONSENT_REQUIRED:
       'Firefox data consent for destinations and search terms is required before opening tabs.',
     PRIVATE_WINDOW_UNSUPPORTED:
-      'Private-window opening and capture need session-only handling and are unavailable in this preview. No private URLs were saved as a job.',
+      'The request belongs to a different regular or private workspace. Open the extension in the intended window.',
     TARGET_WINDOW_CHANGED:
       'The browser session changed. Resume explicitly in this window to choose a new target.',
     INTERRUPTED_CREATE:

@@ -222,7 +222,21 @@ export const mutationStateSchema = v.strictObject({
   data: dataSchema,
   operation: operationSchema,
 });
-export const stateSchema = v.union([migrationStateSchema, mutationStateSchema]);
+export const sessionStateSchema = v.strictObject({
+  ...migrationStateSchema.entries,
+  schemaVersion: v.literal(3),
+  kind: v.literal('session'),
+  revision: v.literal(1),
+  previous: v.null(),
+  restoreTarget: v.null(),
+  data: dataSchema,
+  sessionId: hashSchema,
+});
+export const stateSchema = v.union([
+  migrationStateSchema,
+  mutationStateSchema,
+  sessionStateSchema,
+]);
 export type StoredState = v.InferOutput<typeof stateSchema>;
 export const reviewSchema = v.strictObject({
   backupDigest: hashSchema,

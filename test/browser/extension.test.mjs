@@ -84,7 +84,7 @@ before(
       root = 'chrome-extension://' + root + '/';
     } else {
       const options = new firefox.Options()
-        .addArguments('-headless', '-remote-allow-system-access')
+        .addArguments('-headless')
         .setPreference(
           'extensions.webextensions.uuids',
           JSON.stringify({ [addonId]: uuid }),
@@ -94,7 +94,9 @@ before(
       builder.setFirefoxOptions(options);
       if (process.env.BUO_DRIVER_BIN)
         builder.setFirefoxService(
-          new firefox.ServiceBuilder(process.env.BUO_DRIVER_BIN),
+          new firefox.ServiceBuilder(process.env.BUO_DRIVER_BIN).addArguments(
+            '--allow-system-access',
+          ),
         );
       driver = await builder.build();
       assert.equal(
