@@ -65,7 +65,6 @@ before(
         '--headless=new',
         '--window-size=1280,960',
         '--load-extension=' + resolve('.output/chrome-mv3'),
-        '--disable-extensions-except=' + resolve('.output/chrome-mv3'),
       );
       if (process.env.BUO_BROWSER_BIN)
         options.setChromeBinaryPath(process.env.BUO_BROWSER_BIN);
@@ -98,6 +97,25 @@ before(
         );
       }, root);
       assert.equal(granted.error, null);
+      await driver.wait(
+        () =>
+          driver.executeAsyncScript(function (extensionId, done) {
+            chrome.developerPrivate.getExtensionsInfo(
+              { includeDisabled: true, includeTerminated: true },
+              (items) =>
+                done(
+                  items.some(
+                    (item) =>
+                      item.id === extensionId &&
+                      item.state ===
+                        chrome.developerPrivate.ExtensionState.ENABLED,
+                  ),
+                ),
+            );
+          }, root),
+        20_000,
+        'The extension must stay enabled after its private-access reload.',
+      );
       root = 'chrome-extension://' + root + '/';
     } else {
       const options = new firefox.Options()
@@ -831,6 +849,7 @@ test(
       expectedHead: active.head,
       lines: [url],
     });
+    await page('opening.html?job=' + job.plan.id);
     let completed;
     await driver.wait(async () => {
       completed = (await rpc({ type: 'buo:service/jobs.list' })).find(
@@ -846,6 +865,7 @@ test(
       !requests.includes(path),
       'An inactive held tab must not contact its destination.',
     );
+    await page('popup.html');
     assert((await rpc({ type: 'buo:service/capture' })).lines.includes(url));
     await native(
       'await api.windows.update(arguments[0], {focused: true}); await api.tabs.update(arguments[1], {active: true}); return true;',
@@ -894,6 +914,7 @@ test(
       expectedHead: active.head,
       lines: ['about:config'],
     });
+    await page('opening.html?job=' + restricted.plan.id);
     let result;
     await driver.wait(async () => {
       result = (await rpc({ type: 'buo:service/jobs.list' })).find(
@@ -925,10 +946,11 @@ test(
   'a UTF-8 JSON file is inspected before replacement and retains the draft and jobs',
   { timeout: 60_000 },
   async () => {
+    await page('opening.html');
+    const jobs = await rpc({ type: 'buo:service/jobs.list' });
     await page('data.html');
     const before = await rpc({ type: 'buo:service/library.read' });
     const draft = (await rpc({ type: 'buo:service/workspace.read' })).draft;
-    const jobs = await rpc({ type: 'buo:service/jobs.list' });
     const exported = JSON.parse(
       await rpc({ type: 'buo:service/data.export', legacy: false }),
     );
@@ -967,10 +989,64 @@ test(
       (await rpc({ type: 'buo:service/workspace.read' })).draft,
       draft,
     );
+    await page('opening.html');
     assert.deepEqual(await rpc({ type: 'buo:service/jobs.list' }), jobs);
     report.assertions.push(
       'real UTF-8 file import, escaped review, explicit replacement and retained draft/jobs',
     );
+  },
+);
+
+test(
+  'reviewed manual sync uses the real local API cache and preserves legacy keys',
+  { timeout: 45_000 },
+  async () => {
+    await page('data.html');
+    const before = await rpc({ type: 'buo:service/library.read' });
+    const portable = JSON.parse(
+      await rpc({ type: 'buo:service/data.export', legacy: false }),
+    );
+    const legacy = JSON.parse(
+      await rpc({ type: 'buo:service/data.export', legacy: true }),
+    );
+    await native(
+      'await api.storage.sync.set({user_settings: arguments[0]}); return true;',
+      JSON.stringify(legacy),
+    );
+    await clickText('Review upload');
+    await driver.wait(
+      until.elementLocated(
+        By.xpath('//h3[normalize-space(.)="Review sync upload"]'),
+      ),
+      15_000,
+    );
+    await driver
+      .findElement(By.css('.transfer-review input[type=checkbox]'))
+      .click();
+    await clickText('Upload reviewed copy');
+    await driver.wait(
+      async () =>
+        (await driver.findElement(By.css('[role=status]')).getText()).includes(
+          'verified locally',
+        ),
+      20_000,
+    );
+    const remote = await native('return await api.storage.sync.get(null);');
+    assert.equal(remote.user_settings, JSON.stringify(legacy));
+    assert.deepEqual(remote['bulk-url-opener-v2'].data, portable);
+    const preview = await rpc({
+      type: 'buo:service/sync.download',
+      legacy: false,
+    });
+    assert.deepEqual(preview.portable, portable);
+    assert.deepEqual(
+      (await rpc({ type: 'buo:service/library.read' })).head,
+      before.head,
+    );
+    report.assertions.push(
+      'reviewed real storage.sync cache upload/download and retained legacy key; no remote delivery claim',
+    );
+    report.syncScope = 'local API cache only; no browser accounts signed in';
   },
 );
 
