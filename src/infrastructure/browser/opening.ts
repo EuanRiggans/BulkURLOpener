@@ -191,11 +191,22 @@ export function browserRunnerPort(
 export const browserMenuPort: MenuPort = {
   clear: () =>
     new Promise((resolve, reject) => {
-      browser.contextMenus.removeAll(() => {
-        if (browser.runtime.lastError)
+      const done = () => {
+        const error = browser.runtime.lastError;
+        if (
+          error &&
+          !(
+            !import.meta.env.FIREFOX &&
+            error.message === 'Cannot find menu item with id buo-root'
+          )
+        )
           reject(new MigrationError('MENU_REFRESH_FAILED'));
         else resolve();
-      });
+      };
+      // Chromium's removeAll also clears the other split context's items.
+      // Removing this context's root cascades only through its own subtree.
+      if (import.meta.env.FIREFOX) browser.contextMenus.removeAll(done);
+      else browser.contextMenus.remove('buo-root', done);
     }),
   create: (item) =>
     new Promise((resolve, reject) => {

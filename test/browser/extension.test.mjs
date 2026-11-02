@@ -672,9 +672,12 @@ test(
     );
     const beforeSync = await native('return await api.storage.sync.get(null);');
     const privateWindow = await native(
-      'const window = await api.windows.create({incognito: true, url: api.runtime.getURL("/popup.html")}); return {id: window.id};',
+      'const window = await api.windows.create({incognito: true, url: api.runtime.getURL("/popup.html")}); return {id: window?.id ?? null};',
     );
     await driver.wait(() => findPage('popup.html', true), 20_000);
+    privateWindow.id = await native(
+      'return (await api.windows.getCurrent()).id;',
+    );
     await driver.wait(
       until.elementIsEnabled(
         await driver.wait(until.elementLocated(By.id('entries')), 20_000),
@@ -694,6 +697,14 @@ test(
     );
     const original = await rpc({ type: 'buo:service/workspace.read' });
     assert.equal(original.private, true);
+    await driver.wait(
+      async () =>
+        await native(
+          'try { await api.contextMenus.update("buo-root", {}); return true; } catch { return false; }',
+        ),
+      15_000,
+      'Private menus must mirror regular saved lists.',
+    );
     await clickText('New');
     await driver.wait(
       () => findPage('new-list.html', true),
@@ -713,6 +724,17 @@ test(
     await clickText('Save list');
     await driver.wait(until.urlContains('edit-list.html'), 30_000);
     const saved = await rpc({ type: 'buo:service/workspace.read' });
+    const privateList = saved.data.lists.find(
+      (list) => list.name === 'Private café example',
+    );
+    assert.equal(
+      await native(
+        'try { await api.contextMenus.update("buo-list:" + arguments[0], {}); return true; } catch { return false; }',
+        privateList.id,
+      ),
+      false,
+      'Private-only list names must not enter the global menu.',
+    );
     assert(
       saved.data.lists.some(
         (list) =>
@@ -790,6 +812,13 @@ test(
     assert(captured.lines.every((url) => !url.includes('/batch-')));
     await driver.switchTo().window(normalHandle);
     const normalCaptured = await rpc({ type: 'buo:service/capture' });
+    assert.equal(
+      await native(
+        'try { await api.contextMenus.update("buo-root", {}); return true; } catch { return false; }',
+      ),
+      true,
+      'Private menu refresh must retain the regular menu.',
+    );
     assert(
       normalCaptured.lines.every((url) => !url.includes('synthetic-private')),
     );
@@ -811,13 +840,10 @@ test(
         false,
         'Private IndexedDB must not exist in the regular partition.',
       );
-      const freshWindow = await native(
-        'const window = await api.windows.create({incognito: true, url: api.runtime.getURL("/popup.html")}); return {id: window.id};',
+      await native(
+        'await api.windows.create({incognito: true, url: api.runtime.getURL("/popup.html")}); return true;',
       );
-      await driver.wait(
-        () => findPage('popup.html', true, freshWindow.id),
-        20_000,
-      );
+      await driver.wait(() => findPage('popup.html', true), 20_000);
       const fresh = await rpc({ type: 'buo:service/workspace.read' });
       assert(
         !fresh.data.lists.some((list) => list.name === 'Private café example'),

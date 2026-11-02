@@ -73,6 +73,10 @@ the background, as well as displayed in the UI.
   four permissions: `storage`, `tabs`, `alarms`, `contextMenus`. There are no
   content scripts, broad host grants or new clipboard/download permissions.
   The Firefox identity is unchanged. See [configuration](../wxt.config.ts#L9).
+- Chromium's `contextMenus.removeAll` clears both split contexts. Its adapter
+  now removes only the current context's `buo-root` subtree, accepting the
+  expected missing-root case and surfacing other failures. Each context mirrors
+  regular saved lists; private-only names never become menu entries.
 
 ## Browser test setup
 
@@ -129,7 +133,7 @@ The runtime suite checks:
 
 ## Validation and remaining release gates
 
-Local validation covers 265 modern and 49 frozen legacy checks, strict
+Local validation covers 266 modern and 49 frozen legacy checks, strict
 TypeScript, lint/formatting, both builds, generated-resource checks and Mozilla
 validation with the existing single reviewed Preact warning exception.
 

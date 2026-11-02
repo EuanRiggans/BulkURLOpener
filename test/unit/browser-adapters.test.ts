@@ -4,7 +4,7 @@ const native = vi.hoisted(() => ({
   windows: { get: vi.fn(), getLastFocused: vi.fn(), getAll: vi.fn() },
   tabs: { query: vi.fn(), get: vi.fn(), update: vi.fn() },
   permissions: { getAll: vi.fn() },
-  contextMenus: { create: vi.fn(), removeAll: vi.fn() },
+  contextMenus: { create: vi.fn(), removeAll: vi.fn(), remove: vi.fn() },
   alarms: { get: vi.fn(), create: vi.fn() },
 }));
 vi.mock('wxt/browser', () => ({ browser: native }));
@@ -78,6 +78,7 @@ describe('native browser API adapters', () => {
     expect(native.tabs.query).toHaveBeenLastCalledWith({});
   });
   it('awaits callback completion for menu APIs and observes runtime.lastError', async () => {
+    vi.stubEnv('FIREFOX', 'true');
     native.contextMenus.create.mockImplementation(
       (item: { id: string }, callback: () => void) => {
         callback();
@@ -100,6 +101,26 @@ describe('native browser API adapters', () => {
     await expect(
       browserMenuPort.create({ id: 'root', title: 'Example' }),
     ).rejects.toThrow('MENU_REFRESH_FAILED');
+    await expect(browserMenuPort.clear()).rejects.toThrow(
+      'MENU_REFRESH_FAILED',
+    );
+  });
+  it('clears only the Chromium context root and accepts its expected absent state', async () => {
+    vi.stubEnv('FIREFOX', '');
+    native.contextMenus.remove.mockImplementation(
+      (_id: string, done: () => void) => done(),
+    );
+    await browserMenuPort.clear();
+    expect(native.contextMenus.remove).toHaveBeenCalledWith(
+      'buo-root',
+      expect.any(Function),
+    );
+    expect(native.contextMenus.removeAll).not.toHaveBeenCalled();
+    native.runtime.lastError = {
+      message: 'Cannot find menu item with id buo-root',
+    };
+    await expect(browserMenuPort.clear()).resolves.toBeUndefined();
+    native.runtime.lastError = { message: 'Unknown API failure' };
     await expect(browserMenuPort.clear()).rejects.toThrow(
       'MENU_REFRESH_FAILED',
     );
