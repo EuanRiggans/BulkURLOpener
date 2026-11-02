@@ -898,6 +898,10 @@ test(
         )?.run.cursor === 1,
       25_000,
     );
+    // Dispose the progress document and its pending storage-change debounce.
+    // An extension page left open could otherwise wake a stopped background
+    // itself, making an alarm-recovery check pass for the wrong reason.
+    await navigate(destination + '/worker-observer');
     const stopped = await stopBackground();
     // No runtime messages or page navigation during this wait: recovery must
     // come from the browser alarm, rather than an artificial test RPC wakeup.
@@ -917,6 +921,7 @@ test(
         1,
         'Acknowledged work must not repeat.',
       );
+    await page('opening.html?job=' + job.plan.id);
     await driver.wait(
       async () =>
         (await rpc({ type: 'buo:service/jobs.list' })).find(
