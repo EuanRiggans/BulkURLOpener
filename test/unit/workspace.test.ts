@@ -20,6 +20,7 @@ const decisions: Decisions = {
   preferences: {},
   historical: {},
 };
+const allowSync = () => Promise.resolve();
 const sample = () => ({
   format: 'bulk-url-opener' as const,
   version: 2 as const,
@@ -472,6 +473,35 @@ describe('manual browser-account sync', () => {
     ).rejects.toThrow('SYNC_CONSENT_REQUIRED');
     expect(context.port.syncWrites).toBe(0);
   });
+  it('rechecks a revoked grant after serialized backup work and allows a later reviewed retry', async () => {
+    const context = await setup();
+    const review = await context.workspace.previewUpload();
+    const before = await context.storage.requireActiveData();
+    let checks = 0;
+    context.browser.allowTransmission = (purpose) => {
+      expect(purpose).toBe('sync');
+      return ++checks === 1
+        ? Promise.resolve()
+        : Promise.reject(new MigrationError('SYNC_CONSENT_REQUIRED'));
+    };
+    const request = {
+      type: 'buo:service/sync.upload',
+      id: review.id,
+      acknowledge: true,
+    };
+    await expect(
+      context.services.dispatch(request, sender('data.html')),
+    ).rejects.toThrow('SYNC_CONSENT_REQUIRED');
+    expect(checks).toBe(2);
+    expect(context.port.syncWrites).toBe(0);
+    expect(await context.storage.requireActiveData()).toEqual(before);
+    context.browser.allowTransmission = () => Promise.resolve();
+    await expect(
+      context.services.dispatch(request, sender('data.html')),
+    ).resolves.toBe(true);
+    expect(context.port.syncWrites).toBe(1);
+    expect(await context.storage.requireActiveData()).toEqual(before);
+  });
   it('preserves the legacy key, verifies the new copy and restores only the reviewed download', async () => {
     const context = await setup();
     context.port.sync = {
@@ -480,7 +510,7 @@ describe('manual browser-account sync', () => {
     };
     const before = structuredClone(context.port.sync);
     const upload = await context.workspace.previewUpload();
-    await context.workspace.upload(upload.id);
+    await context.workspace.upload(upload.id, allowSync);
     expect(context.port.sync).toMatchObject(before);
     expect(
       context.port.local['buo:v2:sync-backup:' + (await digest(before))],
@@ -499,13 +529,13 @@ describe('manual browser-account sync', () => {
     const context = await setup();
     const upload = await context.workspace.previewUpload();
     context.port.sync = { fromOtherDevice: true };
-    await expect(context.workspace.upload(upload.id)).rejects.toThrow(
-      'SYNC_CHANGED',
-    );
+    await expect(
+      context.workspace.upload(upload.id, allowSync),
+    ).rejects.toThrow('SYNC_CHANGED');
     expect(context.port.syncWrites).toBe(0);
     const next = await context.workspace.previewUpload();
     await changed(context, 1);
-    await expect(context.workspace.upload(next.id)).rejects.toThrow(
+    await expect(context.workspace.upload(next.id, allowSync)).rejects.toThrow(
       'REVISION_CONFLICT',
     );
   });
@@ -515,12 +545,12 @@ describe('manual browser-account sync', () => {
       const context = await setup();
       const upload = await context.workspace.previewUpload();
       context.port.syncFailure = failure;
-      await expect(context.workspace.upload(upload.id)).rejects.toThrow(
-        /SYNC_WRITE_FAILED|SYNC_VERIFICATION_FAILED/,
-      );
+      await expect(
+        context.workspace.upload(upload.id, allowSync),
+      ).rejects.toThrow(/SYNC_WRITE_FAILED|SYNC_VERIFICATION_FAILED/);
       context.port.syncFailure = null;
       if (failure === 'after') {
-        await context.workspace.upload(upload.id);
+        await context.workspace.upload(upload.id, allowSync);
         expect(context.port.syncWrites).toBe(1);
       }
       expect((await context.workspace.read()).data.lists).toEqual([]);

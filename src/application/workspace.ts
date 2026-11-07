@@ -277,7 +277,7 @@ export class WorkspaceService {
       };
     });
   }
-  upload(id: string) {
+  upload(id: string, beforeWrite: () => Promise<void>) {
     return this.storage.withWorkspace(async (store, active, _commit, sync) => {
       const entry = await store.readTransfer(id);
       requireCondition(
@@ -298,6 +298,9 @@ export class WorkspaceService {
       if (sameContent(expected, current)) return true;
       requireCondition(sameContent(current, payload.remote), 'SYNC_CHANGED');
       await sync.backup(payload.remote);
+      // A request may have waited for the writer or for backup verification.
+      // Recheck current permission immediately before transmitting the copy.
+      await beforeWrite();
       await sync.write({ [syncKey]: payload.envelope });
       requireCondition(
         sameContent((await sync.read())[syncKey], payload.envelope),

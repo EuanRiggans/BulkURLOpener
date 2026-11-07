@@ -294,12 +294,14 @@ describe('separate editor and settings forms', () => {
     await settle();
     const before = structuredClone(context.port.sync);
     await click('Review upload');
+    const localBeforeDecline = structuredClone(context.port.local);
     await act(() =>
       node<HTMLInputElement>('.transfer-review input[type="checkbox"]').click(),
     );
     await settle();
     await click('Upload reviewed copy');
     expect(context.port.sync).toEqual(before);
+    expect(context.port.local).toEqual(localBeforeDecline);
     expect(context.port.syncWrites).toBe(0);
     expect(app.textContent).toContain('optional settings data');
     expect(button('Upload reviewed copy').disabled).toBe(false);

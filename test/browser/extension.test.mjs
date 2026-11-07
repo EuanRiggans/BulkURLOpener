@@ -1164,7 +1164,7 @@ test(
       await driver.setContext(firefox.Context.CHROME);
       try {
         const granted = await driver.executeAsyncScript(
-          `const done = arguments[arguments.length - 1]; const {ExtensionPermissions} = ChromeUtils.importESModule('resource://gre/modules/ExtensionPermissions.sys.mjs'); ExtensionPermissions.add(arguments[0], {permissions: [], origins: [], data_collection: ['technicalAndInteraction']}).then(() => done({ok: true}), error => done({error: String(error)}));`,
+          `const done = arguments[arguments.length - 1]; const {ExtensionPermissions} = ChromeUtils.importESModule('resource://gre/modules/ExtensionPermissions.sys.mjs'); const {ExtensionParent} = ChromeUtils.importESModule('resource://gre/modules/ExtensionParent.sys.mjs'); const extension = ExtensionParent.GlobalManager.getExtension(arguments[0]); ExtensionPermissions.add(arguments[0], {permissions: [], origins: [], data_collection: ['technicalAndInteraction']}, extension).then(() => done({ok: true}), error => done({error: String(error)}));`,
           addonId,
         );
         assert(granted.ok, granted.error);
@@ -1177,6 +1177,7 @@ test(
             await native('return await api.permissions.getAll();')
           ).data_collection.includes('technicalAndInteraction'),
         15_000,
+        'The disposable harness grant must reach the running Firefox extension.',
       );
       report.assertions.push(
         'Firefox settings-data consent refusal preserves both stores; optional grant set by disposable test harness, native consent prompt remains manual',
@@ -1307,7 +1308,7 @@ test(
   'repeated large-library saves measure retained-history growth without deleting recovery data',
   { skip: target !== 'chrome', timeout: 180_000 },
   async () => {
-    await page('data.html');
+    await page('options.html');
     const measurements = [];
     let exhausted = false;
     for (let index = 0; index < 32; index++) {

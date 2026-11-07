@@ -119,7 +119,9 @@ export class SharedServices {
         return this.workspace.previewUpload();
       case 'buo:service/sync.upload':
         await this.platform.allowTransmission('sync');
-        return this.workspace.upload(request.id);
+        return this.workspace.upload(request.id, () =>
+          this.platform.allowTransmission('sync'),
+        );
       case 'buo:service/diagnostics':
         return this.workspace.diagnostics();
       case 'buo:service/main.open': {

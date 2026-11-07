@@ -17,6 +17,8 @@ website publication, default-branch merge or release rollout occurs in this phas
 - Added Firefox's optional settings-data declaration for manual sync. The upload
   click requests optional consent; the background separately checks it before
   any sync write. Decline/error leaves the reviewed upload and both stores intact.
+  A second check after serialized backup work handles a grant revoked while the
+  request was waiting; any verified backup already created remains retained.
   Ordinary navigation still uses the original required categories. Tests cover
   refusal/retry and the native API with an explicit disposable-harness grant;
   the actual native consent prompt remains a manual signed-build gate.
@@ -71,7 +73,7 @@ warning verification remain enabled.
 
 ## Evidence and limits
 
-Local validation covers 283 maintained unit checks and seven packaging checks,
+Local validation covers 284 maintained unit checks and seven packaging checks,
 strict types/lint/format, both MV3 builds/resources/licences, Mozilla validation,
 the actual comparison CLI and clean source/archive reproduction. Mozilla reports
 zero errors/unreviewed warnings and the existing one reviewed Preact renderer

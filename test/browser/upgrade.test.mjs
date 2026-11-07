@@ -319,6 +319,7 @@ test(
     );
     const after = await rpc({ type: 'buo:migration/export', document });
     report.legacyMigration = await compare(before, after, 'legacy');
+    await navigate(root + 'data.html');
     const legacy = JSON.parse(
       await rpc({ type: 'buo:service/data.export', legacy: true }),
     );
