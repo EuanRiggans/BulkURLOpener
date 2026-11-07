@@ -90,12 +90,11 @@ export function Help() {
           <summary>Where is my data stored?</summary>
           <p>
             Lists, drafts, jobs and recovery records are held in local extension
-            storage. Saves reuse unchanged list records and retain up to five
-            internal recovery checkpoints within a size budget. Automatic
-            snapshots have been removed. Opening a URL contacts that
-            destination; searches go to the selected provider. No analytics or
-            developer collection service is used. Recovery files may contain
-            private content; keep them private.
+            storage. Saves reuse unchanged list records and keep one preceding
+            verified save for internal recovery. Automatic snapshots have been
+            removed. Opening a URL contacts that destination; searches go to the
+            selected provider. No analytics or developer collection service is
+            used. Recovery files may contain private content; keep them private.
           </p>
         </details>
         <details>

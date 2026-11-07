@@ -3,7 +3,7 @@
 ### 2.0.0 redevelopment preview — storage simplification
 
 - Removed browser-account sync uploads and automatic/manual snapshot controls; retained read-only recovery of existing sync copies and old snapshots.
-- Separated lists/settings/metadata into shared checksummed records with independent checkpoints, up to five preceding saves and a history-size target.
+- Separated lists/settings/metadata into shared checksummed records with independent checkpoints, one preceding verified save as the internal fallback.
 - Added verified external archival before eligible earlier-preview cleanup; original migration backups, damaged records, unresolved inputs and jobs remain protected.
 - Added compressed full-recovery round trips above the previous 8 MiB limit, bounded decompression and archive integrity checks.
 - Removed Firefox's optional settings-data declaration. Required opening/search consent, the simple 540px popup and separate editors remain.

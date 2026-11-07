@@ -15,11 +15,12 @@ saved-list hierarchy. This is still an unreleased preview.
   lists, settings and draft/recovered-input metadata. Unchanged list content is
   shared. Settings changes do not rewrite the URL arrays.
 - Verification uses each checkpoint's own content and origin, not an endless
-  replay chain. The current root selects up to five preceding verified points.
-  Additional history has a 4 MiB incremental serialized-size target; shared
-  content is counted once. The immediately preceding save is always protected,
-  including if it exceeds the target. Current data, original backups and
-  unresolved work are outside that target and still consume finite storage.
+  replay chain. Following the user's final preference, keep the current save
+  and one preceding verified save as the sole internal fallback. Shared content
+  is counted once. Current data, the fallback, original backups and unresolved
+  work still consume finite storage; a failed save never discards the fallback
+  to make room. The first schema-4 preview's five-reference roots remain readable;
+  the next save reduces ordinary retention to one without breaking either state.
 - A frozen, verified older state can initially supply unchanged component values
   without copying large lists at near quota. Its own checksum/data and original
   backup/stage are checked. After archival frees room, data is materialized into
@@ -104,14 +105,14 @@ upgrade comparison.
 
 ## Verification
 
-Local validation passes 293 unit checks and seven packaging checks, strict
+Local validation passes 294 unit checks and seven packaging checks, strict
 types/lint/format, both MV3 builds, Mozilla validation and clean source/archive
 reproduction. Both browser builds (100 resources total), all three ZIPs and
 checksums reproduce byte-for-byte; private decoys are excluded. Mozilla reports
 zero errors/unreviewed warnings and the existing reviewed Preact warning.
 
 The maintained tests cover 1,000 settings saves with 5,000 exact entries, stable
-storage after warmup, count/size retention, idempotency/stale retries, partial
+storage after warmup, single-fallback retention, idempotency/stale retries, partial
 component/head writes, partial deletion/retry, protected inputs/jobs/originals,
 a near-10-MiB old preview store, verified archive cleanup and recovery files over
 8 MiB. Archive tests include invalid compression/UTF-8/checksums and expansion

@@ -76,8 +76,9 @@ erase recovery data to fix quota. A readiness check outside a mutation is not a
 transaction. List/settings/opening/menu services must use the migration gate.
 Normal mutations use schema-4 independent checkpoints and content-addressed
 lists/settings/metadata; schemas 1/2/3 remain readable for migration/recovery.
-Retain at most five preceding checkpoints under the 4 MiB incremental history
-target, always keeping the preceding verified save. Verify the candidate before
+Retain one preceding verified save as the sole internal fallback. Read earlier
+schema-4 previews with up to five references; new saves reduce their retention
+without losing current/fallback data. Verify the candidate before
 publishing and retain a durable deletion manifest before removing obsolete new
 records. Earlier preview history requires a matching downloaded recovery archive
 and explicit user confirmation before eligible removal. Never delete original

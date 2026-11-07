@@ -14,6 +14,7 @@ import {
   archiveProofSchema,
   archiveReceiptSchema,
   checkpointSchema,
+  checkpointHistoryLimit,
   type Checkpoint,
   type CheckpointReceipt,
 } from '../../domain/storage/checkpoints';
@@ -29,6 +30,7 @@ import {
   checkpointReachability,
   isCheckpoint,
   planCheckpoint,
+  recordBytes,
   stateKey,
 } from './checkpoints';
 import {
@@ -1005,7 +1007,9 @@ export class StorageCoordinator {
           /* A damaged copy remains in the full recovery archive. */
         }
       }
-      return results.sort((a, b) => b.revision - a.revision).slice(0, 6);
+      return results
+        .sort((a, b) => b.revision - a.revision)
+        .slice(0, 1 + checkpointHistoryLimit);
     });
   }
   exportCopy(id: string) {
@@ -1043,15 +1047,13 @@ export class StorageCoordinator {
     let archiveableRecords = 0,
       archiveableBytes = 0;
     let estimatedBytes = 0;
-    const bytes = (key: string, value: unknown) =>
-      new TextEncoder().encode(key + JSON.stringify(value)).byteLength;
     for (const [key, value] of Object.entries(store)) {
-      estimatedBytes += bytes(key, value);
+      estimatedBytes += recordBytes(key, value);
     }
     try {
       for (const record of await previewArchiveRecords(store)) {
         archiveableRecords++;
-        archiveableBytes += bytes(record.key, store[record.key]);
+        archiveableBytes += recordBytes(record.key, store[record.key]);
       }
     } catch {
       /* Unverified sources can be exported, never automatically pruned. */

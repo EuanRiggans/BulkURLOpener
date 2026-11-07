@@ -1,6 +1,5 @@
 import * as v from 'valibot';
 import {
-  checkpointHistoryBytes,
   checkpointHistoryLimit,
   checkpointReceiptLimit,
   checkpointSchema,
@@ -371,26 +370,6 @@ export async function planCheckpoint(
       command: compactCommand(input.command),
     },
   };
-  // The preceding verified save is mandatory; trim additional restore points
-  // against their incremental bytes, counting shared content only once.
-  const activeKeys = new Set<string>();
-  for (const key of Object.keys(writes)) activeKeys.add(key);
-  if (base) activeKeys.add(stateKey(base.stateDigest));
-  for (const entry of lists) activeKeys.add(contentKey('list', entry.digest));
-  activeKeys.add(contentKey('settings', settings));
-  activeKeys.add(contentKey('metadata', metadata));
-  for (;;) {
-    const historyKeys = new Set<string>();
-    for (const old of retained)
-      for (const key of (await reader.read(old)).keys)
-        if (!activeKeys.has(key)) historyKeys.add(key);
-    const size = [...historyKeys].reduce(
-      (total, key) => total + recordBytes(key, store[key]),
-      0,
-    );
-    if (size <= checkpointHistoryBytes || retained.length <= 1) break;
-    retained.pop();
-  }
   const stateDigest = await digest(state);
   const head: Head = {
     schemaVersion: 1,

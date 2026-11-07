@@ -8,8 +8,9 @@ import {
   listIdSchema,
 } from './schema';
 
-export const checkpointHistoryLimit = 5;
-export const checkpointHistoryBytes = 4 * 1024 * 1024;
+export const checkpointHistoryLimit = 1;
+// Read the first schema-4 preview too; new writes keep just one fallback.
+const readableHistoryLimit = 5;
 export const checkpointReceiptLimit = 64;
 export const metadataSchema = v.strictObject({
   draftLines: dataSchema.entries.draftLines,
@@ -48,7 +49,7 @@ export const checkpointSchema = v.strictObject({
   lists: v.array(listReferenceSchema),
   settings: hashSchema,
   metadata: hashSchema,
-  retained: v.pipe(v.array(headSchema), v.maxLength(checkpointHistoryLimit)),
+  retained: v.pipe(v.array(headSchema), v.maxLength(readableHistoryLimit)),
   receipts: v.pipe(
     v.array(checkpointReceiptSchema),
     v.maxLength(checkpointReceiptLimit),

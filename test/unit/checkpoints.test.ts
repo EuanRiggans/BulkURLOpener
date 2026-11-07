@@ -14,7 +14,6 @@ import { WorkspaceService } from '../../src/application/workspace';
 import { applyLibraryCommand } from '../../src/domain/library';
 import {
   checkpointSchema,
-  checkpointHistoryBytes,
   checkpointHistoryLimit,
 } from '../../src/domain/storage/checkpoints';
 import { digest } from '../../src/domain/storage/json';
@@ -143,7 +142,7 @@ describe('independent, bounded save checkpoints', () => {
       ),
     ).toEqual([]);
   }, 120_000);
-  it('retains the preceding save while trimming additional large changed lists to the history budget', async () => {
+  it('keeps exactly one preceding independent save across large list edits', async () => {
     const context = await sharedSetup();
     for (let i = 1; i <= 8; i++)
       await mutate(
@@ -167,24 +166,75 @@ describe('independent, bounded save checkpoints', () => {
       checkpointSchema,
       context.port.local[stateKey(active.head.stateDigest)],
     );
-    expect(root.retained.length).toBeGreaterThanOrEqual(1);
-    expect(root.retained.length).toBeLessThan(checkpointHistoryLimit);
+    expect(root.retained).toHaveLength(1);
     const reader = new CheckpointReader(context.port.local);
     expect(
       (await reader.read(root.retained[0]!)).data.lists[0]!.lines[0],
     ).toMatch(/7$/);
-    const currentKeys = (await reader.read(active.head)).keys;
-    const history = new Set<string>();
-    for (const head of root.retained)
-      for (const key of (await reader.read(head)).keys)
-        if (!currentKeys.has(key)) history.add(key);
+    expect(roots(context)).toHaveLength(2);
     expect(
-      [...history].reduce(
-        (size, key) => size + recordBytes(key, context.port.local[key]),
-        0,
+      Object.keys(context.port.local).filter((key) =>
+        key.startsWith('buo:v2:content:list:'),
       ),
-    ).toBeLessThanOrEqual(checkpointHistoryBytes);
+    ).toHaveLength(2);
   }, 30_000);
+  it('reads the first schema-4 preview with five references and reduces retention on the next save', async () => {
+    const context = await sharedSetup();
+    context.port.removeFailure = true;
+    for (let i = 1; i <= 7; i++)
+      await mutate(context, i, {
+        kind: 'settings.update',
+        patch: { nightMode: i % 2 === 0 },
+      });
+    const current = await context.storage.requireActiveData();
+    const state = v.parse(
+      checkpointSchema,
+      context.port.local[stateKey(current.head.stateDigest)],
+    );
+    const previous = roots(context)
+      .map(([key, raw]) => ({ key, state: v.parse(checkpointSchema, raw) }))
+      .filter((item) => item.state.revision < current.head.revision)
+      .sort((a, b) => b.state.revision - a.state.revision)
+      .slice(0, 5);
+    const legacyRoot = {
+      ...state,
+      retained: previous.map((item) => ({
+        schemaVersion: 1 as const,
+        revision: item.state.revision,
+        stateDigest: item.key.slice('buo:v2:state:'.length),
+      })),
+    };
+    const legacyDigest = await digest(legacyRoot);
+    context.port.local[stateKey(legacyDigest)] = legacyRoot;
+    context.port.local[headKey] = {
+      ...current.head,
+      stateDigest: legacyDigest,
+    };
+    expect((await context.storage.requireActiveData()).data).toEqual(
+      current.data,
+    );
+    context.port.removeFailure = false;
+    await mutate(context, 8, {
+      kind: 'settings.update',
+      patch: { nightMode: current.data.settings.nightMode },
+    });
+    expect(roots(context)).toHaveLength(2);
+    const active = await context.storage.requireActiveData();
+    expect(
+      v.parse(
+        checkpointSchema,
+        context.port.local[stateKey(active.head.stateDigest)],
+      ).retained,
+    ).toHaveLength(1);
+    expect(
+      (
+        await new CheckpointReader(context.port.local).read({
+          ...current.head,
+          stateDigest: legacyDigest,
+        })
+      ).data,
+    ).toEqual(current.data);
+  });
   it('deduplicates recent requests after their original root is collected and safely rejects older stale requests', async () => {
     const context = await sharedSetup();
     const first: MutationInput = {
@@ -354,7 +404,7 @@ describe('independent, bounded save checkpoints', () => {
       patch: { nightMode: false },
     });
     expect((await context.storage.storageInfo()).cleanupPending).toBe(false);
-    expect(roots(context)).toHaveLength(6);
+    expect(roots(context)).toHaveLength(2);
     expect(await readRecoveryStore(context.port.local)).toEqual(
       (await context.storage.requireActiveData()).data,
     );
@@ -516,7 +566,7 @@ describe('verified archival of earlier preview history', () => {
     expect(context.port.local[archivedSnapshotKey]).toBeUndefined();
     expect(context.port.local['buo:v2:transfer:' + review.id]).toBeDefined();
     expect((await context.storage.storageInfo()).cleanupPending).toBe(false);
-    expect(roots(context)).toHaveLength(6);
+    expect(roots(context)).toHaveLength(2);
     // Restarted readers can verify every retained point without old ancestry.
     const fresh = new StorageCoordinator(context.port, mutex());
     const root = v.parse(

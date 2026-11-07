@@ -86,10 +86,9 @@ export function StorageMaintenancePanel() {
       )}
       <p>
         Automatic snapshots have been removed. Saves reuse unchanged records and
-        keep up to five internal recovery points within a storage budget. The
-        preceding verified save is kept even when it exceeds that budget.
-        Original migration sources, damaged records, unresolved inputs and
-        pending jobs stay protected.
+        keep one preceding verified save for internal recovery. Original
+        migration sources, damaged records, unresolved inputs and pending jobs
+        stay protected.
       </p>
       {info?.cleanupPending && (
         <p>

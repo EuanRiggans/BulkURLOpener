@@ -1293,7 +1293,7 @@ test(
     assert(
       Object.values(records).filter(
         (value) => value?.schemaVersion === 4 && value?.kind === 'checkpoint',
-      ).length <= 6,
+      ).length <= 2,
     );
     assert(
       !Object.keys(records).some((key) => key.startsWith('buo:v2:snapshot:')),
@@ -1321,7 +1321,7 @@ test(
         'Synthetic 5000-entry library; finite checkpoint retention and exact compressed recovery import verified. Active data, protected originals and unresolved work still need storage space.',
     };
     report.assertions.push(
-      '100 large-library settings saves plateau after warmup, keep at most five internal restore points, create no automatic snapshots and round-trip compressed recovery',
+      '100 large-library settings saves plateau after warmup, keep one internal fallback, create no automatic snapshots and round-trip compressed recovery',
     );
   },
 );

@@ -26,9 +26,8 @@ Migration reads existing extension page storage, local mirrors and old sync
 copies. It requires explicit review and does not run at startup. Original raw
 stores, migration backups and stages are preserved locally. New saves use
 separate checksummed list/settings/metadata records, reusing unchanged content.
-Independent recovery checkpoints retain up to five preceding verified saves
-under a history-size target. The preceding verified save is kept even when it
-exceeds the target. Cleanup failures keep extra records for a later retry.
+Independent recovery checkpoints retain the current save and one preceding
+verified save. Cleanup failures keep extra records for a later retry.
 
 Automatic and manual snapshot capture have been removed. Existing snapshot
 archives remain recoverable. Earlier preview history can be removed only after
