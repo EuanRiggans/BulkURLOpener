@@ -82,6 +82,10 @@ explaining navigation, search and local recovery of old account caches.
 | Diagnostics                                                        | Prepared for review before copying/downloading; omit saved names/URLs/drafts/jobs/recovery bodies and saved-list references. Nothing automatically sent.                                                                                                                                                                                            |
 
 Firefox declares required `browsingActivity` and `searchTerms` for opening/search.
+Explicit corrupted-library recovery retains the selected source and damaged
+library records after matching archive read-back and review. It restores
+lists/settings locally without installing imported jobs. Include this protected
+retention in the disclosure; see [the recovery contract](CORRUPTION_RECOVERY.md).
 Optional `technicalAndInteraction` is removed with sync uploads. No
 `has_previous_consent` claim is made. Native install/update/refusal prompts still
 require signed-build tests.

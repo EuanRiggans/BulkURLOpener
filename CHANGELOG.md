@@ -1,5 +1,11 @@
 ## Unreleased Changes
 
+### 2.0.0 redevelopment preview — corrupted-library recovery
+
+- Added explicit Data-page restoration of an unreadable library from a selected fallback or imported export, after matching full-archive read-back and replacement review.
+- Preserve damaged library records, old pointers, unresolved input and existing drafts/jobs; publish an independent recovery revision before returning to ordinary bounded saves.
+- Reject stale recovery/editor/opening requests; recover interrupted publication without replaying imported jobs, including within temporary private sessions.
+
 ### 2.0.0 redevelopment preview — recovery hardening
 
 - Added verified-archive quarantine to unblock editing after partial saves without deleting their stored records.

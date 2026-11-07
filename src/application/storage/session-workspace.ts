@@ -155,7 +155,11 @@ export class SessionWorkspace {
   }
   private async initialize(metadata: Metadata): Promise<PrivateWorkspace> {
     const records = this.logical(await this.port.read());
-    if (!Object.hasOwn(records, headKey)) {
+    if (
+      !Object.hasOwn(records, headKey) &&
+      (Object.keys(records).length === 0 ||
+        Object.hasOwn(await this.port.read(), seedKey))
+    ) {
       let seed: Store;
       const pending = (await this.port.read())[seedKey];
       if (pending !== undefined) seed = parsed(jsonObjectSchema, pending);
@@ -203,10 +207,23 @@ export class SessionWorkspace {
     }
     if (this.cached?.id === metadata.id) return this.cached;
     const activeRecords = this.logical(await this.port.read());
-    requireCondition(
-      await readRecoveryStore(activeRecords),
-      'PRIVATE_SESSION_INVALID',
-    );
+    try {
+      if (Object.hasOwn(activeRecords, headKey))
+        requireCondition(
+          await readRecoveryStore(activeRecords),
+          'PRIVATE_SESSION_INVALID',
+        );
+    } catch (reason) {
+      // Keep the existing epoch-bound coordinator available to the Data page's
+      // explicit recovery flow. Ordinary services retain their canonical gate.
+      if (
+        !(reason instanceof MigrationError) ||
+        !['INTEGRITY_CHECK_FAILED', 'RECOVERY_REVIEW_INVALID'].includes(
+          reason.code,
+        )
+      )
+        throw reason;
+    }
     const roots = Object.entries(activeRecords)
       .filter(([key]) => key.startsWith(storagePrefix + 'state:'))
       .flatMap(([, value]) => {

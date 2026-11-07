@@ -9,11 +9,13 @@ export function TransferReview({
   busy,
   apply,
   cancel,
+  recovery = false,
 }: {
   review: Review;
   busy: boolean;
   apply: (operation: string, decisions: Decisions) => void;
   cancel: () => void;
+  recovery?: boolean;
 }) {
   const operation = useRef(newRequestId());
   const heading = useRef<HTMLHeadingElement>(null);
@@ -29,14 +31,21 @@ export function TransferReview({
   return (
     <section aria-labelledby="transfer-title" class="transfer-review">
       <h2 id="transfer-title" tabIndex={-1} ref={heading}>
-        Review replacement
+        {recovery ? 'Review library recovery' : 'Review replacement'}
       </h2>
+      {recovery && (
+        <p>
+          The damaged library records and this recovery input stay protected
+          locally. Keep your verified full archive too.
+        </p>
+      )}
       <p>
         Accepting replaces the active saved lists and settings. The working
         draft and opening jobs are kept. URLs are not opened. The original
-        recovery or legacy import stays protected locally. A plain
-        lists/settings import can expire with its checkpoint. Keep the external
-        file as an independent backup.
+        recovery or legacy import stays protected locally.
+        {!recovery &&
+          ' A plain lists/settings import can expire with its checkpoint.'}{' '}
+        Keep the external file as an independent backup.
       </p>
       <label class="check-label">
         <input

@@ -90,19 +90,22 @@ Implementation: [retention and scope schema](../src/domain/opening/history.ts),
 
 ## Further findings requiring follow-up
 
-**Confirmed remaining recovery gap:** corruption of the active library still
-blocks in-place import/restore, even if its independent fallback is healthy.
+**Confirmed recovery gap at this checkpoint, now addressed:** see
+[explicit corruption recovery](CORRUPTION_RECOVERY.md) for the follow-up fix and
+its verification limits. At this checkpoint, corruption of the active library
+blocked in-place import/restore, even if its independent fallback was healthy.
 A synthetic check corrupted the current list blob, successfully exported the
 previous copy, then received `INTEGRITY_CHECK_FAILED` while previewing that
-copy for import. Existing guards deliberately prevent initialization or ordinary
-mutations over unreadable data. The missing feature is a separate, explicitly
+copy for import. Existing guards deliberately prevented initialization or ordinary
+mutations over unreadable data. The missing feature was a separate, explicitly
 reviewed recovery activation after a verified full backup, with monotonic
 revisions and protection against late/stale callbacks. Do not work around this
 by clearing the profile or automatically selecting a fallback.
 
-Sources: [copy export](../src/application/storage/coordinator.ts#L1150),
-[normal workspace gate](../src/application/storage/coordinator.ts#L648),
-[import preview](../src/application/workspace.ts#L163).
+Historical source references:
+[copy export](https://github.com/EuanRiggans/BulkURLOpener/blob/2ffb0e8ae46b9170d99370484e9bb2c59a34458d/src/application/storage/coordinator.ts#L1150),
+[normal workspace gate](https://github.com/EuanRiggans/BulkURLOpener/blob/2ffb0e8ae46b9170d99370484e9bb2c59a34458d/src/application/storage/coordinator.ts#L648),
+[import preview](https://github.com/EuanRiggans/BulkURLOpener/blob/2ffb0e8ae46b9170d99370484e9bb2c59a34458d/src/application/workspace.ts#L163).
 
 **Optional capacity improvement:** frozen editor handoffs and unresolved import
 reviews remain intentionally retained. Resolved handoffs do not yet have a

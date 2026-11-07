@@ -491,3 +491,81 @@ it('keeps the verified archive tied to the latest file selection when reads fini
   ]);
   expect(failed).not.toHaveBeenCalled();
 });
+
+it('reviews and restores a corrupt active library on the Data page while keeping recovery out of the popup', async () => {
+  const id = await createList();
+  const healthy = await context.storage.requireActiveData();
+  await context.storage.mutate({
+    id: token(2),
+    expectedHead: healthy.head,
+    command: {
+      kind: 'list.update',
+      id,
+      name: 'Synthetic damaged update',
+      lines: ['https://damaged.example.test/'],
+    },
+  });
+  const active = await context.storage.requireActiveData();
+  const { checkpointSchema } =
+    await import('../../src/domain/storage/checkpoints');
+  const { contentKey, stateKey } =
+    await import('../../src/application/storage/checkpoints');
+  const { parse } = await import('valibot');
+  const root = parse(
+    checkpointSchema,
+    context.port.local[stateKey(active.head.stateDigest)],
+  );
+  const damaged = contentKey('list', root.lists[0]!.digest);
+  context.port.local[damaged] = null;
+  from = 'data.html';
+  history.replaceState(null, '', '/data.html');
+  await act(() => render(<DataPage />, app));
+  await settle();
+  expect(app.textContent).toContain('Restore an unreadable library');
+  expect(button('Inspect recovery replacement').disabled).toBe(true);
+  const archive = await context.storage.exportArchive({});
+  const bytes = await new Blob([JSON.stringify(archive)]).arrayBuffer();
+  await act(() => {
+    const picker = node<HTMLInputElement>('#corruption-backup-archive');
+    Object.defineProperty(picker, 'files', {
+      configurable: true,
+      value: [
+        { size: bytes.byteLength, arrayBuffer: () => Promise.resolve(bytes) },
+      ],
+    });
+    picker.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  await vi.waitFor(() =>
+    expect(
+      node<HTMLInputElement>(
+        '[aria-labelledby="corrupted-library-title"] input[type="checkbox"]',
+      ).disabled,
+    ).toBe(false),
+  );
+  await act(() =>
+    node<HTMLInputElement>(
+      '[aria-labelledby="corrupted-library-title"] input[type="checkbox"]',
+    ).click(),
+  );
+  await select('#corruption-copy', healthy.head.stateDigest);
+  await click('Inspect recovery replacement');
+  expect(app.textContent).toContain('Review library recovery');
+  expect(button('Replace lists and settings').disabled).toBe(true);
+  await act(() =>
+    node<HTMLInputElement>('.transfer-review input[type="checkbox"]').click(),
+  );
+  await click('Replace lists and settings');
+  expect(app.textContent).toContain('The reviewed library was restored.');
+  expect(app.querySelector('#corrupted-library-title')).toBeNull();
+  expect(context.port.local[damaged]).toBeNull();
+  expect(context.browser.created).toEqual([]);
+  expect(
+    (await context.storage.requireActiveData()).data.lists[0]!.lines,
+  ).toEqual(healthy.data.lists[0]!.lines);
+  await act(() => render(null, app));
+  from = 'popup.html';
+  history.replaceState(null, '', '/popup.html');
+  await act(() => render(<Popup />, app));
+  await settle();
+  expect(app.textContent).not.toContain('Restore an unreadable library');
+});

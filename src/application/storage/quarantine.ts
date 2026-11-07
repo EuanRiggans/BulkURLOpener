@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import { recoveryProtection } from './recovery-records';
 import { quarantineSchema } from '../../domain/storage/quarantine';
 import { checkpointSchema } from '../../domain/storage/checkpoints';
 import { stateSchema } from '../../domain/storage/schema';
@@ -7,10 +8,11 @@ import { requireCondition } from '../../domain/storage/errors';
 import { contentKey, stateKey } from './checkpoints';
 
 type Store = Record<string, unknown>;
-export async function quarantines(store: Store) {
+export async function quarantines(store: Store, protectedKeys?: Set<string>) {
   const results = [];
-  for (const [key, raw] of Object.entries(store).filter(([key]) =>
-    key.startsWith('buo:v2:quarantine:'),
+  const recovered = protectedKeys ?? (await recoveryProtection(store));
+  for (const [key, raw] of Object.entries(store).filter(
+    ([key]) => key.startsWith('buo:v2:quarantine:') && !recovered.has(key),
   )) {
     const parsed = v.safeParse(quarantineSchema, raw);
     requireCondition(

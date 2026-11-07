@@ -11,11 +11,13 @@ export function ArchiveFileInput({
   disabled,
   ready,
   failed,
+  label = 'Select the downloaded full recovery archive',
 }: {
   id: string;
   disabled: boolean;
   ready: (archive: PackedJson | null) => void;
   failed: (reason: unknown) => void;
+  label?: string;
 }) {
   const generation = useRef(0);
   const [loading, setLoading] = useState(false);
@@ -27,7 +29,7 @@ export function ArchiveFileInput({
   );
   return (
     <>
-      <label for={id}>Select the downloaded full recovery archive</label>
+      <label for={id}>{label}</label>
       <input
         id={id}
         type="file"

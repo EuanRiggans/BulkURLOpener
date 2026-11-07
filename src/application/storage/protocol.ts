@@ -6,11 +6,27 @@ import {
   headSchema,
 } from '../../domain/storage/schema';
 import { packedJsonSchema } from '../../domain/storage/archive';
+import {
+  recoveryApplySchema,
+  recoverySourceSchema,
+} from '../../domain/storage/recovery';
 
 const type = <A extends string>(action: A) =>
   v.literal(('buo:migration/' + action) as `buo:migration/${A}`);
 export const requestSchema = v.variant('type', [
   v.strictObject({ type: type('status') }),
+  v.strictObject({ type: type('recovery-available') }),
+  v.strictObject({
+    type: type('recovery-preview'),
+    document: documentSchema,
+    archive: packedJsonSchema,
+    source: recoverySourceSchema,
+  }),
+  v.strictObject({
+    type: type('recovery-activate'),
+    document: documentSchema,
+    input: recoveryApplySchema,
+  }),
   v.strictObject({ type: type('prepare'), document: documentSchema }),
   v.strictObject({
     type: type('commit'),

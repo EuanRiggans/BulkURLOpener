@@ -1,4 +1,5 @@
 import { InterruptedSaveRecovery } from '../recovery/InterruptedSaveRecovery';
+import { CorruptedLibraryRecovery } from '../recovery/CorruptedLibraryRecovery';
 import { useEffect, useState } from 'preact/hooks';
 import * as v from 'valibot';
 import { extensionRequest } from '../../infrastructure/browser/client';
@@ -42,6 +43,7 @@ export function DataPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [recoveryVersion, setRecoveryVersion] = useState(0);
   const [privateMode, setPrivateMode] = useState<boolean | null>(null);
   useEffect(() => {
     void extensionRequest({ type: 'buo:service/context.read' }, contextSchema)
@@ -118,6 +120,18 @@ export function DataPage() {
         </p>
       )}
       <p role="status">{busy ? 'Working…' : notice}</p>
+      <CorruptedLibraryRecovery
+        key={'corruption-' + recoveryVersion}
+        restored={() =>
+          perform(async () => {
+            await reload();
+            setRecoveryVersion((value) => value + 1);
+            setNotice(
+              'The reviewed library was restored. Damaged records remain protected. No imported URLs were opened.',
+            );
+          })
+        }
+      />
       {review && (
         <TransferReview
           key={review.id}
@@ -379,9 +393,9 @@ export function DataPage() {
           ))}
         </section>
       )}
-      <InterruptedSaveRecovery />
-      <StorageMaintenancePanel />
-      <RecoveryPanel />
+      <InterruptedSaveRecovery key={'interrupted-' + recoveryVersion} />
+      <StorageMaintenancePanel key={'maintenance-' + recoveryVersion} />
+      <RecoveryPanel key={'status-' + recoveryVersion} />
     </PageLayout>
   );
 }

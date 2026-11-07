@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+import { isRecoveryState, readRecoveryState } from './recovery-records';
 import {
   checkpointHistoryLimit,
   checkpointReceiptLimit,
@@ -86,6 +87,11 @@ export class CheckpointReader {
   async anchor(ref: Head): Promise<CanonicalData> {
     const cached = this.legacy.get(ref.stateDigest);
     if (cached) return cached;
+    if (isRecoveryState(this.store[stateKey(ref.stateDigest)])) {
+      const recovered = await readRecoveryState(this.store, ref);
+      this.legacy.set(ref.stateDigest, recovered.data);
+      return recovered.data;
+    }
     const state = checked(stateSchema, this.store[stateKey(ref.stateDigest)]);
     requireCondition(
       state.revision === ref.revision &&

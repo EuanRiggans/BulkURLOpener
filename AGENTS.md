@@ -23,6 +23,8 @@ and [store disclosure drafts](docs/STORE_SUBMISSION.md). The user-approved
 unbounded-history, sync and snapshot contracts. Development same-ID
 tests are not signed-store evidence. Keep preview status until the release gates
 are actually satisfied and a specific release is authorized.
+Explicit recovery of an unreadable active library is documented in
+[corruption recovery](docs/CORRUPTION_RECOVERY.md).
 
 - Work on `redevelopment`. Its fresh starting commit is
   `4eb346d3bca8a12e6fa0f7e5ba891fcb711d9bf7`.
@@ -77,6 +79,14 @@ erase recovery data to fix quota. A readiness check outside a mutation is not a
 transaction. List/settings/opening/menu services must use the migration gate.
 Normal mutations use schema-4 independent checkpoints and content-addressed
 lists/settings/metadata; schemas 1/2/3 remain readable for migration/recovery.
+Schema-5 recovery anchors are created only by the Data page's explicitly reviewed
+corruption-recovery flow after a matching full archive is verified. Preserve the
+raw old pointer and damaged library records; advance beyond all observed safe
+library revisions, verify the new origin and publish the pointer last. Resume
+ordinary writes through schema-4 checkpoints. Protected old roots are not
+acknowledged operations. Invalidate cached opening scopes before recovery
+publication; imported jobs are never installed. Keep private recovery epoch-bound
+and ephemeral, including after background restart or a missing active pointer.
 Retain one preceding verified save as the sole internal fallback. Read earlier
 schema-4 previews with up to five references; new saves reduce their retention
 without losing current/fallback data. Verify the candidate before

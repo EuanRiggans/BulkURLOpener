@@ -43,6 +43,14 @@ archive and explicitly confirming. The inactive records remain locally protected
 by a checksummed quarantine receipt, and editing resumes from the last saved
 library. This does not restore an unreadable active library automatically.
 
+For an unreadable active library, the Data page can explicitly restore reviewed
+lists/settings from a selected healthy copy or file after verifying a matching
+downloaded full archive. It retains the selected input, exact old pointer and
+damaged library records locally. Separately saved working drafts and existing
+jobs remain; imported jobs are not installed or replayed. These protected recovery
+sources can use additional storage. Private recovery stays in the temporary
+private workspace and is cleared with that session.
+
 Working popup text uses a separate local record. Concurrent conflicting drafts
 and editor handoffs are retained. Imports/restores replace only lists and
 preferences after review; current drafts/jobs remain and imported jobs never

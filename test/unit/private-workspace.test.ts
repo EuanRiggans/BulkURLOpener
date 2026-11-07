@@ -128,6 +128,97 @@ function reply(
 }
 
 describe('session-only private workspace', () => {
+  it.each(['component', 'missing-head'] as const)(
+    'keeps %s corruption recovery available after restart within the private epoch',
+    async (damage) => {
+      const context = await setup();
+      const storage = context.workspace.storage;
+      const active = await storage.requireActiveData();
+      const normalBefore = structuredClone(context.normal.port.local);
+      const { headKey } = await import('../../src/domain/storage/schema');
+      const { contentKey, stateKey } =
+        await import('../../src/application/storage/checkpoints');
+      const { checkpointSchema } =
+        await import('../../src/domain/storage/checkpoints');
+      const { parse } = await import('valibot');
+      await storage.mutate({
+        id: token(1100),
+        expectedHead: active.head,
+        command: {
+          kind: 'list.create',
+          name: 'Synthetic private recovery',
+          lines: ['https://private-recovery.example.test/'],
+        },
+      });
+      const current = await storage.requireActiveData();
+      if (damage === 'missing-head')
+        delete context.port.values[privatePrefix + headKey];
+      else {
+        const root = parse(
+          checkpointSchema,
+          context.port.values[
+            privatePrefix + stateKey(current.head.stateDigest)
+          ],
+        );
+        context.port.values[
+          privatePrefix + contentKey('list', root.lists.at(-1)!.digest)
+        ] = null;
+      }
+      const reopened = await new SessionWorkspace(
+        context.port,
+        context.normal.storage,
+      ).open(10);
+      expect(reopened.id).toBe(context.workspace.id);
+      expect(await reopened.storage.recoveryAvailable()).toEqual({
+        available: true,
+      });
+      const archive = await reopened.storage.exportArchive({});
+      const preview = await reopened.storage.previewRecovery({}, archive, {
+        kind: 'copy',
+        id: active.head.stateDigest,
+      });
+      const result = await reopened.storage.activateRecovery(
+        {},
+        {
+          id: preview.id,
+          operation: token(1101),
+          acknowledgeReplacement: true,
+          decisions: {
+            acknowledgeIssues: true,
+            preferences: {},
+            historical: {},
+          },
+        },
+      );
+      expect(result.data!.lists.map((list) => list.lines)).toEqual(
+        active.data.lists.map((list) => list.lines),
+      );
+      expect(context.normal.port.local).toEqual(normalBefore);
+      expect(context.normal.port.syncWrites).toBe(0);
+      context.port.live = [];
+      await context.sessions.existing();
+      await expect(
+        reopened.storage.activateRecovery(
+          {},
+          {
+            id: preview.id,
+            operation: token(1101),
+            acknowledgeReplacement: true,
+            decisions: {
+              acknowledgeIssues: true,
+              preferences: {},
+              historical: {},
+            },
+          },
+        ),
+      ).rejects.toThrow('PRIVATE_SESSION_ENDED');
+      expect(
+        Object.keys(context.port.values).some((key) =>
+          key.startsWith(privatePrefix),
+        ),
+      ).toBe(false);
+    },
+  );
   it('copies saved lists/preferences without the normal draft, staging, history or startup side effects', async () => {
     const context = await setup();
     const data = (await context.workspace.storage.requireActiveData()).data;

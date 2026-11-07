@@ -19,6 +19,15 @@ export function createMigrationListener(
         throw new MigrationError('PRIVATE_WINDOW_UNSUPPORTED');
       const request = v.parse(requestSchema, message);
       if (
+        [
+          'buo:migration/recovery-available',
+          'buo:migration/recovery-preview',
+          'buo:migration/recovery-activate',
+        ].includes(request.type) &&
+        new URL(sender.url!).pathname !== '/data.html'
+      )
+        throw new MigrationError('UNAUTHORIZED_PAGE');
+      if (
         privateMode &&
         [
           'buo:migration/prepare',
@@ -32,6 +41,22 @@ export function createMigrationListener(
       switch (request.type) {
         case 'buo:migration/status':
           value = await storage.status();
+          break;
+        case 'buo:migration/recovery-available':
+          value = await storage.recoveryAvailable();
+          break;
+        case 'buo:migration/recovery-preview':
+          value = await storage.previewRecovery(
+            privateMode ? {} : request.document,
+            request.archive,
+            request.source,
+          );
+          break;
+        case 'buo:migration/recovery-activate':
+          value = await storage.activateRecovery(
+            privateMode ? {} : request.document,
+            request.input,
+          );
           break;
         case 'buo:migration/prepare':
           value = await storage.prepare(request.document);

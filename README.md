@@ -93,6 +93,8 @@ Earlier preview history is not silently deleted. Download a **full recovery arch
 
 Interrupted saves whose original editor is unavailable can be set aside through Data & recovery after a matching full recovery archive is selected and verified. Their original records remain protected; editing resumes from the last saved library. New completed-job history keeps up to ten recent results within a 1 MiB target (the newest result is kept even if larger). Current/preceding progress records, unfinished/uncertain work and live or unsettled holding tabs stay protected. Earlier preview jobs require explicit verified archival. Old expired opening requests are rejected rather than replayed. See [recovery hardening and further findings](docs/RECOVERY_HARDENING.md).
 
+If the active library itself is unreadable, Data & recovery offers an explicit restore after verifying a matching downloaded full archive. Choose and review a healthy internal copy or external export; damaged library records remain protected. The new revision keeps existing working drafts/jobs and imports no jobs. Unknown future formats remain blocked. See [corruption recovery and limits](docs/CORRUPTION_RECOVERY.md).
+
 Saved-list startup preferences use the same opening policy. Jobs retain a settings snapshot and durable acknowledgements; interrupted/unconfirmed tab creation needs review instead of blind replay. Pending work from a new browser session needs an explicit target window. Settings links to staged-change and opening-job recovery.
 
 Jobs retain URLs/search input locally and navigate to user-chosen destinations/providers. Firefox declares and checks corresponding consent before opening destinations.

@@ -1,4 +1,16 @@
 import type { HeldJobs } from '../../domain/opening/history';
+import { CorruptionRecovery } from './recovery';
+import {
+  isRecoveryState,
+  readRecoveryState,
+  recoveryProtection,
+} from './recovery-records';
+import {
+  recoveryStateSchema,
+  type RecoveryState,
+  type RecoverySource,
+  type RecoveryApply,
+} from '../../domain/storage/recovery';
 import { openingEpoch } from './job-maintenance';
 import { quarantines, quarantineReferences } from './quarantine';
 import * as v from 'valibot';
@@ -76,7 +88,10 @@ export type Exclusive = <T>(work: () => Promise<T>) => Promise<T>;
 type Store = Record<string, unknown>;
 type Verified = {
   status: StorageStatus;
-  state: StoredState | (Checkpoint & { data: CanonicalData }) | null;
+  state:
+    | StoredState
+    | ((Checkpoint | RecoveryState) & { data: CanonicalData })
+    | null;
   reachable: Set<string>;
 };
 
@@ -97,7 +112,7 @@ function knownKeys(store: Store) {
         key === storagePrefix + 'draft' ||
         key === storagePrefix + 'job-epoch' ||
         /^buo:v2:content:(list|settings|metadata):[a-f0-9]{64}$/.test(key) ||
-        /^buo:v2:(gc|archive-proof|quarantine|job-gc):[a-f0-9]{64}$/.test(
+        /^buo:v2:(gc|archive-proof|quarantine|job-gc|recovery-review):[a-f0-9]{64}$/.test(
           key,
         ) ||
         /^buo:v2:(backup|stage|state|job|job-plan|job-state|draft-state|snapshot|transfer|sync-backup):[a-f0-9]{64}$/.test(
@@ -270,6 +285,19 @@ async function verify(store: Store): Promise<Verified> {
   knownKeys(store);
   if (!Object.hasOwn(store, headKey)) return verifyLegacy(store);
   const head = decoded(headSchema, store[headKey]);
+  if (isRecoveryState(store[stateKey(head.stateDigest)])) {
+    const recovered = await readRecoveryState(store, head);
+    return {
+      status: {
+        status: 'ready',
+        head,
+        data: recovered.data,
+        canRollback: false,
+      },
+      state: { ...recovered.state, data: recovered.data },
+      reachable: new Set([head.stateDigest]),
+    };
+  }
   if (!isCheckpoint(store[stateKey(head.stateDigest)]))
     return verifyLegacy(store);
   const current = await checkpointReachability(store, head);
@@ -446,6 +474,34 @@ export class StorageCoordinator {
     return this.run(async () => (await verify(await this.local())).status);
   }
 
+  private corruptionRecovery() {
+    return new CorruptionRecovery({
+      read: () => this.local(),
+      capture: (document) => this.capture(document, true),
+      append: (key, value) => this.append(key, value),
+      write: (key, value) => this.write(key, value),
+      verify: async (store) => (await verify(store)).status,
+      readRecovery: readRecoveryStore,
+      known: knownKeys,
+      now: this.now,
+    });
+  }
+  recoveryAvailable() {
+    return this.run(() => this.corruptionRecovery().available());
+  }
+  previewRecovery(
+    document: Record<string, string>,
+    archive: PackedJson,
+    source: RecoverySource,
+  ) {
+    return this.run(() =>
+      this.corruptionRecovery().preview(document, archive, source),
+    );
+  }
+  activateRecovery(document: Record<string, string>, input: RecoveryApply) {
+    return this.run(() => this.corruptionRecovery().apply(document, input));
+  }
+
   async requireActiveData(): Promise<{
     head: Head;
     data: NonNullable<StorageStatus['data']>;
@@ -472,12 +528,16 @@ export class StorageCoordinator {
       current.status.head && current.status.data && current.state,
       'MIGRATION_REQUIRED',
     );
-    const suspended = await quarantines(store);
+    const recovered = await recoveryProtection(store);
+    const suspended = await quarantines(store, recovered);
     requireCondition(
       !suspended.some((entry) => entry.operationId === input.id),
       'OPERATION_QUARANTINED',
     );
     const suspendedIds = new Set(suspended.map((entry) => entry.stateDigest));
+    for (const key of recovered)
+      if (key.startsWith(storagePrefix + 'state:'))
+        suspendedIds.add(key.slice((storagePrefix + 'state:').length));
     const requestDigest = await digest({
       expectedHead: input.expectedHead,
       command: input.command,
@@ -518,6 +578,14 @@ export class StorageCoordinator {
     )) {
       const hash = key.slice((storagePrefix + 'state:').length);
       if (current.reachable.has(hash) || suspendedIds.has(hash)) continue;
+      if (isRecoveryState(value)) {
+        const old = decoded(recoveryStateSchema, value);
+        requireCondition(
+          old.revision <= current.status.head.revision,
+          'PENDING_MUTATION',
+        );
+        continue;
+      }
       if (isCheckpoint(value)) {
         const staged = decoded(checkpointSchema, value);
         if (staged.revision > current.status.head.revision) {
@@ -696,9 +764,13 @@ export class StorageCoordinator {
       current.status.head && current.status.data,
       'MIGRATION_REQUIRED',
     );
+    const recovered = await recoveryProtection(store);
     const suspendedIds = new Set(
-      (await quarantines(store)).map((entry) => entry.stateDigest),
+      (await quarantines(store, recovered)).map((entry) => entry.stateDigest),
     );
+    for (const key of recovered)
+      if (key.startsWith(storagePrefix + 'state:'))
+        suspendedIds.add(key.slice((storagePrefix + 'state:').length));
     const pending: { stateDigest: string; input: MutationInput | null }[] = [];
     for (const [key, value] of Object.entries(store).filter(([key]) =>
       key.startsWith(storagePrefix + 'state:'),
@@ -707,7 +779,7 @@ export class StorageCoordinator {
       if (current.reachable.has(stateDigest) || suspendedIds.has(stateDigest))
         continue;
       const recognized = v.safeParse(
-        v.union([stateSchema, checkpointSchema]),
+        v.union([stateSchema, checkpointSchema, recoveryStateSchema]),
         value,
       );
       if (!recognized.success) {
@@ -717,11 +789,16 @@ export class StorageCoordinator {
             typeof value === 'object' &&
             'schemaVersion' in value &&
             typeof value.schemaVersion === 'number' &&
-            value.schemaVersion > 4
+            value.schemaVersion > 5
           ),
           'UNKNOWN_STORAGE_VERSION',
         );
         pending.push({ stateDigest, input: null });
+        continue;
+      }
+      if (isRecoveryState(value)) {
+        if (recognized.output.revision > current.status.head.revision)
+          pending.push({ stateDigest, input: null });
         continue;
       }
       if (isCheckpoint(value)) {
@@ -1122,7 +1199,7 @@ export class StorageCoordinator {
         key.startsWith(storagePrefix + 'state:'),
       )) {
         const parsed = v.safeParse(
-          v.union([stateSchema, checkpointSchema]),
+          v.union([stateSchema, checkpointSchema, recoveryStateSchema]),
           raw,
         );
         if (!parsed.success) continue;
@@ -1151,7 +1228,7 @@ export class StorageCoordinator {
     return this.run(async () => {
       const store = await this.local();
       const state = decoded(
-        v.union([stateSchema, checkpointSchema]),
+        v.union([stateSchema, checkpointSchema, recoveryStateSchema]),
         store[stateKey(id)],
       );
       const copy = await new CheckpointReader(store).read({

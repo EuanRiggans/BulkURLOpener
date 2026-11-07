@@ -1474,3 +1474,112 @@ test(
     );
   },
 );
+
+test(
+  'the Data page restores a corrupt active library after archive read-back without opening tabs',
+  { timeout: 120_000 },
+  async () => {
+    await page('new-list.html');
+    const before = await rpc({ type: 'buo:service/library.read' });
+    const changed = await rpc({
+      type: 'buo:service/library.mutate',
+      input: {
+        id: id(),
+        expectedHead: before.head,
+        command: {
+          kind: 'list.create',
+          name: 'Synthetic corrupted recovery',
+          lines: [destination + '/corruption-recovery', ''],
+        },
+      },
+    });
+    const broken = await native(
+      'const records = await api.storage.local.get(null); const state = records["buo:v2:state:" + arguments[0].stateDigest]; const key = "buo:v2:content:list:" + state.lists.at(-1).digest; await api.storage.local.set({[key]: {synthetic: "preserve damaged body"}}); return {key, state};',
+      changed.head,
+    );
+    await page('data.html');
+    assert.deepEqual(await rpc({ type: 'buo:migration/recovery-available' }), {
+      available: true,
+    });
+    await audit('corrupted-library');
+    const archive = await rpc({
+      type: 'buo:migration/export-archive',
+      document: {},
+    });
+    const file = resolve(evidence, 'synthetic-corrupted-library-recovery.json');
+    await writeFile(file, JSON.stringify(archive));
+    await driver.wait(
+      until.elementLocated(By.id('corruption-backup-archive')),
+      20_000,
+    );
+    await driver.findElement(By.id('corruption-backup-archive')).sendKeys(file);
+    const section = await driver.findElement(
+      By.css('[aria-labelledby="corrupted-library-title"]'),
+    );
+    const backupAck = await section.findElement(By.css('input[type=checkbox]'));
+    await driver.wait(until.elementIsEnabled(backupAck), 20_000);
+    await backupAck.click();
+    await native(
+      'const field = document.getElementById("corruption-copy"); field.value = arguments[0]; field.dispatchEvent(new Event("change", {bubbles: true})); return field.value;',
+      before.head.stateDigest,
+    );
+    const inspect = await section.findElement(
+      By.xpath('.//button[normalize-space(.)="Inspect recovery replacement"]'),
+    );
+    await driver.wait(until.elementIsEnabled(inspect), 20_000);
+    await inspect.click();
+    await driver.wait(until.elementLocated(By.css('.transfer-review')), 20_000);
+    assert.equal(
+      await driver.findElement(By.id('transfer-title')).getText(),
+      'Review library recovery',
+    );
+    await audit('corrupted-library-review');
+    await driver
+      .findElement(By.css('.transfer-review input[type=checkbox]'))
+      .click();
+    const tabsBefore = await native(
+      'return (await api.tabs.query({})).map(tab => tab.id).sort();',
+    );
+    const replace = await driver.findElement(
+      By.xpath('//button[normalize-space(.)="Replace lists and settings"]'),
+    );
+    await driver.wait(until.elementIsEnabled(replace), 20_000);
+    await replace.click();
+    await driver.wait(async () => {
+      const response = await native(
+        'return await api.runtime.sendMessage({type: "buo:service/library.read"});',
+      );
+      return (
+        response.ok && response.value.head.revision > changed.head.revision
+      );
+    }, 30_000);
+    const restored = await rpc({ type: 'buo:service/library.read' });
+    assert.deepEqual(
+      restored.data.lists.map(({ id, name, lines }) => ({ id, name, lines })),
+      before.data.lists.map(({ id, name, lines }) => ({ id, name, lines })),
+    );
+    assert.deepEqual(restored.data.settings, before.data.settings);
+    assert.deepEqual(
+      await native(
+        'return (await api.tabs.query({})).map(tab => tab.id).sort();',
+      ),
+      tabsBefore,
+    );
+    const retained = await native(
+      'return await api.storage.local.get([arguments[0], "buo:v2:state:" + arguments[1].stateDigest]);',
+      broken.key,
+      changed.head,
+    );
+    assert.deepEqual(retained[broken.key], {
+      synthetic: 'preserve damaged body',
+    });
+    assert.deepEqual(
+      retained['buo:v2:state:' + changed.head.stateDigest],
+      broken.state,
+    );
+    await settings({ nightMode: !restored.data.settings.nightMode });
+    report.assertions.push(
+      'corrupt active library restored through explicit file read-back, copy selection and reviewed replacement; raw damaged records remain and no tabs are opened',
+    );
+  },
+);

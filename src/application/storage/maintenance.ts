@@ -1,4 +1,5 @@
 import { quarantines } from './quarantine';
+import { recoveryProtection } from './recovery-records';
 import * as v from 'valibot';
 import {
   archiveProofSchema,
@@ -57,7 +58,9 @@ async function disposableTransfer(raw: unknown) {
 async function protectedKeys(store: Store, head: Head) {
   const current = await checkpointReachability(store, head);
   const keys = current.keys;
-  for (const entry of await quarantines(store))
+  const recovered = await recoveryProtection(store);
+  for (const key of recovered) keys.add(key);
+  for (const entry of await quarantines(store, recovered))
     for (const key of entry.protectedKeys) keys.add(key);
   const plannedRoots = new Set<string>();
   for (const [key, raw] of Object.entries(store).filter(([key]) =>
@@ -83,6 +86,7 @@ async function protectedKeys(store: Store, head: Head) {
   for (const [key, raw] of Object.entries(store).filter(([key]) =>
     key.startsWith('buo:v2:state:'),
   )) {
+    if (recovered.has(key)) continue;
     if (!isCheckpoint(raw)) {
       const old = v.safeParse(stateSchema, raw);
       if (

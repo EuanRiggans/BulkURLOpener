@@ -3,6 +3,12 @@ import { recoveryError } from '../recovery/labels';
 export function serviceError(error: unknown): string {
   const code = error instanceof Error ? error.message : '';
   const messages: Record<string, string> = {
+    RECOVERY_NOT_REQUIRED:
+      'The library is readable now. Refresh this page; ordinary imports remain available below.',
+    RECOVERY_REVIEW_INVALID:
+      'This recovery review could not be verified. Keep the full archive and inspect a fresh recovery replacement.',
+    RECOVERY_REVISION_EXHAUSTED:
+      'A stored revision is too large to advance safely. Keep the full recovery archive and restore its verified lists into a clean installation.',
     WINDOW_SCOPE_MISMATCH:
       'This action must stay within the same regular or private workspace. Refresh the opener in the intended window.',
     PRIVATE_ACCESS_REQUIRED:
