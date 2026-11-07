@@ -15,6 +15,11 @@ in [Phase 5](docs/PHASE_5_HARDENING.md), with remaining manual release checks in
 [the test protocol](docs/PHASE_5_MANUAL_CHECKS.md).
 Browser-only cleanup and source/package reproduction are recorded in
 [Phase 6](docs/PHASE_6_CLEANUP.md) and [the build guide](docs/BUILD_AND_PACKAGE.md).
+Release preparation and outstanding blockers are recorded in
+[Phase 7](docs/PHASE_7_RELEASE.md), with [upgrade verification](docs/UPGRADE_VERIFICATION.md)
+and [store disclosure drafts](docs/STORE_SUBMISSION.md). Development same-ID
+tests are not signed-store evidence. Keep preview status until the release gates
+are actually satisfied and a specific release is authorized.
 
 - Work on `redevelopment`. Its fresh starting commit is
   `4eb346d3bca8a12e6fa0f7e5ba891fcb711d9bf7`.
@@ -99,3 +104,7 @@ consent, local backup and a visible-change check. Its original legacy keys stay
 read-only; never clear the sync area. Optional snapshot cleanup can remove only
 verified `buo:v2:snapshot:` records after a new copy is verified. Mandatory
 history, original legacy snapshots and damaged records remain intact.
+Firefox sync additionally needs optional `technicalAndInteraction` consent for
+preferences: request it in the upload gesture and recheck it in the background.
+Do not broaden ordinary opening consent or treat a privileged test grant as
+evidence for a native user prompt.

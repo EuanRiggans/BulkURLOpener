@@ -97,6 +97,11 @@ for (const browser of ['chrome', 'firefox']) {
         .required,
       ['browsingActivity', 'searchTerms'],
     );
+    assert.deepEqual(
+      manifest.browser_specific_settings.gecko.data_collection_permissions
+        .optional,
+      ['technicalAndInteraction'],
+    );
   } else {
     resource(manifest.background.service_worker);
     assert(!manifest.background.scripts);

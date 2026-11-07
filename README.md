@@ -2,7 +2,7 @@
 
 A browser extension for opening URLs and searches in batches and managing saved lists.
 
-**The `redevelopment` branch is a development preview.** Phase 6 removes the retired desktop/legacy implementation and adds verified browser/source packages to the functional extension. Use an isolated development browser profile; manual release checks and signed-upgrade verification remain required.
+**The `redevelopment` branch is a development preview.** Phase 7 adds upgrade-preservation checks and release preparation. Genuine signed upgrades, long-term storage capacity and the remaining release gates still require verification. Use an isolated development browser profile.
 
 The popup stays focused on URL entry and simple actions. Creating and editing lists use separate pages. The context menu is `Bulk URL Opener → Open Lists → [saved lists]`; enable it in Settings for an existing profile. Fresh installations enable the basic menu. Settings, Data & recovery, Tools, Help and Opening jobs have full pages.
 
@@ -24,20 +24,22 @@ Use WXT's isolated development profile or a separate disposable profile. Never u
 
 ## Builds and checks
 
-| Command                         | Purpose                                                                                     |
-| ------------------------------- | ------------------------------------------------------------------------------------------- |
-| `npm run build`                 | Production-mode Chromium MV3 preview in `.output/chrome-mv3/`.                              |
-| `npm run build:firefox`         | Production-mode Firefox MV3 preview in `.output/firefox-mv3/`.                              |
-| `npm run build:all`             | Build both browsers.                                                                        |
-| `npm run check`                 | Strict TypeScript, ESLint, formatting, modern service/UI tests and packaging tests.         |
-| `npm run check:build`           | Check generated manifests, resources, CSP, icons and build contents. Run after both builds. |
-| `npm run lint:firefox`          | Mozilla validation of the generated Firefox extension.                                      |
-| `npm run validate`              | All of the above checks and both builds.                                                    |
-| `npm run test:packaging`        | Archive safety, source selection and deterministic packaging checks.                        |
-| `npm run test:browser`          | Real-browser suite; requires configured disposable Selenium browsers as in browser CI.      |
-| `npm run package`               | Build verified Chrome/Firefox/source ZIPs and SHA-256 checksums in `dist/`.                 |
-| `npm run check:packages`        | Verify every archive member, its bytes and checksums against the current source/build.      |
-| `npm run check:reproducibility` | Install/build/test the source ZIP in a fresh directory and compare output bytes.            |
+| Command                                             | Purpose                                                                                     |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `npm run build`                                     | Production-mode Chromium MV3 preview in `.output/chrome-mv3/`.                              |
+| `npm run build:firefox`                             | Production-mode Firefox MV3 preview in `.output/firefox-mv3/`.                              |
+| `npm run build:all`                                 | Build both browsers.                                                                        |
+| `npm run check`                                     | Strict TypeScript, ESLint, formatting, modern service/UI tests and packaging tests.         |
+| `npm run check:build`                               | Check generated manifests, resources, CSP, icons and build contents. Run after both builds. |
+| `npm run lint:firefox`                              | Mozilla validation of the generated Firefox extension.                                      |
+| `npm run validate`                                  | All of the above checks and both builds.                                                    |
+| `npm run test:packaging`                            | Archive safety, source selection and deterministic packaging checks.                        |
+| `npm run test:browser`                              | Real-browser suite; requires configured disposable Selenium browsers as in browser CI.      |
+| `npm run test:upgrade`                              | Same-ID development update with synthetic historical stores; not signed-store verification. |
+| `npm run upgrade:compare -- BEFORE.json AFTER.json` | Read-only comparison of private baseline/recovery files; fixed codes and counts only.       |
+| `npm run package`                                   | Build verified Chrome/Firefox/source ZIPs and SHA-256 checksums in `dist/`.                 |
+| `npm run check:packages`                            | Verify every archive member, its bytes and checksums against the current source/build.      |
+| `npm run check:reproducibility`                     | Install/build/test the source ZIP in a fresh directory and compare output bytes.            |
 
 WXT generates browser-specific background configuration: a Chromium service worker and Firefox background scripts. Source version `2.0.0` comes from `package.json`; this is an unreleased redevelopment version, not a store submission.
 
@@ -85,6 +87,8 @@ Data & recovery supports portable 2.x and legacy 1.x JSON exports, paste/file im
 
 Manual browser-account sync uploads only explicitly reviewed lists/settings to a new key, preserving the legacy sync key and a local copy of previous sync contents. A conservative 8 KB item limit applies; larger libraries use JSON transfer. Read-back verifies the local sync area, not remote delivery. Chrome-family and Firefox accounts do not share a sync service.
 
+Firefox asks for optional settings-data consent when uploading a reviewed sync copy, in addition to its required browsing/search categories. Refusal leaves the review and both stores intact; ordinary opening remains available. The settings-data grant is used for manual sync, not analytics.
+
 Saved-list startup preferences use the same opening policy. Jobs retain a settings snapshot and durable acknowledgements; interrupted/unconfirmed tab creation needs review instead of blind replay. Pending work from a new browser session needs an explicit target window. Settings links to staged-change and opening-job recovery.
 
 Jobs retain URLs/search input locally and navigate to user-chosen destinations/providers. Firefox declares and checks corresponding consent before opening or uploading sync data.
@@ -92,6 +96,8 @@ Jobs retain URLs/search input locally and navigate to user-chosen destinations/p
 Private access requires the browser's extension grant. A private workspace starts with regular saved lists/preferences; its drafts, edits, snapshots and jobs use temporary private storage (Firefox session storage; Chromium's isolated incognito IndexedDB). Closing the last private window clears that workspace; browser restart/extension reload can clear it too. Capture stays within the matching privacy scope. Sync and startup remain regular, and the global menu always lists regular saved lists. Explicit file/clipboard exports can outlast a private session. See the [privacy policy](privacy-policy.md) and [Phase 5 hardening record](docs/PHASE_5_HARDENING.md).
 
 Download a recovery file first, then choose **Inspect and back up data**. Conflicting preferences and ambiguous historical comma records require explicit choices. Storage errors block activation rather than deleting data to make room. Recovery downloads contain private data; keep them private. See [the Phase 2 contract and limits](docs/PHASE_2_DATA.md).
+
+Mandatory recovery/history and reviewed imports have no automatic expiry. Repeated saves can fill browser storage even with optional snapshots disabled. This candidate retains records and fails visibly; the long-term capacity design remains a release gate. See [Phase 7](docs/PHASE_7_RELEASE.md) and the [upgrade comparison protocol](docs/UPGRADE_VERIFICATION.md).
 
 This is a public repository. Never commit personal exports, browser profiles, private URLs/list names or unsanitized diagnostics. All committed migration fixtures are synthetic. The Firefox add-on ID is public extension metadata.
 
@@ -106,6 +112,9 @@ This is a public repository. Never commit personal exports, browser profiles, pr
 - [Phase 5 accessibility, private sessions and browser evidence](docs/PHASE_5_HARDENING.md)
 - [Remaining manual release checks](docs/PHASE_5_MANUAL_CHECKS.md)
 - [Phase 6 cleanup and package evidence](docs/PHASE_6_CLEANUP.md)
+- [Phase 7 release preparation and remaining gates](docs/PHASE_7_RELEASE.md)
+- [Upgrade preservation and comparison protocol](docs/UPGRADE_VERIFICATION.md)
+- [Store identity and disclosure draft](docs/STORE_SUBMISSION.md)
 - [Historical storage fixtures](test/fixtures/legacy/README.md)
 
 Completed phases are committed, pushed to `redevelopment` and verified against GitHub. Linux automation exercises Chrome stable, Firefox stable and Firefox ESR with synthetic data. It does not establish screen-reader listening, other operating systems, remote account-sync delivery or genuine signed upgrades; those remain separate release gates.

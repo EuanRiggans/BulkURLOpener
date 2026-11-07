@@ -3,7 +3,7 @@ const native = vi.hoisted(() => ({
   runtime: { lastError: undefined as { message: string } | undefined },
   windows: { get: vi.fn(), getLastFocused: vi.fn(), getAll: vi.fn() },
   tabs: { query: vi.fn(), get: vi.fn(), update: vi.fn() },
-  permissions: { getAll: vi.fn() },
+  permissions: { getAll: vi.fn(), request: vi.fn() },
   contextMenus: { create: vi.fn(), removeAll: vi.fn(), remove: vi.fn() },
   alarms: { get: vi.fn(), create: vi.fn() },
 }));
@@ -20,6 +20,7 @@ import {
   browserServicePlatform,
   createBrowserServicePlatform,
 } from '../../src/infrastructure/browser/services';
+import { requestSyncConsent } from '../../src/infrastructure/browser/sync-consent';
 
 describe('native browser API adapters', () => {
   beforeEach(() => {
@@ -150,5 +151,43 @@ describe('native browser API adapters', () => {
     native.alarms.get.mockResolvedValueOnce(undefined);
     native.alarms.create.mockReturnValueOnce(undefined);
     await expect(prepareOpeningRecovery()).resolves.toBeUndefined();
+  });
+  it('requires optional Firefox settings consent for sync while opening remains available', async () => {
+    vi.stubEnv('FIREFOX', 'true');
+    native.permissions.getAll.mockResolvedValue({
+      data_collection: ['browsingActivity', 'searchTerms'],
+    });
+    await expect(requireTransmissionConsent()).resolves.toBeUndefined();
+    await expect(requireTransmissionConsent('sync')).rejects.toThrow(
+      'SYNC_CONSENT_REQUIRED',
+    );
+    native.permissions.getAll.mockResolvedValue({
+      data_collection: [
+        'browsingActivity',
+        'searchTerms',
+        'technicalAndInteraction',
+      ],
+    });
+    await expect(requireTransmissionConsent('sync')).resolves.toBeUndefined();
+  });
+  it('requests Firefox settings consent synchronously within the upload gesture and handles refusal', async () => {
+    vi.stubEnv('FIREFOX', 'true');
+    native.permissions.request.mockResolvedValueOnce(false);
+    const request = requestSyncConsent();
+    expect(native.permissions.request).toHaveBeenCalledWith({
+      data_collection: ['technicalAndInteraction'],
+    });
+    await expect(request).rejects.toThrow('SYNC_CONSENT_REQUIRED');
+    native.permissions.request.mockResolvedValueOnce(true);
+    await expect(requestSyncConsent()).resolves.toBeUndefined();
+    native.permissions.request.mockRejectedValueOnce(
+      new Error('private details'),
+    );
+    await expect(requestSyncConsent()).rejects.toThrow('SYNC_CONSENT_REQUIRED');
+  });
+  it('does not call the Firefox-only optional permission API in Chromium', async () => {
+    vi.stubEnv('FIREFOX', '');
+    await expect(requestSyncConsent()).resolves.toBeUndefined();
+    expect(native.permissions.request).not.toHaveBeenCalled();
   });
 });

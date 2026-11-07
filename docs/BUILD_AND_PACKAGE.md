@@ -13,6 +13,12 @@ npm run check:packages
 npm run check:reproducibility
 ```
 
+`npm run test:upgrade` runs the separate synthetic same-ID development update
+suite with the disposable browser environment used by browser CI. It does not
+establish a signed-store upgrade. `npm run upgrade:compare -- BEFORE.json AFTER.json`
+compares private baseline/recovery captures without writing them; see
+[the upgrade protocol](UPGRADE_VERIFICATION.md) and [release gates](PHASE_7_RELEASE.md).
+
 `validate` checks the source tree, types, lint, formatting, maintained tests,
 both MV3 builds, generated resources, bundled licences and Mozilla validation.
 The narrow, pinned Preact vendor warning policy remains visible. Actual browser

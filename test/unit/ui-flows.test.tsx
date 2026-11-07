@@ -19,6 +19,7 @@ const fake = vi.hoisted(() => ({
   create: vi.fn<() => Promise<unknown>>(() => Promise.resolve({})),
   addListener: vi.fn(),
   removeListener: vi.fn(),
+  requestPermission: vi.fn<() => Promise<boolean>>(),
 }));
 vi.mock('wxt/browser', () => ({
   browser: {
@@ -29,6 +30,7 @@ vi.mock('wxt/browser', () => ({
       getManifest: () => ({ version: '2.0.0', manifest_version: 3 }),
     },
     tabs: { create: fake.create },
+    permissions: { request: fake.requestPermission },
     windows: { getCurrent: () => Promise.resolve({ id: 1 }) },
     storage: {
       onChanged: {
@@ -98,6 +100,7 @@ afterEach(async () => {
   app.remove();
   vi.useRealTimers();
   vi.restoreAllMocks();
+  vi.unstubAllEnvs();
 });
 async function settle() {
   await vi.waitFor(
@@ -280,6 +283,33 @@ describe('simple popup flows', () => {
 });
 
 describe('separate editor and settings forms', () => {
+  it('retains the reviewed Firefox upload after consent refusal and uploads only after a later grant', async () => {
+    vi.stubEnv('FIREFOX', 'true');
+    fake.requestPermission
+      .mockResolvedValueOnce(false)
+      .mockResolvedValueOnce(true);
+    from = 'data.html';
+    history.replaceState(null, '', '/data.html');
+    await act(() => render(<DataPage />, app));
+    await settle();
+    const before = structuredClone(context.port.sync);
+    await click('Review upload');
+    await act(() =>
+      node<HTMLInputElement>('.transfer-review input[type="checkbox"]').click(),
+    );
+    await settle();
+    await click('Upload reviewed copy');
+    expect(context.port.sync).toEqual(before);
+    expect(context.port.syncWrites).toBe(0);
+    expect(app.textContent).toContain('optional settings data');
+    expect(button('Upload reviewed copy').disabled).toBe(false);
+    await click('Upload reviewed copy');
+    expect(fake.requestPermission).toHaveBeenCalledWith({
+      data_collection: ['technicalAndInteraction'],
+    });
+    expect(context.port.syncWrites).toBe(1);
+    expect(app.textContent).toContain('Sync write verified locally.');
+  });
   it('prepares copyable exports and applies only an acknowledged, reviewed import from the data page', async () => {
     from = 'data.html';
     history.replaceState(null, '', '/data.html');

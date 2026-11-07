@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import * as v from 'valibot';
 import { extensionRequest } from '../../infrastructure/browser/client';
 import { pageUrl } from '../../infrastructure/browser/pages';
+import { requestSyncConsent } from '../../infrastructure/browser/sync-consent';
 import {
   archiveSummarySchema,
   contextSchema,
@@ -278,6 +279,13 @@ export function DataPage() {
           use a JSON file between them. Sync copies contain saved URLs and
           preferences.
         </p>
+        {import.meta.env.FIREFOX && (
+          <p>
+            Firefox asks for optional settings-data consent when you upload.
+            Declining leaves your local data and sync copy unchanged. This
+            permission is used for manual sync, not analytics.
+          </p>
+        )}
         <p class="hint">
           A modern sync copy is limited to 8 KB. Larger libraries use JSON
           transfer. An API read-back confirms the local sync area; remote
@@ -356,6 +364,7 @@ export function DataPage() {
                 disabled={busy || !uploadAck}
                 onClick={() =>
                   void perform(async () => {
+                    await requestSyncConsent();
                     await extensionRequest(
                       {
                         type: 'buo:service/sync.upload',
@@ -565,6 +574,11 @@ export function DataPage() {
           new capture will retry cleanup; original recovery history is kept.
         </p>
       )}
+      <p>
+        Recovery history and reviewed imports have no automatic expiry and can
+        fill browser storage as you save changes. Keep a full recovery file
+        outside the browser; a lists-and-settings export excludes that history.
+      </p>
       <RecoveryPanel />
     </PageLayout>
   );

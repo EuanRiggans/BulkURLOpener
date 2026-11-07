@@ -74,6 +74,14 @@ jobs:
           BUO_BROWSER_BIN: ${{ steps.chrome.outputs.chrome-path || steps.firefox.outputs.firefox-path }}
           BUO_DRIVER_BIN: ${{ steps.chrome.outputs.chromedriver-path || format('{0}/geckodriver', runner.temp) }}
           MOZ_REMOTE_ALLOW_SYSTEM_ACCESS: '1'
+      - name: Exercise same-identity development upgrade
+        run: npm run test:upgrade
+        env:
+          BUO_TEST_BROWSER: ${{ matrix.browser }}
+          BUO_TEST_LABEL: ${{ matrix.label }}
+          BUO_BROWSER_BIN: ${{ steps.chrome.outputs.chrome-path || steps.firefox.outputs.firefox-path }}
+          BUO_DRIVER_BIN: ${{ steps.chrome.outputs.chromedriver-path || format('{0}/geckodriver', runner.temp) }}
+          MOZ_REMOTE_ALLOW_SYSTEM_ACCESS: '1'
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

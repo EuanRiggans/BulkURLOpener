@@ -1138,6 +1138,50 @@ test(
       ),
       10_000,
     );
+    if (target === 'firefox') {
+      await native(
+        'return await api.permissions.remove({data_collection: ["technicalAndInteraction"]});',
+      );
+      const review = await rpc({ type: 'buo:service/sync.preview-upload' });
+      const stores = await native(
+        'return {local: await api.storage.local.get(null), sync: await api.storage.sync.get(null)};',
+      );
+      const refusal = await native(
+        'return await api.runtime.sendMessage(arguments[0]);',
+        {
+          type: 'buo:service/sync.upload',
+          id: review.id,
+          acknowledge: true,
+        },
+      );
+      assert.deepEqual(refusal, { ok: false, error: 'SYNC_CONSENT_REQUIRED' });
+      assert.deepEqual(
+        await native(
+          'return {local: await api.storage.local.get(null), sync: await api.storage.sync.get(null)};',
+        ),
+        stores,
+      );
+      await driver.setContext(firefox.Context.CHROME);
+      try {
+        const granted = await driver.executeAsyncScript(
+          `const done = arguments[arguments.length - 1]; const {ExtensionPermissions} = ChromeUtils.importESModule('resource://gre/modules/ExtensionPermissions.sys.mjs'); ExtensionPermissions.add(arguments[0], {permissions: [], origins: [], data_collection: ['technicalAndInteraction']}).then(() => done({ok: true}), error => done({error: String(error)}));`,
+          addonId,
+        );
+        assert(granted.ok, granted.error);
+      } finally {
+        await driver.setContext(firefox.Context.CONTENT);
+      }
+      await driver.wait(
+        async () =>
+          (
+            await native('return await api.permissions.getAll();')
+          ).data_collection.includes('technicalAndInteraction'),
+        15_000,
+      );
+      report.assertions.push(
+        'Firefox settings-data consent refusal preserves both stores; optional grant set by disposable test harness, native consent prompt remains manual',
+      );
+    }
     await clickText('Upload reviewed copy');
     await driver.wait(async () => {
       const state = await driver.executeScript(
@@ -1256,5 +1300,71 @@ test(
         'await api.storage.local.remove("buo-test:quota"); return true;',
       );
     }
+  },
+);
+
+test(
+  'repeated large-library saves measure retained-history growth without deleting recovery data',
+  { skip: target !== 'chrome', timeout: 180_000 },
+  async () => {
+    await page('data.html');
+    const measurements = [];
+    let exhausted = false;
+    for (let index = 0; index < 32; index++) {
+      const before = await rpc({ type: 'buo:service/library.read' });
+      const bytes = await native(
+        'return await api.storage.local.getBytesInUse(null);',
+      );
+      const response = await native(
+        'return await api.runtime.sendMessage(arguments[0]);',
+        {
+          type: 'buo:service/library.mutate',
+          input: {
+            id: id(),
+            expectedHead: before.head,
+            command: {
+              kind: 'settings.update',
+              patch: { nightMode: !before.data.settings.nightMode },
+            },
+          },
+        },
+      );
+      measurements.push({
+        save: index + 1,
+        bytesBefore: bytes,
+        saved: response.ok,
+      });
+      if (!response.ok) {
+        assert.equal(response.error, 'STORAGE_WRITE_FAILED');
+        assert.deepEqual(
+          await rpc({ type: 'buo:service/library.read' }),
+          before,
+        );
+        const recovery = await rpc({
+          type: 'buo:migration/export',
+          document: {},
+        });
+        assert.equal(recovery.format, 'bulk-url-opener-recovery');
+        assert(Object.hasOwn(recovery.sources.storageLocal, 'buo:v2:head'));
+        exhausted = true;
+        break;
+      }
+      assert.equal(
+        (await rpc({ type: 'buo:service/library.read' })).head.revision,
+        before.head.revision + 1,
+      );
+    }
+    report.retention = {
+      measurements,
+      exhausted,
+      bytesAfter: await native(
+        'return await api.storage.local.getBytesInUse(null);',
+      ),
+      scope:
+        'Synthetic 5000-entry library; bounded save sequence in Chrome only, not a retention or unlimited-capacity guarantee.',
+    };
+    report.assertions.push(
+      'retained-history volume measured; any quota rejection preserves the last acknowledged library and read-only recovery export',
+    );
   },
 );

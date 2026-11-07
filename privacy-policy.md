@@ -1,11 +1,16 @@
 # Bulk URL Opener Privacy Policy
 
-This policy describes the unreleased `redevelopment` preview through Phase 6 cleanup.
+This policy describes the unreleased `redevelopment` preview through Phase 7 release preparation.
 It is not a statement that the preview has replaced a published store version.
 
 The preview stores extension data locally and sends no saved lists, preferences,
 drafts or recovery records to the developer or an analytics service. It has no
 separate collection server, telemetry or remote fonts.
+
+Browser-API information is used only to provide the described extension functions.
+It is not sold or used for advertising, profiling, creditworthiness or lending
+decisions. Its use follows the Chrome Web Store User Data Policy, including the
+Limited Use requirements.
 
 Opening a batch navigates to the destinations chosen by the user. When the
 selected non-URL policy is search, the text is sent as a query to the chosen
@@ -26,7 +31,12 @@ names, destinations/search entries and preferences to the browser account's
 extension sync service. This is optional and manual; nothing automatically
 uploads after a local change. A local copy of previous sync contents is retained
 before the modern sync key is replaced. Original legacy sync keys are unchanged.
-Firefox consent is checked before upload. The provider manages remote storage,
+Firefox's optional `technicalAndInteraction` consent is requested from the upload
+action because the copy includes preferences. It is used for manual sync, not
+analytics. Required browsing/search consent and this optional grant are checked
+again before upload. Refusal leaves local data and the previous sync copy intact;
+ordinary opening does not require the optional settings-data grant.
+The provider manages remote storage,
 delivery and account controls. Firefox and Chrome-family accounts do not provide
 cross-vendor sync; JSON export/import provides that transfer route. Sync copies
 have a conservative 8 KB item limit in this preview.
@@ -78,5 +88,7 @@ No recovery files or browser profiles are sent to this public source repository.
 Phase 5 includes Linux browser checks for private isolation and cleanup. Other
 platforms, remote cross-device delivery and genuine same-identity upgrades still
 require verification before release. Store declarations require final review.
+Same-ID development updates with synthetic historical stores are tested separately;
+they do not establish signed-candidate upgrade results.
 The preview requests
 `storage`, `tabs`, `alarms` and `contextMenus`, with no broad host access.

@@ -1,5 +1,11 @@
 ## Unreleased Changes
 
+### 2.0.0 redevelopment preview — Phase 7 preparation
+
+- Added a read-only upgrade comparison command, synthetic same-ID browser update/reload coverage, signed-upgrade and store submission protocols, and an explicit release checklist.
+- Declared/requested Firefox's optional settings-data consent for manual sync and rechecked it before upload; refusal preserves the review and both stores.
+- Added repeated-save storage-growth coverage and a recovery-history capacity notice. Long-term capacity, genuine signed upgrades and remaining release gates stay open; no release is published.
+
 - Set the popup's preferred width to 540px while retaining narrow-screen and high-zoom reflow.
 
 ### 2.0.0 redevelopment preview — Phase 6

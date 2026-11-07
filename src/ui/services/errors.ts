@@ -57,6 +57,8 @@ export function serviceError(error: unknown): string {
       'Data may have been saved, but the context menu could not be refreshed. Check the saved setting and try again.',
     DATA_CONSENT_REQUIRED:
       'Firefox data consent for destinations and search terms is required before opening tabs.',
+    SYNC_CONSENT_REQUIRED:
+      'Firefox consent for destinations, searches and optional settings data is required for manual sync. Your local data and previous sync copy are unchanged.',
     PRIVATE_WINDOW_UNSUPPORTED:
       'The request belongs to a different regular or private workspace. Open the extension in the intended window.',
     TARGET_WINDOW_CHANGED:

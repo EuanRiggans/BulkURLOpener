@@ -69,6 +69,9 @@ and downloaded-file UX, private-access refusal, private multi-window cleanup,
 browser restart and restricted file/browser pages under each browser's policy.
 
 Same-identity, genuinely signed upgrades from published versions are Phase 7.
+The [Phase 7 upgrade protocol](UPGRADE_VERIFICATION.md) now supplies a private
+baseline capture and read-only comparison command; same-ID development updates
+are automated separately and do not satisfy this signed-upgrade gate.
 Use copied/backed-up profiles; do not uninstall the existing add-on. Compare
 all historical list/settings data, drafts and retained recovery sources after
 upgrade. An unpacked development profile with an empty legacy store cannot

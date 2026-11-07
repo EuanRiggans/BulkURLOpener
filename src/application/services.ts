@@ -16,7 +16,7 @@ import { WorkspaceService } from './workspace';
 
 export interface ServicePlatform {
   targetWindow(id: number | null): Promise<number>;
-  allowTransmission(): Promise<void>;
+  allowTransmission(purpose?: 'opening' | 'sync'): Promise<void>;
   capture(
     scope: 'currentWindow' | 'allOpenedTabs',
     windowId: number,
@@ -118,7 +118,7 @@ export class SharedServices {
       case 'buo:service/sync.preview-upload':
         return this.workspace.previewUpload();
       case 'buo:service/sync.upload':
-        await this.platform.allowTransmission();
+        await this.platform.allowTransmission('sync');
         return this.workspace.upload(request.id);
       case 'buo:service/diagnostics':
         return this.workspace.diagnostics();

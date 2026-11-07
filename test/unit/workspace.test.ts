@@ -460,14 +460,16 @@ describe('manual browser-account sync', () => {
   it('checks Firefox transmission consent before any sync write', async () => {
     const context = await setup();
     const review = await context.workspace.previewUpload();
-    context.browser.allowTransmission = () =>
-      Promise.reject(new MigrationError('DATA_CONSENT_REQUIRED'));
+    context.browser.allowTransmission = (purpose) => {
+      expect(purpose).toBe('sync');
+      return Promise.reject(new MigrationError('SYNC_CONSENT_REQUIRED'));
+    };
     await expect(
       context.services.dispatch(
         { type: 'buo:service/sync.upload', id: review.id, acknowledge: true },
         sender('data.html'),
       ),
-    ).rejects.toThrow('DATA_CONSENT_REQUIRED');
+    ).rejects.toThrow('SYNC_CONSENT_REQUIRED');
     expect(context.port.syncWrites).toBe(0);
   });
   it('preserves the legacy key, verifies the new copy and restores only the reviewed download', async () => {

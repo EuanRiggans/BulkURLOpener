@@ -103,7 +103,8 @@ export class FakeBrowser implements RunnerPort, ServicePlatform {
     identity.root + 'deferred.html?job=' + job + '&index=' + String(index);
   targetWindow = (id: number | null) =>
     this.targetHook ? this.targetHook(id) : Promise.resolve(id ?? 1);
-  allowTransmission = () => Promise.resolve();
+  allowTransmission: ServicePlatform['allowTransmission'] = () =>
+    Promise.resolve();
   capture = (scope: 'currentWindow' | 'allOpenedTabs', windowId: number) => {
     this.captures.push({ scope, windowId });
     return Promise.resolve(this.captured);
