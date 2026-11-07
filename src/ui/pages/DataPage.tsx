@@ -203,9 +203,10 @@ export function DataPage() {
           Supports 1.x exports, modern portable exports and verified full
           recovery files. Inspect the proposed lists and settings before
           accepting a replacement. Recovery imports restore lists and settings;
-          other imported records stay with the retained recovery checkpoint.
-          Keep the external file for longer-term recovery. Existing drafts and
-          jobs are kept, and imported jobs are never replayed.
+          other records in recovery or legacy files stay in their protected
+          originals. Plain lists/settings imports follow checkpoint retention.
+          Keep the external file too. Existing drafts and jobs are kept, and
+          imported jobs are never replayed.
         </p>
         <p class="hint">
           Recovery archives support up to 64 MiB of decoded JSON and 16 MiB of

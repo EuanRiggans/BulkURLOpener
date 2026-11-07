@@ -113,6 +113,8 @@ sync stores read-only and retain local recovery of their existing copies. Never
 clear account storage or request optional technical/settings-data consent.
 Archives use bounded native gzip JSON, checksums and the shared verifier; imports
 allow 64 MiB decoded / 16 MiB compressed with a smaller message transport limit.
-Protect unresolved reviews. Consumed schema-2 transfer bodies can be collected
-only after their owning new-format checkpoint leaves retention. Keep existing
+Protect unresolved reviews and full recovery/legacy import originals, which may
+contain backups, damaged input or pending work outside the active library. Only
+consumed pure portable lists/settings bodies can be collected automatically,
+after their owning new-format checkpoint leaves retention. Keep existing
 preview archives until verified external archival; checksums are not encryption.

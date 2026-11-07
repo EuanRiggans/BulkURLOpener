@@ -83,7 +83,7 @@ In Settings or Data & recovery, **Data protection and recovery** captures exact 
 
 The popup saves working text promptly to a separate verified record; conflicts and new-list handoffs are retained as immutable copies. Initial loading never auto-opens a list. Auto-load and auto-open remain separate preferences, with a temporary popup override. List saves and settings autosave use revision checks; stale edits stay visible for review. Select **Save settings** to save immediately.
 
-Data & recovery supports portable 2.x and legacy 1.x JSON exports, paste/file import, reviewed replacement and inspection of retained legacy archives. Recovery imports restore lists/settings while keeping current drafts/jobs; other imported records remain in the retained original while its recovery checkpoint is kept. Original migration backups and unresolved imports are protected.
+Data & recovery supports portable 2.x and legacy 1.x JSON exports, paste/file import, reviewed replacement and inspection of retained legacy archives. Recovery imports restore lists/settings while keeping current drafts/jobs; other records from recovery/legacy imports remain in their protected originals. Plain lists/settings import originals can expire with their checkpoint. Original migration backups and unresolved imports are protected.
 
 Browser-account sync and automatic/manual snapshots have been removed. Existing sync copies and old snapshot archives remain available for read-only inspection and local recovery. Nothing is uploaded or cleared in account storage; JSON export/import transfers lists between installations. Firefox retains required browsing/search consent for opening and no longer requests optional settings-data consent.
 

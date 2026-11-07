@@ -39,10 +39,11 @@ original migration backups, damaged records, unresolved inputs or opening jobs.
 Working popup text uses a separate local record. Concurrent conflicting drafts
 and editor handoffs are retained. Imports/restores replace only lists and
 preferences after review; current drafts/jobs remain and imported jobs never
-replay. Unresolved import reviews are protected. An applied import's original
-source remains while its checkpoint is retained; consumed new-format transfer
-records can then be collected with obsolete checkpoints. Original migration
-backups remain separate and protected.
+replay. Unresolved import reviews are protected. Applied plain lists/settings sources
+remain while their checkpoint is retained and can then be collected with obsolete
+checkpoints. Recovery/legacy import originals stay protected: they may contain
+backups, damaged records or unresolved work outside the active library. Original
+migration backups remain separate and protected.
 
 Opening plans, inputs, omitted-entry reports, progress and tab receipts stay in
 local extension storage for recovery. Each job retains its opening preferences.

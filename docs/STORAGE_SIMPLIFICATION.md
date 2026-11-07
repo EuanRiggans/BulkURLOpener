@@ -33,7 +33,10 @@ saved-list hierarchy. This is still an unreleased preview.
   reset or silent replay. Recent 64 request receipts prevent duplicate saves;
   an older original request has a stale revision and fails safely.
 - Only verified obsolete new-format roots, their unneeded components and consumed
-  new-format transfer bodies enter automatic cleanup. A checksummed deletion
+  pure portable lists/settings transfer bodies enter automatic cleanup. Full
+  recovery and legacy import originals stay protected beyond checkpoint expiry:
+  they may contain original backups, damaged input or unresolved drafts/jobs
+  outside the active library. A checksummed deletion
   manifest is retained before removal, so partial deletion can resume. Damaged or
   unknown records and unresolved reviews/drafts are preserved. A cleanup failure
   after publication does not turn an acknowledged save into a reported failure;
@@ -86,9 +89,9 @@ The UI encodes ordinary files before messaging the background to stay below
 Chrome's message-size ceiling. Streaming decompression stops at the decoded
 limit; invalid UTF-8, malformed/truncated gzip/base64 and checksum mismatches fail
 before replacement. Current lists/settings import only after explicit review;
-current drafts/jobs remain and imported jobs never replay. Applied new-format
-import originals remain during their checkpoint retention; preserve a separate
-external archive if the complete imported history must be kept indefinitely.
+current drafts/jobs remain and imported jobs never replay. Applied plain lists/settings import originals follow checkpoint retention.
+Full recovery/legacy import originals remain protected locally; keep the external
+file as an independent backup too.
 
 A full archive can still exceed these limits, or an active library/protected
 sources can fill storage. Save a portable lists/settings export separately.

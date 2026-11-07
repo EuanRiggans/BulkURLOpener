@@ -34,8 +34,9 @@ export function TransferReview({
       <p>
         Accepting replaces the active saved lists and settings. The working
         draft and opening jobs are kept. URLs are not opened. The original
-        import stays locally while its recovery checkpoint is retained. Keep the
-        external file if you need its full contents for longer.
+        recovery or legacy import stays protected locally. A plain
+        lists/settings import can expire with its checkpoint. Keep the external
+        file as an independent backup.
       </p>
       <label class="check-label">
         <input

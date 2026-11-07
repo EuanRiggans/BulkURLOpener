@@ -87,6 +87,20 @@ describe('compressed full recovery archives', () => {
     );
     expect(await unpackJson(retained.raw)).toEqual(raw);
     expect(JSON.stringify(retained).length).toBeLessThan(200_000);
+    for (let id = 2; id <= 4; id++) {
+      const current = await target.storage.requireActiveData();
+      await target.storage.mutate({
+        id: token(id),
+        expectedHead: current.head,
+        command: {
+          kind: 'settings.update',
+          patch: { nightMode: current.data.settings.nightMode },
+        },
+      });
+    }
+    // Imported jobs, raw originals and other recovery data are not in the
+    // active library; their original archive must outlive its fallback root.
+    expect(target.port.local['buo:v2:transfer:' + review.id]).toEqual(retained);
   }, 30_000);
   it('accepts old uncompressed full-recovery and verified-backup downloads', async () => {
     const source = await sharedSetup();

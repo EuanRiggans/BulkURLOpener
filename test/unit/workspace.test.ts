@@ -189,7 +189,8 @@ describe('portable transfer and reviewed replacement', () => {
     expect((await context.workspace.read()).data.settings.nightMode).toBe(true);
   });
   it('requires acknowledgement of damaged legacy records and retains their raw values', async () => {
-    const { workspace, port } = await setup();
+    const context = await setup();
+    const { workspace, port } = context;
     const raw = {
       lists: [{ broken: 'retained raw value' }],
       settings: {},
@@ -210,6 +211,14 @@ describe('portable transfer and reviewed replacement', () => {
       port.local['buo:v2:transfer:' + review.id],
     );
     expect(await unpackJson(entry.raw)).toEqual(raw);
+    await workspace.apply({
+      id: review.id,
+      operation: token(1),
+      acknowledgeReplacement: true,
+      decisions: reviewed(review.legacy!),
+    });
+    for (let id = 2; id <= 4; id++) await changed(context, id);
+    expect(port.local['buo:v2:transfer:' + review.id]).toEqual(entry);
   });
   it.each(['before', 'after', 'drop'] as const)(
     'recovers replacement publication failure without losing the old library: %s',

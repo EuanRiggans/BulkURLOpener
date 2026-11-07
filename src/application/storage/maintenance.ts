@@ -5,6 +5,8 @@ import {
   checkpointSchema,
 } from '../../domain/storage/checkpoints';
 import { digest } from '../../domain/storage/json';
+import { unpackJson } from '../../domain/storage/archive';
+import { portableData } from '../../domain/portable';
 import {
   hashSchema,
   headSchema,
@@ -36,6 +38,20 @@ const gcSchema = v.strictObject({
   records: v.array(v.strictObject({ key: v.string(), digest: hashSchema })),
 });
 const contentPattern = /^buo:v2:content:(list|settings|metadata):[a-f0-9]{64}$/;
+
+async function disposableTransfer(raw: unknown) {
+  const entry = v.safeParse(transferRecordSchema, raw);
+  if (!entry.success || entry.output.schemaVersion !== 2) return false;
+  try {
+    // Only a pure portable lists/settings source can expire automatically.
+    // Recovery/legacy originals may hold backups, damaged input or pending work
+    // that the active library intentionally does not import.
+    portableData(await unpackJson(entry.output.raw));
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 async function protectedKeys(store: Store, head: Head) {
   const current = await checkpointReachability(store, head);
@@ -243,8 +259,7 @@ export async function collectCheckpoints(io: MaintenanceIO, head: Head) {
           (candidate === key ||
             contentPattern.test(candidate) ||
             (candidate.startsWith('buo:v2:transfer:') &&
-              v.is(transferRecordSchema, store[candidate]) &&
-              store[candidate].schemaVersion === 2))
+              (await disposableTransfer(store[candidate]))))
         )
           obsolete.add(candidate);
     } catch {
@@ -277,15 +292,13 @@ export async function collectCheckpoints(io: MaintenanceIO, head: Head) {
       if (!Object.hasOwn(store, entry.key)) continue;
       const value = store[entry.key];
       const root = v.safeParse(checkpointSchema, value);
-      const transfer = v.safeParse(transferRecordSchema, value);
       const allowed =
         contentPattern.test(entry.key) ||
         (entry.key.startsWith('buo:v2:state:') &&
           root.success &&
           root.output.revision < parsed.output.head.revision) ||
         (entry.key.startsWith('buo:v2:transfer:') &&
-          transfer.success &&
-          transfer.output.schemaVersion === 2);
+          (await disposableTransfer(value)));
       if (
         allowed &&
         !protectedSet.has(entry.key) &&
