@@ -12,7 +12,7 @@ export function serviceError(error: unknown): string {
     PRIVATE_STORAGE_UNAVAILABLE:
       'Temporary private storage is unavailable. Try reopening the private workspace.',
     PRIVATE_SYNC_UNAVAILABLE:
-      'Browser-account sync is unavailable in a private session. Use a regular window for sync.',
+      'Previous browser-sync copies can be recovered only from a regular window.',
     PRIVATE_MIGRATION_UNAVAILABLE:
       'Persistent migration and migration undo are available only from a regular window.',
     PRIVATE_PREFERENCE_UNAVAILABLE:
@@ -24,25 +24,19 @@ export function serviceError(error: unknown): string {
     CLIPBOARD_UNAVAILABLE:
       'Clipboard access was unavailable. Select and copy the displayed text, or use Download.',
     WORKSPACE_INTEGRITY_FAILED:
-      'A draft, snapshot or transfer record could not be verified. Keep the recovery data and download a recovery file.',
+      'A draft, recovery copy or transfer record could not be verified. Keep the recovery data and download a recovery file.',
     IMPORT_INVALID:
       'This is not a valid list export or verified recovery file. The active library has not been replaced.',
     IMPORT_TOO_LARGE:
-      'This import is larger than 8 MiB. Keep the original file; it has not been truncated or applied.',
+      'This import exceeds the transfer size limit. Use a compressed recovery archive (up to 64 MiB decoded JSON and 16 MiB compressed). The original has not been truncated or applied.',
+    PARTIAL_SAVE_REQUIRES_ORIGINAL_INPUT:
+      'Only part of this save was stored. Retry with the original editor input and request, or keep a recovery archive before investigating.',
     SYNC_EMPTY:
-      'No matching browser sync copy was found. Upload from the other installation first, or import a JSON file.',
+      'No previous browser-sync copy was found. Use a JSON export from the other installation instead.',
     SYNC_INVALID:
       'The browser sync copy could not be verified. It has not replaced the local library.',
-    SYNC_CHANGED:
-      'The browser sync area changed after the preview. Inspect it again before uploading.',
-    SYNC_TOO_LARGE:
-      'This library exceeds the conservative 8 KB sync item limit. Use JSON export/import for this transfer. Your local library is kept.',
     SYNC_READ_FAILED:
       'Browser sync could not be read. Check browser-account sync availability and try again.',
-    SYNC_WRITE_FAILED:
-      'The browser did not confirm the sync write. Check the current copy before retrying; the previous copy is retained locally.',
-    SYNC_VERIFICATION_FAILED:
-      'The sync write did not match when read back. Inspect the copy again; local data and the previous sync backup are kept.',
     MIGRATION_REQUIRED:
       'Migrate and verify your data in Settings before using these services.',
     JOB_REVISION_CONFLICT:
@@ -57,8 +51,6 @@ export function serviceError(error: unknown): string {
       'Data may have been saved, but the context menu could not be refreshed. Check the saved setting and try again.',
     DATA_CONSENT_REQUIRED:
       'Firefox data consent for destinations and search terms is required before opening tabs.',
-    SYNC_CONSENT_REQUIRED:
-      'Firefox consent for destinations, searches and optional settings data is required for manual sync. Your local data and previous sync copy are unchanged.',
     PRIVATE_WINDOW_UNSUPPORTED:
       'The request belongs to a different regular or private workspace. Open the extension in the intended window.',
     TARGET_WINDOW_CHANGED:

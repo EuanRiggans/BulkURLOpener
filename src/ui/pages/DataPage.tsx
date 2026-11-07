@@ -2,22 +2,20 @@ import { useEffect, useState } from 'preact/hooks';
 import * as v from 'valibot';
 import { extensionRequest } from '../../infrastructure/browser/client';
 import { pageUrl } from '../../infrastructure/browser/pages';
-import { requestSyncConsent } from '../../infrastructure/browser/sync-consent';
+import {
+  maxArchiveBytes,
+  prepareImportText,
+} from '../../domain/storage/archive';
+import { StorageMaintenancePanel } from '../recovery/StorageMaintenancePanel';
 import {
   archiveSummarySchema,
   contextSchema,
   draftResultSchema,
   recoveredInputSchema,
-  snapshotListSchema,
-  syncUploadReviewSchema,
   transferReviewSchema,
   type TransferReview as Review,
 } from '../../domain/workspace-schema';
-import {
-  hashSchema,
-  statusSchema,
-  type Decisions,
-} from '../../domain/storage/schema';
+import { statusSchema, type Decisions } from '../../domain/storage/schema';
 import { newRequestId } from '../../shared/ids';
 import { PageLayout } from '../../ui/PageLayout';
 import { RecoveryPanel } from '../../ui/recovery/RecoveryPanel';
@@ -30,22 +28,14 @@ import {
 } from '../../ui/services/workspace';
 import { serviceError } from '../../ui/services/errors';
 
-type Snapshots = v.InferOutput<typeof snapshotListSchema>;
 type Archive = v.InferOutput<typeof archiveSummarySchema>;
 type Recovered = v.InferOutput<typeof recoveredInputSchema>;
-type Upload = v.InferOutput<typeof syncUploadReviewSchema>;
 export function DataPage() {
   const [text, setText] = useState('');
   const [exported, setExported] = useState('');
   const [legacyExport, setLegacyExport] = useState(false);
   const [legacySync, setLegacySync] = useState(false);
   const [review, setReview] = useState<Review | null>(null);
-  const [upload, setUpload] = useState<Upload | null>(null);
-  const [uploadAck, setUploadAck] = useState(false);
-  const [snapshots, setSnapshots] = useState<Snapshots>({
-    records: [],
-    damaged: 0,
-  });
   const [archives, setArchives] = useState<Archive[]>([]);
   const [recovered, setRecovered] = useState<Recovered[]>([]);
   const [busy, setBusy] = useState(false);
@@ -57,15 +47,8 @@ export function DataPage() {
       .then((context) => setPrivateMode(context.private))
       .catch(() => setPrivateMode(true));
   }, []);
-  useEffect(() => {
-    if (review) setUpload(null);
-  }, [review]);
   async function reload() {
-    const results = await Promise.all([
-      extensionRequest(
-        { type: 'buo:service/snapshots.list' },
-        snapshotListSchema,
-      ),
+    const [archives, recovered] = await Promise.all([
       extensionRequest(
         { type: 'buo:service/archives.list' },
         v.array(archiveSummarySchema),
@@ -75,9 +58,8 @@ export function DataPage() {
         v.array(recoveredInputSchema),
       ),
     ]);
-    setSnapshots(results[0]);
-    setArchives(results[1]);
-    setRecovered(results[2]);
+    setArchives(archives);
+    setRecovered(recovered);
   }
   async function perform(work: () => Promise<void>) {
     setBusy(true);
@@ -96,11 +78,14 @@ export function DataPage() {
   }, []);
   async function preview(text: string, source: 'paste' | 'file') {
     const result = await extensionRequest(
-      { type: 'buo:service/data.preview', text, source },
+      {
+        type: 'buo:service/data.preview',
+        text: await prepareImportText(text),
+        source,
+      },
       transferReviewSchema,
     );
     setReview(result);
-    setUpload(null);
   }
   async function apply(operation: string, decisions: Decisions) {
     if (!review) return;
@@ -218,12 +203,14 @@ export function DataPage() {
           Supports 1.x exports, modern portable exports and verified full
           recovery files. Inspect the proposed lists and settings before
           accepting a replacement. Recovery imports restore lists and settings;
-          other imported records stay in the retained original. Existing drafts
-          and jobs are kept, and imported jobs are never replayed.
+          other imported records stay with the retained recovery checkpoint.
+          Keep the external file for longer-term recovery. Existing drafts and
+          jobs are kept, and imported jobs are never replayed.
         </p>
         <p class="hint">
-          Imports are limited to 8 MiB. A large full recovery file can exceed
-          this limit; keep a separate lists-and-settings export as well.
+          Recovery archives support up to 64 MiB of decoded JSON and 16 MiB of
+          compressed data. Imports are validated before replacement; keep a
+          separate lists-and-settings export too.
         </p>
         <label for="import-json">Paste JSON</label>
         <textarea
@@ -243,7 +230,7 @@ export function DataPage() {
             Inspect pasted JSON
           </button>
         </div>
-        <label for="import-file">Or choose a JSON file (up to 8 MiB)</label>
+        <label for="import-file">Or choose a JSON file (up to 64 MiB)</label>
         <input
           id="import-file"
           type="file"
@@ -253,7 +240,7 @@ export function DataPage() {
             const file = event.currentTarget.files?.[0];
             if (!file) return;
             void perform(async () => {
-              if (file.size > 8 * 1024 * 1024)
+              if (file.size > maxArchiveBytes)
                 throw new Error('IMPORT_TOO_LARGE');
               let content: string;
               try {
@@ -269,31 +256,12 @@ export function DataPage() {
           }}
         />
       </section>
-      <section aria-labelledby="sync-title">
-        <h2 id="sync-title">Manual browser-account sync</h2>
-        {privateMode && (
-          <p>
-            Browser-account sync is disabled in private sessions. Lists and
-            preferences here remain temporary.
-          </p>
-        )}
+      <section aria-labelledby="legacy-sync-title">
+        <h2 id="legacy-sync-title">Recover a previous browser-sync copy</h2>
         <p>
-          Upload and download are explicit. Enable extension sync in your
-          browser account. Chrome-family and Firefox accounts do not share data;
-          use a JSON file between them. Sync copies contain saved URLs and
-          preferences.
-        </p>
-        {import.meta.env.FIREFOX && (
-          <p>
-            Firefox asks for optional settings-data consent when you upload.
-            Declining leaves your local data and sync copy unchanged. This
-            permission is used for manual sync, not analytics.
-          </p>
-        )}
-        <p class="hint">
-          A modern sync copy is limited to 8 KB. Larger libraries use JSON
-          transfer. An API read-back confirms the local sync area; remote
-          delivery still depends on the browser.
+          Browser-account sync has been removed. You can inspect an existing
+          copy and recover its lists and settings locally. No data is uploaded
+          or cleared.
         </p>
         <label class="check-label">
           <input
@@ -302,217 +270,54 @@ export function DataPage() {
             disabled={busy || privateMode !== false}
             onChange={(event) => setLegacySync(event.currentTarget.checked)}
           />
-          Read the legacy sync copy even if a modern copy exists
+          Read the legacy copy instead of a newer preview copy
         </label>
-        <div class="actions">
-          <button
-            disabled={busy || privateMode !== false}
-            onClick={() =>
-              void perform(async () => {
-                setReview(
-                  await extensionRequest(
-                    { type: 'buo:service/sync.download', legacy: legacySync },
-                    transferReviewSchema,
-                  ),
-                );
-                setUpload(null);
-              })
-            }
-          >
-            Inspect sync download
-          </button>
-          <button
-            disabled={busy || privateMode !== false}
-            onClick={() =>
-              void perform(async () => {
-                setUpload(
-                  await extensionRequest(
-                    { type: 'buo:service/sync.preview-upload' },
-                    syncUploadReviewSchema,
-                  ),
-                );
-                setUploadAck(false);
-                setReview(null);
-              })
-            }
-          >
-            Review upload
-          </button>
-        </div>
-        {upload && (
-          <div class="transfer-review">
-            <h3>Review sync upload</h3>
-            <p>
-              {upload.lists} lists · {upload.bytes} bytes ·{' '}
-              {upload.replacesCopy
-                ? 'replaces the modern sync copy'
-                : 'creates a modern sync copy'}
-              . The previous sync contents are retained locally. The original
-              legacy sync key is kept.
-            </p>
-            <details>
-              <summary>Exact data to upload</summary>
-              <pre>{JSON.stringify(upload.data, null, 2)}</pre>
-            </details>
-            <label class="check-label">
-              <input
-                type="checkbox"
-                checked={uploadAck}
-                disabled={busy}
-                onChange={(event) => setUploadAck(event.currentTarget.checked)}
-              />
-              Upload this reviewed data to my browser account.
-            </label>
-            <div class="actions">
-              <button
-                disabled={busy || !uploadAck}
-                onClick={() =>
-                  void perform(async () => {
-                    await requestSyncConsent();
-                    await extensionRequest(
-                      {
-                        type: 'buo:service/sync.upload',
-                        id: upload.id,
-                        acknowledge: true,
-                      },
-                      v.boolean(),
-                    );
-                    setUpload(null);
-                    setNotice(
-                      'Sync write verified locally. Remote delivery is managed by the browser.',
-                    );
-                  })
-                }
-              >
-                Upload reviewed copy
-              </button>
-              <button disabled={busy} onClick={() => setUpload(null)}>
-                Cancel upload
-              </button>
-            </div>
-          </div>
+        <button
+          disabled={busy || privateMode !== false}
+          onClick={() =>
+            void perform(async () => {
+              setReview(
+                await extensionRequest(
+                  { type: 'buo:service/data.recover-sync', legacy: legacySync },
+                  transferReviewSchema,
+                ),
+              );
+            })
+          }
+        >
+          Inspect previous sync copy
+        </button>
+        {privateMode && (
+          <p>Account-copy recovery is available only in a regular window.</p>
         )}
       </section>
-      <section aria-labelledby="snapshot-title">
-        <h2 id="snapshot-title">Snapshots</h2>
-        <p>
-          Up to five optional snapshots retain lists and settings from before
-          changes. Disabling automatic snapshots stops new automatic copies.
-          Migration backups and verified history are retained separately.
-        </p>
-        <div class="actions">
-          <button
-            disabled={busy}
-            onClick={() =>
-              void perform(async () => {
-                await extensionRequest(
-                  { type: 'buo:service/snapshots.capture' },
-                  hashSchema,
-                );
-                await reload();
-                setNotice('Snapshot verified.');
-              })
-            }
-          >
-            Take snapshot now
-          </button>
-          <button disabled={busy} onClick={() => void perform(reload)}>
-            Refresh recovery records
-          </button>
-          <button
-            disabled={busy || !snapshots.records.length}
-            onClick={() => {
-              if (
-                confirm(
-                  'Delete the optional snapshots listed here? Mandatory history and original legacy snapshots will be kept.',
-                )
-              )
-                void perform(async () => {
-                  await extensionRequest(
-                    { type: 'buo:service/snapshots.purge', acknowledge: true },
-                    v.boolean(),
-                  );
-                  await reload();
-                  setNotice('Optional snapshots deleted.');
-                });
-            }}
-          >
-            Delete optional snapshots
-          </button>
-        </div>
-        {snapshots.damaged > 0 && (
-          <p role="alert">
-            {snapshots.damaged} damaged snapshot records were retained for
-            recovery.
-          </p>
-        )}
-        {snapshots.records.length ? (
+      {archives.length > 0 && (
+        <section aria-labelledby="archives-title">
+          <h2 id="archives-title">Retained archives from earlier versions</h2>
           <ul>
-            {snapshots.records.map((item) => (
+            {archives.map((item) => (
               <li key={item.id}>
-                <span>
-                  {new Date(item.createdAt).toLocaleString()} · {item.lists}{' '}
-                  lists
-                </span>{' '}
+                {item.label}{' '}
                 <button
                   disabled={busy}
                   onClick={() =>
                     void perform(async () => {
                       setReview(
                         await extensionRequest(
-                          {
-                            type: 'buo:service/snapshots.preview',
-                            id: item.id,
-                            legacy: false,
-                          },
+                          { type: 'buo:service/archives.preview', id: item.id },
                           transferReviewSchema,
                         ),
                       );
                     })
                   }
                 >
-                  Review restore
+                  Inspect archive
                 </button>
               </li>
             ))}
           </ul>
-        ) : (
-          <p>No optional snapshots yet.</p>
-        )}
-        {archives.length > 0 && (
-          <details>
-            <summary>
-              Original legacy snapshots and sync archives ({archives.length})
-            </summary>
-            <ul>
-              {archives.map((item) => (
-                <li key={item.id}>
-                  {item.label}{' '}
-                  <button
-                    disabled={busy}
-                    onClick={() =>
-                      void perform(async () => {
-                        setReview(
-                          await extensionRequest(
-                            {
-                              type: 'buo:service/snapshots.preview',
-                              id: item.id,
-                              legacy: true,
-                            },
-                            transferReviewSchema,
-                          ),
-                        );
-                      })
-                    }
-                  >
-                    Inspect archive
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </details>
-        )}
-      </section>
+        </section>
+      )}
       {recovered.length > 0 && (
         <section aria-labelledby="recovered-title">
           <h2 id="recovered-title">Recovered inputs</h2>
@@ -572,17 +377,7 @@ export function DataPage() {
           ))}
         </section>
       )}
-      {snapshots.records.length > 5 && (
-        <p role="status">
-          Extra verified snapshots were kept because cleanup did not complete. A
-          new capture will retry cleanup; original recovery history is kept.
-        </p>
-      )}
-      <p>
-        Recovery history and reviewed imports have no automatic expiry and can
-        fill browser storage as you save changes. Keep a full recovery file
-        outside the browser; a lists-and-settings export excludes that history.
-      </p>
+      <StorageMaintenancePanel />
       <RecoveryPanel />
     </PageLayout>
   );

@@ -32,8 +32,8 @@ const groups: { title: string; keys: (keyof Settings)[] }[] = [
     ],
   },
   {
-    title: 'Appearance and backups',
-    keys: ['nightMode', 'customTheme', 'buttonLook', 'disableSnapshots'],
+    title: 'Appearance',
+    keys: ['nightMode', 'customTheme', 'buttonLook'],
   },
 ];
 const choices = {

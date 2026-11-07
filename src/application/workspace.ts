@@ -8,18 +8,14 @@ import {
   type Decisions,
   type Head,
   recoveryExportSchema,
+  backupSchema,
 } from '../domain/storage/schema';
 import {
   digest,
   jsonValueSchema,
-  jsonObjectSchema,
   type JsonValue,
 } from '../domain/storage/json';
-import {
-  analyzeSources,
-  createCandidate,
-  sameContent,
-} from '../domain/storage/migrate';
+import { analyzeSources, createCandidate } from '../domain/storage/migrate';
 import {
   legacyExport,
   portableData,
@@ -33,9 +29,14 @@ import {
   type TransferReview,
 } from '../domain/workspace-schema';
 import { MigrationError, requireCondition } from '../domain/storage/errors';
+import {
+  maxTransportBytes,
+  packJson,
+  unpackJson,
+} from '../domain/storage/archive';
 
 const syncKey = 'bulk-url-opener-v2';
-const maxImportBytes = 8 * 1024 * 1024;
+const maxImportBytes = maxTransportBytes;
 const bytes = (text: string) => new TextEncoder().encode(text).byteLength;
 const envelopeSchema = v.strictObject({
   schemaVersion: v.literal(1),
@@ -46,6 +47,10 @@ const envelopeSchema = v.strictObject({
 async function inspected(
   raw: JsonValue,
 ): Promise<Pick<TransferReview, 'portable' | 'legacy'>> {
+  // Earlier previews downloaded verified backup records without the format tag.
+  const backup = v.safeParse(backupSchema, raw);
+  if (backup.success)
+    raw = { format: 'bulk-url-opener-recovery', ...backup.output };
   if (
     raw &&
     typeof raw === 'object' &&
@@ -101,14 +106,19 @@ async function inspected(
     });
   return { portable: null, legacy };
 }
-function record(
+async function record(
   baseHead: Head,
   source: TransferRecord['source'],
   raw: unknown,
-): TransferRecord {
+): Promise<TransferRecord> {
   const json = v.safeParse(jsonValueSchema, raw);
   requireCondition(json.success, 'IMPORT_INVALID');
-  return { schemaVersion: 1, baseHead, source, raw: json.output };
+  return {
+    schemaVersion: 2,
+    baseHead,
+    source,
+    raw: await packJson(json.output),
+  };
 }
 function selected(
   review: Pick<TransferReview, 'portable' | 'legacy'>,
@@ -119,10 +129,7 @@ function selected(
   return createCandidate(review.legacy, decisions);
 }
 export class WorkspaceService {
-  constructor(
-    private readonly storage: StorageCoordinator,
-    private readonly now = () => new Date().toISOString(),
-  ) {}
+  constructor(private readonly storage: StorageCoordinator) {}
   read() {
     return this.storage.withWorkspace(async (store, active) => ({
       ...active,
@@ -162,8 +169,9 @@ export class WorkspaceService {
       } catch {
         throw new MigrationError('IMPORT_INVALID');
       }
-      const entry = record(active.head, source, raw);
-      const review = await inspected(entry.raw);
+      const original = await unpackJson(raw);
+      const entry = await record(active.head, source, original);
+      const review = await inspected(original);
       const id = await store.transfer(entry);
       return { id, baseHead: active.head, source, ...review };
     });
@@ -173,7 +181,10 @@ export class WorkspaceService {
       requireCondition(input.acknowledgeReplacement, 'REVIEW_REQUIRED');
       const entry = await store.readTransfer(input.id);
       requireCondition(entry.source !== 'sync-upload', 'IMPORT_INVALID');
-      const data = selected(await inspected(entry.raw), input.decisions);
+      const data = selected(
+        await inspected(await unpackJson(entry.raw)),
+        input.decisions,
+      );
       return commit({
         id: input.operation,
         expectedHead: entry.baseHead,
@@ -186,37 +197,18 @@ export class WorkspaceService {
       });
     });
   }
-  snapshots() {
-    return this.storage.withWorkspace((store) => store.snapshots());
-  }
-  captureSnapshot() {
-    return this.storage.withWorkspace((store, active) =>
-      store.capture(active.head, active.data, this.now()),
-    );
-  }
-  purgeSnapshots() {
-    return this.storage.withWorkspace(async (store) => {
-      await store.purgeSnapshots();
-      return true;
-    });
-  }
   archives() {
     return this.storage.withWorkspace(async (store) =>
       (await store.archives()).map(({ id, label }) => ({ id, label })),
     );
   }
-  previewSnapshot(id: string, legacy: boolean) {
+  previewArchive(id: string) {
     return this.storage.withWorkspace(async (store, active) => {
-      const archive = legacy
-        ? (await store.archives()).find((entry) => entry.id === id)
-        : null;
-      if (legacy) requireCondition(archive, 'SNAPSHOT_NOT_FOUND');
-      const raw = legacy ? archive!.raw : (await store.snapshot(id)).data;
-      const source = legacy
-        ? ('legacy-snapshot' as const)
-        : ('snapshot' as const);
-      const entry = record(active.head, source, raw);
-      const review = await inspected(entry.raw);
+      const archive = (await store.archives()).find((entry) => entry.id === id);
+      requireCondition(archive, 'SNAPSHOT_NOT_FOUND');
+      const source = 'legacy-snapshot' as const;
+      const entry = await record(active.head, source, archive.raw);
+      const review = await inspected(await unpackJson(entry.raw));
       return {
         id: await store.transfer(entry),
         baseHead: active.head,
@@ -225,7 +217,7 @@ export class WorkspaceService {
       };
     });
   }
-  previewDownload(legacy: boolean) {
+  recoverSync(legacy: boolean) {
     return this.storage.withWorkspace(async (store, active, _commit, sync) => {
       const remote = await sync.read();
       let raw: unknown;
@@ -248,65 +240,14 @@ export class WorkspaceService {
           }
         }
       }
-      const entry = record(active.head, 'sync', raw);
-      const review = await inspected(entry.raw);
+      const entry = await record(active.head, 'sync', raw);
+      const review = await inspected(await unpackJson(entry.raw));
       return {
         id: await store.transfer(entry),
         baseHead: active.head,
         source: entry.source,
         ...review,
       };
-    });
-  }
-  previewUpload() {
-    return this.storage.withWorkspace(async (store, active, _commit, sync) => {
-      const remote = v.parse(jsonObjectSchema, await sync.read());
-      const data = toPortable(active.data);
-      const envelope = { schemaVersion: 1, digest: await digest(data), data };
-      // A single key is an atomic local API write; never split a library across
-      // mutable sync keys. Leave space below Chromium's 8192-byte item limit.
-      const size = bytes(syncKey) + bytes(JSON.stringify(envelope));
-      requireCondition(size <= 8000, 'SYNC_TOO_LARGE');
-      const entry = record(active.head, 'sync-upload', { remote, envelope });
-      return {
-        id: await store.transfer(entry),
-        lists: data.lists.length,
-        bytes: size,
-        replacesCopy: Object.hasOwn(remote, syncKey),
-        data,
-      };
-    });
-  }
-  upload(id: string, beforeWrite: () => Promise<void>) {
-    return this.storage.withWorkspace(async (store, active, _commit, sync) => {
-      const entry = await store.readTransfer(id);
-      requireCondition(
-        entry.source === 'sync-upload' &&
-          sameContent(entry.baseHead, active.head),
-        'REVISION_CONFLICT',
-      );
-      const payload = v.parse(
-        v.strictObject({ remote: jsonObjectSchema, envelope: envelopeSchema }),
-        entry.raw,
-      );
-      requireCondition(
-        (await digest(payload.envelope.data)) === payload.envelope.digest,
-        'SYNC_INVALID',
-      );
-      const expected = { ...payload.remote, [syncKey]: payload.envelope };
-      const current = await sync.read();
-      if (sameContent(expected, current)) return true;
-      requireCondition(sameContent(current, payload.remote), 'SYNC_CHANGED');
-      await sync.backup(payload.remote);
-      // A request may have waited for the writer or for backup verification.
-      // Recheck current permission immediately before transmitting the copy.
-      await beforeWrite();
-      await sync.write({ [syncKey]: payload.envelope });
-      requireCondition(
-        sameContent((await sync.read())[syncKey], payload.envelope),
-        'SYNC_VERIFICATION_FAILED',
-      );
-      return true;
     });
   }
   diagnostics() {

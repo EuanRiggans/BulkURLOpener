@@ -5,37 +5,20 @@ are release gates, not a request to expose account credentials, profiles or
 personal exports in an issue or this public repository. The Phase 5 browser
 suite runs without signed-in browser accounts.
 
-## Remote browser-account delivery
+## Transfer and legacy account-cache recovery
 
-Run independently for a Chromium account and a Firefox account. They are
-different services. Use two installations under the same extension identity
-and account, with extension sync enabled. Record browser/OS versions, extension
-commit, elapsed delivery time and outcomes without account identifiers.
+Browser-account sync uploads and snapshot capture were removed after Phase 7.
+The earlier remote-delivery protocol is historical and is no longer a release
+gate. Use two backed-up installations to check JSON export/import, including
+Unicode, exact URL/query/newline content and all preferences. A preview must not
+replace data before explicit review; replacement must retain current drafts/jobs
+and never replay imported jobs.
 
-1. On installation A, save a list named `Sync example` with
-   `https://one.example.test/?q=%2526` and `https://two.example.test/caf%C3%A9`.
-   Choose nondefault appearance and fractional delay settings. Keep the whole
-   portable payload below 8 KB. Download a local recovery file on A and B.
-2. In A's Data & recovery page, review the exact upload, consent and upload.
-   Its success message proves the local sync API write only.
-3. In B, inspect the sync download after provider delivery. Compare every list
-   identity, name, line and setting with A's portable export. Inspecting must
-   leave B's active head unchanged. Accept replacement only after review.
-   Confirm B's working draft/jobs remain and no URLs open during replacement.
-4. Take B offline. Edit and upload a different synthetic copy on A. Reconnect
-   B and inspect again. Record eventual delivery and the provider's behaviour;
-   do not assume a fixed delivery deadline.
-5. Keep an upload review open on A; change the remote copy through B and wait
-   until A's local sync cache receives it. Accept the old review. It must
-   report a changed copy and require fresh inspection. Retain both local
-   recovery files; there is no distributed compare-and-swap guarantee.
-6. Check that any pre-existing synthetic legacy `user_settings` sync key stays
-   intact. Try a library over 8 KB: upload preview must fail visibly while
-   local saved data remains usable. Confirm exports transfer between vendors.
-
-A same-profile read-back, two unsigned installs with unrelated IDs, or a local
-cache test cannot establish this result. Real service outage, account policy,
-concurrent-device conflict and delivery latency remain provider-dependent.
+Where a previous account cache exists, inspect and restore it locally. Confirm
+all sync keys remain unchanged and no upload/optional-settings-consent controls
+are present. No remote provider-delivery claim is made. Verify a downloaded full
+recovery archive by reading it back before optional preview-history compaction;
+follow the [current storage contract](STORAGE_SIMPLIFICATION.md).
 
 ## Assistive technology and native browser controls
 
@@ -77,6 +60,7 @@ all historical list/settings data, drafts and retained recovery sources after
 upgrade. An unpacked development profile with an empty legacy store cannot
 establish preservation of an installed user's data.
 
-Keep mandatory recovery/history retention under review as libraries accumulate.
-The 5,000-entry browser check measures one synthetic save/export, not unlimited
-history, disk-full resilience or the safety of opening thousands of live tabs.
+Ordinary save history is now bounded and repeated large-library saves are tested.
+Active data, original migration backups, damaged records and unresolved work can
+still fill finite storage. Test recovery/archival on signed upgrades; no test
+establishes unlimited capacity or safe opening of thousands of live tabs.

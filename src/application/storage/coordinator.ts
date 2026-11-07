@@ -4,7 +4,33 @@ import { digest, jsonObjectSchema } from '../../domain/storage/json';
 import { applyLibraryCommand } from '../../domain/library';
 import { JobJournal } from './job-journal';
 import { WorkspaceStore } from './workspace-store';
+import {
+  archiveEligible,
+  collectCheckpoints,
+  finishArchiveProofs,
+} from './maintenance';
 import { transferRecordSchema } from '../../domain/workspace-schema';
+import {
+  archiveProofSchema,
+  archiveReceiptSchema,
+  checkpointSchema,
+  type Checkpoint,
+  type CheckpointReceipt,
+} from '../../domain/storage/checkpoints';
+import {
+  packJson,
+  unpackJson,
+  type PackedJson,
+} from '../../domain/storage/archive';
+import { toPortable } from '../../domain/portable';
+import {
+  CheckpointReader,
+  checkpointCommand,
+  checkpointReachability,
+  isCheckpoint,
+  planCheckpoint,
+  stateKey,
+} from './checkpoints';
 import {
   analyzeSources,
   createCandidate,
@@ -19,6 +45,7 @@ import {
   stageSchema,
   stateSchema,
   mutationInputSchema,
+  recoveryExportSchema,
   storagePrefix,
   type Backup,
   type Decisions,
@@ -38,13 +65,12 @@ export interface StoragePort {
   readSync(): Promise<Record<string, unknown>>;
   writeLocal(values: Record<string, unknown>): Promise<void>;
   removeLocal?(keys: string[]): Promise<void>;
-  writeSync?(values: Record<string, unknown>): Promise<void>;
 }
 export type Exclusive = <T>(work: () => Promise<T>) => Promise<T>;
 type Store = Record<string, unknown>;
 type Verified = {
   status: StorageStatus;
-  state: StoredState | null;
+  state: StoredState | (Checkpoint & { data: CanonicalData }) | null;
   reachable: Set<string>;
 };
 
@@ -63,6 +89,8 @@ function knownKeys(store: Store) {
     requireCondition(
       key === headKey ||
         key === storagePrefix + 'draft' ||
+        /^buo:v2:content:(list|settings|metadata):[a-f0-9]{64}$/.test(key) ||
+        /^buo:v2:(gc|archive-proof):[a-f0-9]{64}$/.test(key) ||
         /^buo:v2:(backup|stage|state|job|job-plan|job-state|draft-state|snapshot|transfer|sync-backup):[a-f0-9]{64}$/.test(
           key,
         ) ||
@@ -95,7 +123,7 @@ async function verifiedTransfer(hash: string, store: Store) {
   return record;
 }
 
-async function verify(store: Store): Promise<Verified> {
+async function verifyLegacy(store: Store): Promise<Verified> {
   knownKeys(store);
   const reachable = new Set<string>();
   if (!Object.hasOwn(store, headKey))
@@ -229,6 +257,74 @@ async function verify(store: Store): Promise<Verified> {
   };
 }
 
+async function verify(store: Store): Promise<Verified> {
+  knownKeys(store);
+  if (!Object.hasOwn(store, headKey)) return verifyLegacy(store);
+  const head = decoded(headSchema, store[headKey]);
+  if (!isCheckpoint(store[stateKey(head.stateDigest)]))
+    return verifyLegacy(store);
+  const current = await checkpointReachability(store, head);
+  requireCondition(current.state, 'INTEGRITY_CHECK_FAILED');
+  return {
+    status: { status: 'ready', head, data: current.data, canRollback: false },
+    state: { ...current.state, data: current.data },
+    reachable: new Set(
+      [...current.keys]
+        .filter((key) => key.startsWith(storagePrefix + 'state:'))
+        .map((key) => key.slice((storagePrefix + 'state:').length)),
+    ),
+  };
+}
+
+// Archive only verified, acknowledged preview ancestry. A transfer review that
+// was never applied is unresolved input, even if its file is well formed.
+async function previewArchiveRecords(store: Store) {
+  const current = await verify(store);
+  const history = new Set<string>();
+  for (const hash of current.reachable) {
+    if (history.has(hash)) continue;
+    const raw = v.safeParse(stateSchema, store[stateKey(hash)]);
+    if (!raw.success) continue;
+    try {
+      const old = await verifyLegacy({
+        ...store,
+        [headKey]: {
+          schemaVersion: 1,
+          revision: raw.output.revision,
+          stateDigest: hash,
+        },
+      });
+      for (const ancestor of old.reachable) history.add(ancestor);
+    } catch {
+      /* Incomplete or damaged ancestry stays protected. */
+    }
+  }
+  const consumed = new Set<string>();
+  for (const hash of history) {
+    const raw = v.parse(stateSchema, store[stateKey(hash)]);
+    if (
+      raw.kind === 'mutation' &&
+      raw.operation.command.kind === 'library.replace'
+    )
+      consumed.add(
+        storagePrefix + 'transfer:' + raw.operation.command.sourceDigest,
+      );
+  }
+  const records = [];
+  for (const [key, value] of Object.entries(store)) {
+    if (
+      key.startsWith(storagePrefix + 'state:') &&
+      !history.has(key.slice((storagePrefix + 'state:').length))
+    )
+      continue;
+    if (key.startsWith(storagePrefix + 'transfer:') && !consumed.has(key))
+      continue;
+    if (await archiveEligible(key, value))
+      records.push({ key, digest: await digest(value) });
+  }
+  return records;
+}
+
 // Recovery imports use the same verifier as the live store, without writing it.
 export async function readRecoveryStore(
   store: Store,
@@ -360,7 +456,10 @@ export class StorageCoordinator {
   mutate(raw: MutationInput): Promise<StorageStatus> {
     return this.run(() => this.mutateLocked(raw));
   }
-  private async mutateLocked(raw: MutationInput): Promise<StorageStatus> {
+  private async mutateLocked(
+    raw: MutationInput,
+    materialize = false,
+  ): Promise<StorageStatus> {
     const input = decoded(mutationInputSchema, raw);
     const store = await this.local();
     const current = await verify(store);
@@ -372,20 +471,69 @@ export class StorageCoordinator {
       expectedHead: input.expectedHead,
       command: input.command,
     });
-    for (const hash of current.reachable) {
-      const ancestor = decoded(stateSchema, store[recordKey('state', hash)]);
-      if (ancestor.kind === 'mutation' && ancestor.operation.id === input.id) {
+    const receipts: CheckpointReceipt[] =
+      current.state.kind === 'checkpoint' ? current.state.receipts : [];
+    for (const receipt of receipts)
+      if (receipt.id === input.id) {
         requireCondition(
-          ancestor.operation.requestDigest === requestDigest,
+          receipt.requestDigest === requestDigest,
           'OPERATION_ID_REUSED',
         );
+        await this.collect(current.status.head);
         return current.status;
+      }
+    for (const hash of current.reachable) {
+      const parsed = v.safeParse(stateSchema, store[stateKey(hash)]);
+      if (parsed.success && parsed.output.kind === 'mutation') {
+        receipts.push({
+          id: parsed.output.operation.id,
+          requestDigest: parsed.output.operation.requestDigest,
+        });
+        if (parsed.output.operation.id === input.id) {
+          requireCondition(
+            parsed.output.operation.requestDigest === requestDigest,
+            'OPERATION_ID_REUSED',
+          );
+          return current.status;
+        }
       }
     }
     requireCondition(
       sameContent(current.status.head, input.expectedHead),
       'REVISION_CONFLICT',
     );
+    for (const [key, value] of Object.entries(store).filter(([key]) =>
+      key.startsWith(storagePrefix + 'state:'),
+    )) {
+      const hash = key.slice((storagePrefix + 'state:').length);
+      if (current.reachable.has(hash)) continue;
+      if (isCheckpoint(value)) {
+        const staged = decoded(checkpointSchema, value);
+        if (staged.revision > current.status.head.revision) {
+          requireCondition(
+            sameContent(staged.operation.expectedHead, input.expectedHead) &&
+              staged.operation.id === input.id,
+            'PENDING_MUTATION',
+          );
+          requireCondition(
+            staged.operation.requestDigest === requestDigest,
+            'OPERATION_ID_REUSED',
+          );
+        }
+      } else {
+        const old = decoded(stateSchema, value);
+        if (
+          current.state.kind !== 'checkpoint' ||
+          old.revision > current.status.head.revision
+        )
+          requireCondition(
+            old.kind === 'mutation' &&
+              old.operation.id === input.id &&
+              old.operation.requestDigest === requestDigest,
+            'PENDING_MUTATION',
+          );
+      }
+    }
     if (input.command.kind === 'library.replace') {
       const transfer = await verifiedTransfer(
         input.command.sourceDigest,
@@ -397,43 +545,85 @@ export class StorageCoordinator {
         'INTEGRITY_CHECK_FAILED',
       );
     }
-    const state: StoredState = {
-      schemaVersion: 2,
-      kind: 'mutation',
-      revision: input.expectedHead.revision + 1,
-      previous: input.expectedHead,
-      backupDigest: current.state.backupDigest,
-      stageDigest: current.state.stageDigest,
-      restoreTarget: null,
-      data: applyLibraryCommand(current.status.data, input.command, input.id),
-      operation: { id: input.id, command: input.command, requestDigest },
-    };
-    const stateDigest = await digest(state);
-    for (const key of Object.keys(store).filter((key) =>
-      key.startsWith(storagePrefix + 'state:'),
-    ))
-      requireCondition(
-        key === recordKey('state', stateDigest) ||
-          current.reachable.has(key.slice((storagePrefix + 'state:').length)),
-        'PENDING_MUTATION',
-      );
-    const head: Head = {
-      schemaVersion: 1,
-      revision: state.revision,
-      stateDigest,
-    };
-    if (
-      !current.status.data.settings.disableSnapshots &&
-      input.command.kind !== 'draft.update'
-    )
-      await this.workspaceStore().capture(
-        current.status.head,
-        current.status.data,
-        this.now(),
-      );
-    await this.append(recordKey('state', stateDigest), state);
-    await verify({ ...(await this.local()), [headKey]: head });
-    return this.publish(head, input.expectedHead);
+    const next = applyLibraryCommand(
+      current.status.data,
+      input.command,
+      input.id,
+    );
+    const plan = await planCheckpoint(
+      store,
+      {
+        head: current.status.head,
+        data: current.status.data,
+        backupDigest: current.state.backupDigest,
+        stageDigest: current.state.stageDigest,
+      },
+      input,
+      next,
+      current.state.kind === 'checkpoint' ? receipts : receipts.reverse(),
+      materialize,
+    );
+    // Persist intent before component blobs. An interrupted save retains its
+    // identity and references, so its user input cannot become anonymous garbage.
+    await this.append(stateKey(plan.head.stateDigest), plan.state);
+    for (const [key, value] of Object.entries(plan.writes))
+      await this.append(key, value);
+    await verify({ ...(await this.local()), [headKey]: plan.head });
+    const result = await this.publish(plan.head, input.expectedHead);
+    await this.collect(plan.head);
+    return result;
+  }
+
+  private async remove(keys: string[]) {
+    requireCondition(
+      this.port.removeLocal &&
+        keys.every((key) => key.startsWith(storagePrefix)),
+      'INVALID_STORAGE_KEY',
+    );
+    try {
+      await this.port.removeLocal(keys);
+    } catch (reason) {
+      if (
+        reason instanceof MigrationError &&
+        ['PRIVATE_SESSION_ENDED', 'PRIVATE_SESSION_INVALID'].includes(
+          reason.code,
+        )
+      )
+        throw reason;
+      throw new MigrationError('STORAGE_WRITE_FAILED');
+    }
+    const stored = await this.local();
+    requireCondition(
+      keys.every((key) => !Object.hasOwn(stored, key)),
+      'WRITE_VERIFICATION_FAILED',
+    );
+  }
+  private async collect(head: Head) {
+    try {
+      if (
+        !this.port.removeLocal ||
+        !isCheckpoint((await this.local())[stateKey(head.stateDigest)])
+      )
+        return;
+      const io = {
+        read: () => this.local(),
+        append: (key: string, value: unknown) => this.append(key, value),
+        remove: (keys: string[]) => this.remove(keys),
+        now: this.now,
+      };
+      await collectCheckpoints(io, head);
+      await finishArchiveProofs(io, head);
+    } catch (reason) {
+      if (
+        reason instanceof MigrationError &&
+        ['PRIVATE_SESSION_ENDED', 'PRIVATE_SESSION_INVALID'].includes(
+          reason.code,
+        )
+      )
+        throw reason;
+      // Publication succeeded. Retain extra records and retry cleanup later;
+      // never report a committed save as an invitation to submit a new operation.
+    }
   }
 
   private workspaceStore(): WorkspaceStore {
@@ -441,26 +631,6 @@ export class StorageCoordinator {
       read: () => this.local(),
       append: (key, value) => this.append(key, value),
       write: (key, value) => this.write(key, value),
-      removeSnapshots: async (keys) => {
-        requireCondition(
-          keys.every((key) => /^buo:v2:snapshot:[a-f0-9]{64}$/.test(key)),
-          'INVALID_STORAGE_KEY',
-        );
-        requireCondition(
-          typeof this.port.removeLocal === 'function',
-          'STORAGE_WRITE_FAILED',
-        );
-        try {
-          await this.port.removeLocal(keys);
-        } catch {
-          throw new MigrationError('STORAGE_WRITE_FAILED');
-        }
-        const stored = await this.local();
-        requireCondition(
-          keys.every((key) => !Object.hasOwn(stored, key)),
-          'WRITE_VERIFICATION_FAILED',
-        );
-      },
     });
   }
 
@@ -471,8 +641,6 @@ export class StorageCoordinator {
       commit: (input: MutationInput) => Promise<StorageStatus>,
       sync: {
         read: () => Promise<Store>;
-        write: (values: Store) => Promise<void>;
-        backup: (values: Store) => Promise<void>;
       },
     ) => Promise<T>,
   ): Promise<T> {
@@ -494,28 +662,14 @@ export class StorageCoordinator {
               throw new MigrationError('SYNC_READ_FAILED');
             }
           },
-          write: async (values) => {
-            requireCondition(
-              typeof this.port.writeSync === 'function',
-              'SYNC_WRITE_FAILED',
-            );
-            try {
-              await this.port.writeSync(values);
-            } catch {
-              throw new MigrationError('SYNC_WRITE_FAILED');
-            }
-          },
-          backup: async (values) =>
-            this.append(
-              storagePrefix + 'sync-backup:' + (await digest(values)),
-              values,
-            ),
         },
       );
     });
   }
 
-  pendingMutations(): Promise<{ stateDigest: string; input: MutationInput }[]> {
+  pendingMutations(): Promise<
+    { stateDigest: string; input: MutationInput | null }[]
+  > {
     return this.run(async () => {
       const store = await this.local();
       const current = await verify(store);
@@ -523,34 +677,71 @@ export class StorageCoordinator {
         current.status.head && current.status.data,
         'MIGRATION_REQUIRED',
       );
-      const pending = [];
-      for (const key of Object.keys(store).filter((key) =>
+      const pending: { stateDigest: string; input: MutationInput | null }[] =
+        [];
+      for (const [key, value] of Object.entries(store).filter(([key]) =>
         key.startsWith(storagePrefix + 'state:'),
       )) {
         const stateDigest = key.slice((storagePrefix + 'state:').length);
         if (current.reachable.has(stateDigest)) continue;
-        const state = decoded(stateSchema, store[key]);
-        requireCondition(
-          state.kind === 'mutation' &&
-            sameContent(state.previous, current.status.head),
-          'ORPHANED_STATE',
-        );
-        await verify({
-          ...store,
-          [headKey]: {
-            schemaVersion: 1,
-            revision: state.revision,
+        if (isCheckpoint(value)) {
+          const state = decoded(checkpointSchema, value);
+          if (state.revision <= current.status.head.revision) continue;
+          requireCondition(
+            sameContent(state.operation.expectedHead, current.status.head),
+            'ORPHANED_STATE',
+          );
+          let input: MutationInput | null = null;
+          try {
+            const candidate = await new CheckpointReader(store).read({
+              schemaVersion: 1,
+              revision: state.revision,
+              stateDigest,
+            });
+            input = {
+              id: state.operation.id,
+              expectedHead: state.operation.expectedHead,
+              command: checkpointCommand(state, candidate.data),
+            };
+            requireCondition(
+              sameContent(
+                applyLibraryCommand(
+                  current.status.data,
+                  input.command,
+                  input.id,
+                ),
+                candidate.data,
+              ),
+              'INTEGRITY_CHECK_FAILED',
+            );
+          } catch {
+            /* Partial component writes require the original input or an archive. */
+          }
+          pending.push({ stateDigest, input });
+        } else if (current.state?.kind !== 'checkpoint') {
+          const state = decoded(stateSchema, value);
+          requireCondition(
+            state.kind === 'mutation' &&
+              sameContent(state.previous, current.status.head),
+            'ORPHANED_STATE',
+          );
+          await verify({
+            ...store,
+            [headKey]: {
+              schemaVersion: 1,
+              revision: state.revision,
+              stateDigest,
+            },
+          });
+          pending.push({
             stateDigest,
-          },
-        });
-        pending.push({
-          stateDigest,
-          input: {
-            id: state.operation.id,
-            expectedHead: state.previous,
-            command: state.operation.command,
-          },
-        });
+            input: {
+              id: state.operation.id,
+              expectedHead: state.previous,
+              command: state.operation.command,
+            },
+          });
+        }
       }
       return pending;
     });
@@ -766,6 +957,193 @@ export class StorageCoordinator {
         digest: await digest(sources),
         sources,
       };
+    });
+  }
+
+  exportArchive(document: Record<string, string>): Promise<PackedJson> {
+    return this.run(async () => {
+      const sources = await this.capture(document, true);
+      return packJson({
+        format: 'bulk-url-opener-recovery',
+        schemaVersion: 1,
+        capturedAt: this.now(),
+        digest: await digest(sources),
+        sources,
+      });
+    });
+  }
+
+  storageInfo() {
+    return this.run(() => this.storageInfoLocked());
+  }
+  recoveryCopies() {
+    return this.run(async () => {
+      const store = await this.local();
+      const reader = new CheckpointReader(store);
+      const results = [];
+      for (const [key, raw] of Object.entries(store).filter(([key]) =>
+        key.startsWith(storagePrefix + 'state:'),
+      )) {
+        const parsed = v.safeParse(
+          v.union([stateSchema, checkpointSchema]),
+          raw,
+        );
+        if (!parsed.success) continue;
+        try {
+          const id = key.slice((storagePrefix + 'state:').length);
+          const entry = await reader.read({
+            schemaVersion: 1,
+            revision: parsed.output.revision,
+            stateDigest: id,
+          });
+          results.push({
+            id,
+            revision: parsed.output.revision,
+            lists: entry.data.lists.length,
+          });
+        } catch {
+          /* A damaged copy remains in the full recovery archive. */
+        }
+      }
+      return results.sort((a, b) => b.revision - a.revision).slice(0, 6);
+    });
+  }
+  exportCopy(id: string) {
+    return this.run(async () => {
+      const store = await this.local();
+      const state = decoded(
+        v.union([stateSchema, checkpointSchema]),
+        store[stateKey(id)],
+      );
+      const copy = await new CheckpointReader(store).read({
+        schemaVersion: 1,
+        revision: state.revision,
+        stateDigest: id,
+      });
+      return JSON.stringify(toPortable(copy.data), null, 2);
+    });
+  }
+  private async storageInfoLocked() {
+    const store = await this.local();
+    let format: 'legacy' | 'checkpoint' | 'uninitialized' | 'unverified' =
+      'unverified';
+    let recoveryPoints = 0;
+    try {
+      const current = await verify(store);
+      format = current.status.data
+        ? current.state?.kind === 'checkpoint'
+          ? 'checkpoint'
+          : 'legacy'
+        : 'uninitialized';
+      if (current.state?.kind === 'checkpoint')
+        recoveryPoints = current.state.retained.length;
+    } catch {
+      /* Raw export remains available when integrity cannot be verified. */
+    }
+    let archiveableRecords = 0,
+      archiveableBytes = 0;
+    let estimatedBytes = 0;
+    const bytes = (key: string, value: unknown) =>
+      new TextEncoder().encode(key + JSON.stringify(value)).byteLength;
+    for (const [key, value] of Object.entries(store)) {
+      estimatedBytes += bytes(key, value);
+    }
+    try {
+      for (const record of await previewArchiveRecords(store)) {
+        archiveableRecords++;
+        archiveableBytes += bytes(record.key, store[record.key]);
+      }
+    } catch {
+      /* Unverified sources can be exported, never automatically pruned. */
+    }
+    return {
+      format,
+      estimatedBytes,
+      recoveryPoints,
+      archiveableRecords,
+      archiveableBytes,
+      cleanupPending: Object.entries(store).some(
+        ([key, raw]) =>
+          key.startsWith(storagePrefix + 'gc:') ||
+          (key.startsWith(storagePrefix + 'archive-proof:') &&
+            v.is(archiveProofSchema, raw)),
+      ),
+    };
+  }
+
+  compactArchive(document: Record<string, string>, raw: unknown) {
+    return this.run(async () => {
+      const archive = decoded(recoveryExportSchema, await unpackJson(raw));
+      requireCondition(
+        (await digest(archive.sources)) === archive.digest,
+        'RECOVERY_DIGEST_MISMATCH',
+      );
+      const archiveDigest = await digest(archive);
+      let store = await this.local();
+      let authorized = false;
+      for (const [key, value] of Object.entries(store).filter(([key]) =>
+        key.startsWith(storagePrefix + 'archive-proof:'),
+      )) {
+        const proof = v.safeParse(
+          v.union([archiveProofSchema, archiveReceiptSchema]),
+          value,
+        );
+        if (
+          proof.success &&
+          proof.output.archiveDigest === archiveDigest &&
+          (await digest(proof.output)) ===
+            key.slice((storagePrefix + 'archive-proof:').length)
+        )
+          authorized = true;
+      }
+      if (!authorized) {
+        requireCondition(
+          (await digest(await this.capture(document, true))) === archive.digest,
+          'ARCHIVE_SOURCES_CHANGED',
+        );
+        const records = await previewArchiveRecords(store);
+        const proof = {
+          schemaVersion: 1 as const,
+          archiveDigest,
+          sourcesDigest: archive.digest,
+          records,
+        };
+        await this.append(
+          storagePrefix + 'archive-proof:' + (await digest(proof)),
+          proof,
+        );
+      }
+      let current = await verify(await this.local());
+      requireCondition(
+        current.status.head && current.status.data,
+        'MIGRATION_REQUIRED',
+      );
+      if (current.state?.kind !== 'checkpoint') {
+        await this.mutateLocked({
+          id: await digest({ archiveDigest, action: 'adopt' }),
+          expectedHead: current.status.head,
+          command: { kind: 'settings.update', patch: {} },
+        });
+      }
+      current = await verify(await this.local());
+      requireCondition(current.status.head, 'MIGRATION_REQUIRED');
+      await this.collect(current.status.head);
+      store = await this.local();
+      const root = decoded(
+        checkpointSchema,
+        store[stateKey(current.status.head.stateDigest)],
+      );
+      if (root.base) {
+        await this.mutateLocked(
+          {
+            id: await digest({ archiveDigest, action: 'materialize' }),
+            expectedHead: current.status.head,
+            command: { kind: 'settings.update', patch: {} },
+          },
+          true,
+        );
+      }
+      return this.storageInfoLocked();
     });
   }
 

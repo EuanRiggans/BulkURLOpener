@@ -1,94 +1,84 @@
 # Bulk URL Opener Privacy Policy
 
-This policy describes the unreleased `redevelopment` preview through Phase 7 release preparation.
-It is not a statement that the preview has replaced a published store version.
+This policy describes the unreleased `redevelopment` preview, including the
+storage simplification after Phase 7. It does not claim the preview has replaced
+a published store version.
 
-The preview stores extension data locally and sends no saved lists, preferences,
-drafts or recovery records to the developer or an analytics service. It has no
-separate collection server, telemetry or remote fonts.
+The extension stores saved lists, preferences, drafts and recovery records
+locally. It has no developer collection server, analytics, telemetry or remote
+fonts. Browser-API information is used only for the extension functions below,
+not sold or used for advertising, profiling, creditworthiness or lending. Its
+use follows the Chrome Web Store User Data Policy, including Limited Use.
 
-Browser-API information is used only to provide the described extension functions.
-It is not sold or used for advertising, profiling, creditworthiness or lending
-decisions. Its use follows the Chrome Web Store User Data Policy, including the
-Limited Use requirements.
+Opening a batch navigates to user-chosen destinations. With the search policy,
+non-URL text is sent over HTTPS to the chosen Google, DuckDuckGo or Bing search
+provider. A configured startup list can open automatically. Firefox declares
+required `browsingActivity` and `searchTerms` consent and checks the grants before
+opening. These transmissions provide the opening/search function.
 
-Opening a batch navigates to the destinations chosen by the user. When the
-selected non-URL policy is search, the text is sent as a query to the chosen
-Google, DuckDuckGo or Bing provider over HTTPS. Saved lists can also open at
-browser startup when that preference is enabled. Firefox declares required
-`browsingActivity` and `searchTerms` data permissions and checks the grants before
-opening. These transmissions implement the opening/search function.
+Browser-account sync uploads have been removed. The extension can read existing
+legacy/preview sync caches for migration backups and explicit local recovery;
+it does not upload, overwrite or clear account storage. Optional settings-data
+consent is no longer requested. JSON export/import transfers lists between
+installations.
 
-The settings page can read the extension's existing page storage, background
-mirrors and browser-account sync cache to prepare a recovery backup. It writes
-verified migration, staging and history records to the browser's local extension
-storage. Original legacy stores, sync copies and snapshots are not deleted or
-overwritten. Migration requires an explicit review action; it does not run at
-startup.
+Migration reads existing extension page storage, local mirrors and old sync
+copies. It requires explicit review and does not run at startup. Original raw
+stores, migration backups and stages are preserved locally. New saves use
+separate checksummed list/settings/metadata records, reusing unchanged content.
+Independent recovery checkpoints retain up to five preceding verified saves
+under a history-size target. The preceding verified save is kept even when it
+exceeds the target. Cleanup failures keep extra records for a later retry.
 
-The Data & recovery page can upload an explicitly reviewed copy of saved list
-names, destinations/search entries and preferences to the browser account's
-extension sync service. This is optional and manual; nothing automatically
-uploads after a local change. A local copy of previous sync contents is retained
-before the modern sync key is replaced. Original legacy sync keys are unchanged.
-Firefox's optional `technicalAndInteraction` consent is requested from the upload
-action because the copy includes preferences. It is used for manual sync, not
-analytics. Required browsing/search consent and this optional grant are checked
-again before upload. Refusal leaves local data and the previous sync copy intact;
-ordinary opening does not require the optional settings-data grant.
-The provider manages remote storage,
-delivery and account controls. Firefox and Chrome-family accounts do not provide
-cross-vendor sync; JSON export/import provides that transfer route. Sync copies
-have a conservative 8 KB item limit in this preview.
+Automatic and manual snapshot capture have been removed. Existing snapshot
+archives remain recoverable. Earlier preview history can be removed only after
+a user downloads a full recovery archive, selects that file for read-back
+verification and explicitly authorizes compaction. Records still needed by
+retained or pending saves remain protected. This maintenance never deletes
+original migration backups, damaged records, unresolved inputs or opening jobs.
 
-Opening plans, inputs, omitted-entry reports, progress, tab receipts and data
-mutation history are retained in local extension storage for recovery. A job
-keeps its settings snapshot. Opaque startup/session metadata is held in browser
-session storage. Held-tab helper URLs contain opaque references rather than the
-destination URL. Actual destination navigation is performed by the browser.
+Working popup text uses a separate local record. Concurrent conflicting drafts
+and editor handoffs are retained. Imports/restores replace only lists and
+preferences after review; current drafts/jobs remain and imported jobs never
+replay. Unresolved import reviews are protected. An applied import's original
+source remains while its checkpoint is retained; consumed new-format transfer
+records can then be collected with obsolete checkpoints. Original migration
+backups remain separate and protected.
 
-Working popup text is saved in a separate local record. Conflicting drafts and
-new-list handoffs are retained as immutable local copies. Imports and restores
-retain the reviewed source locally and replace only saved lists/preferences;
-existing drafts/jobs remain, and imported jobs are not replayed. Up to five
-optional list/settings snapshots are normally kept. Cleanup failures retain
-extra copies; damaged snapshots are kept for recovery. Explicit snapshot purge
-removes verified optional copies, not mandatory history or original legacy
-archives.
+Opening plans, inputs, omitted-entry reports, progress and tab receipts stay in
+local extension storage for recovery. Each job retains its opening preferences.
+Opaque startup/session metadata uses browser session storage. Held-tab helper
+URLs contain opaque references; the browser performs destination navigation.
 
-Private access requires the browser's extension permission for private windows.
-The private workspace starts with a copy of regular saved lists/preferences,
-excluding regular drafts and staging. Its edits, inputs, snapshots and jobs use
-temporary browser storage: Firefox session storage or Chromium's isolated
-incognito IndexedDB partition. They clear when the last private window closes;
-browser restart or extension reload can also clear that temporary storage.
-Private and regular capture are separated. Private data does not automatically
-enter local storage or account sync. Startup and global context-menu preferences
-are managed from regular windows; the global menu lists regular saved lists.
-Private sessions cannot upload sync data or perform persistent migration.
-Explicit copy/download actions can create files or clipboard content that outlast
-the private session.
+Private access requires the browser's private-window permission. A private
+workspace starts with regular saved lists/preferences, excluding regular drafts
+and staging. Its edits, drafts, recovery records and jobs use temporary Firefox
+session storage or Chromium's isolated incognito IndexedDB partition. Closing
+the last private window clears that workspace; browser restart or extension
+reload can also clear it. Private/regular capture stay separate. Private data is
+not written to persistent local/account storage. Startup and global menu
+preferences are managed from regular windows; global menus show regular lists.
+Private sessions cannot perform persistent migration, preview-history compaction
+or recover old account caches. Explicit copy/download can outlast the session.
 
-Recovery downloads are user-requested local JSON files. They can contain list
-names, URLs, searches, preferences, unsaved input and other retained extension
-data, including damaged records. Store these files privately. They are not
-encrypted; content checksums detect differences rather than protecting secrecy.
+Recovery downloads are user-requested local JSON archives. They can contain
+names, URLs, searches, preferences, drafts, jobs and damaged records. New archives
+use gzip/base64 inside JSON and checksums. They are **not encrypted**; keep them
+private. Imports support up to 64 MiB decoded JSON and 16 MiB compressed data.
+A normal portable/compatibility export contains lists/preferences and excludes
+drafts, jobs and history. No files/profiles are sent to this public repository.
 
-Normal portable and compatibility exports include lists/preferences and exclude
-drafts, jobs and recovery history. Clipboard writes and file downloads occur only
-after a user action. The extension does not read the clipboard. Diagnostics are
-prepared for review before copying/downloading and omit saved names, destinations,
-drafts, job/recovery contents and actual saved-list references in preferences.
+Clipboard writes and downloads require user actions. The extension does not
+read the clipboard. Diagnostics are prepared for review before sharing and
+exclude saved names, destinations, drafts, job/recovery bodies and actual saved
+list references in preferences. Nothing is sent automatically to the developer.
 
-Recovery/history remains in the browser profile without automatic pruning.
-Uninstalling an extension or clearing its browser data can remove that storage;
-keep an independent recovery file or backed-up profile before upgrade testing.
-No recovery files or browser profiles are sent to this public source repository.
+Active data, protected originals and unresolved work still need finite browser
+storage. Uninstalling or clearing extension data can remove it; keep independent
+recovery files or backed-up profiles before upgrade testing. Linux automation
+does not establish signed-store upgrades, native assistive-technology usability
+or every OS/browser combination. Store disclosures require final review.
 
-Phase 5 includes Linux browser checks for private isolation and cleanup. Other
-platforms, remote cross-device delivery and genuine same-identity upgrades still
-require verification before release. Store declarations require final review.
-Same-ID development updates with synthetic historical stores are tested separately;
-they do not establish signed-candidate upgrade results.
-The preview requests
-`storage`, `tabs`, `alarms` and `contextMenus`, with no broad host access.
+The preview requests `storage`, `tabs`, `alarms` and `contextMenus`, with no broad
+host access. `tabs` supports capturing open-tab URLs; no browsing-history API is
+requested.

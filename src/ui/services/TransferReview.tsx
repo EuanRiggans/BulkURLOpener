@@ -34,7 +34,8 @@ export function TransferReview({
       <p>
         Accepting replaces the active saved lists and settings. The working
         draft and opening jobs are kept. URLs are not opened. The original
-        import is retained locally.
+        import stays locally while its recovery checkpoint is retained. Keep the
+        external file if you need its full contents for longer.
       </p>
       <label class="check-label">
         <input

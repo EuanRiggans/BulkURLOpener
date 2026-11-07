@@ -15,7 +15,10 @@ import { scopedKeys } from '../../shared/storage-events';
 
 const activeSchema = v.strictObject({ head: headSchema, data: dataSchema });
 const pendingSchema = v.array(
-  v.strictObject({ stateDigest: hashSchema, input: mutationInputSchema }),
+  v.strictObject({
+    stateDigest: hashSchema,
+    input: v.nullable(mutationInputSchema),
+  }),
 );
 type Active = v.InferOutput<typeof activeSchema>;
 type Pending = v.InferOutput<typeof pendingSchema>;
@@ -104,9 +107,13 @@ export function ServiceControls() {
           {pending.map((change) => (
             <details key={change.stateDigest}>
               <summary>Review saved change</summary>
-              <pre>{JSON.stringify(change.input.command, null, 2)}</pre>
+              <pre>
+                {change.input
+                  ? JSON.stringify(change.input.command, null, 2)
+                  : 'This save was interrupted before all records were written. Retry from the original editor, or download a recovery archive before further repair.'}
+              </pre>
               <button
-                disabled={busy}
+                disabled={busy || !change.input}
                 type="button"
                 onClick={() => {
                   void perform(async () => {

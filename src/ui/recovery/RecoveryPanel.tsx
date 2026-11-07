@@ -5,7 +5,6 @@ import { digest } from '../../domain/storage/json';
 import { requireCondition } from '../../domain/storage/errors';
 import {
   backupSchema,
-  recoveryExportSchema,
   reviewSchema,
   statusSchema,
   type Decisions,
@@ -18,6 +17,7 @@ import {
 } from '../../infrastructure/browser/migration-client';
 import { MigrationReviewForm } from './MigrationReviewForm';
 import { recoveryError } from './labels';
+import { packJson, packedJsonSchema } from '../../domain/storage/archive';
 
 function download(value: unknown, name: string) {
   const url = URL.createObjectURL(
@@ -151,12 +151,11 @@ export function RecoveryPanel() {
           onClick={() => {
             void perform(async () => {
               const file = await migrationRequest(
-                { type: 'buo:migration/export', document: captureDocument() },
-                recoveryExportSchema,
-              );
-              requireCondition(
-                (await digest(file.sources)) === file.digest,
-                'INTEGRITY_CHECK_FAILED',
+                {
+                  type: 'buo:migration/export-archive',
+                  document: captureDocument(),
+                },
+                packedJsonSchema,
               );
               download(file, 'bulk-url-opener-recovery');
               setNotice('Recovery download prepared.');
@@ -224,7 +223,13 @@ export function RecoveryPanel() {
                   (await digest(backup.sources)) === backup.digest,
                   'INTEGRITY_CHECK_FAILED',
                 );
-                download(backup, 'bulk-url-opener-verified-backup');
+                download(
+                  await packJson({
+                    format: 'bulk-url-opener-recovery',
+                    ...backup,
+                  }),
+                  'bulk-url-opener-verified-backup',
+                );
               });
             }}
           >

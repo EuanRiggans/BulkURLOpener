@@ -6,6 +6,12 @@ Started 6 November; prepared 7 November 2026 on `redevelopment`, from
 below.** `2.0.0` is still an unsigned preview. No store submission/signing,
 website publication, default-branch merge or release rollout occurs in this phase.
 
+> The capacity and sync decisions below describe the Phase 7 checkpoint.
+> The subsequently approved [storage simplification](STORAGE_SIMPLIFICATION.md)
+> replaces full-state history, removes sync uploads/snapshot capture and adds
+> bounded, compressed recovery. Use that record for the current implementation;
+> signed/native release gates still apply.
+
 ## Changes
 
 - Added a read-only [upgrade comparison](UPGRADE_VERIFICATION.md) command and
@@ -35,10 +41,10 @@ website publication, default-branch merge or release rollout occurs in this phas
 
 ## Storage capacity decision
 
-Relevant implementation: [full-state mutation publication](../src/application/storage/coordinator.ts#L408),
+Relevant implementation: [full-state mutation publication](https://github.com/EuanRiggans/BulkURLOpener/blob/8227d7eefefd36bfac63713bb3e5d47d1b604139/src/application/storage/coordinator.ts#L408),
 [read-only upgrade audit](../src/application/storage/upgrade-audit.ts#L37),
-[upload/write-time consent](../src/application/workspace.ts#L280),
-[Firefox upload gesture](../src/infrastructure/browser/sync-consent.ts#L6) and
+[upload/write-time consent](https://github.com/EuanRiggans/BulkURLOpener/blob/8227d7eefefd36bfac63713bb3e5d47d1b604139/src/application/workspace.ts#L280),
+[Firefox upload gesture](https://github.com/EuanRiggans/BulkURLOpener/blob/8227d7eefefd36bfac63713bb3e5d47d1b604139/src/infrastructure/browser/sync-consent.ts#L6) and
 [development update harness](../test/browser/upgrade.test.mjs#L208).
 
 **Confirmed by source:** each library/settings mutation retains an immutable
@@ -123,10 +129,11 @@ All unchecked items are required evidence or decisions, not claimed passes.
       and restart evidence passes, including damaged/large copies and all references.
 - [ ] Native install/update/data-consent prompts and refusal are verified on the
       signed Firefox candidate; API/menu permission changes are recorded per store.
-- [ ] The long-term history/capacity design is resolved and verified without
-      deleting retained originals or hiding quota failure.
-- [ ] Real same-account, two-installation sync delivery/conflict/offline checks
-      pass independently for Firefox and a Chromium provider.
+- [ ] Review the storage-simplification evidence and include near-quota/archive
+      recovery in genuine signed-upgrade testing. Ordinary history is now bounded;
+      active data, protected originals and pending work still need space.
+- Browser-account sync delivery is no longer a release gate: uploads are removed;
+  existing caches remain readable for recovery.
 - [ ] Native popup/menu/shortcut/clipboard/download behavior, accessibility and
       the supported OS/browser matrix pass [the manual checks](PHASE_5_MANUAL_CHECKS.md).
 - [ ] Final advisory/licence review, privacy policy URL, listing/dashboard
@@ -142,6 +149,6 @@ for forward rescue. Do not promise the store supports a percentage rollout or
 private same-ID channel without confirming its actual capabilities.
 
 The absence of store credentials/accounts in this environment prevents signing
-and provider-delivery evidence here. Do not paste tokens or profiles into chat,
+evidence here. Do not paste tokens or profiles into chat,
 issues or Git. [The upgrade protocol](UPGRADE_VERIFICATION.md) and store draft make
 the remaining maintainer work concrete; they do not substitute for its results.

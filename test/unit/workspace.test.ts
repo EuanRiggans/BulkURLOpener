@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import * as v from 'valibot';
 import { WorkspaceService } from '../../src/application/workspace';
+import { MigrationError } from '../../src/domain/storage/errors';
+import { unpackJson } from '../../src/domain/storage/archive';
+import { transferRecordSchema } from '../../src/domain/workspace-schema';
 import { StorageCoordinator } from '../../src/application/storage/coordinator';
 import {
   portableData,
@@ -13,14 +16,12 @@ import { headKey, type Decisions } from '../../src/domain/storage/schema';
 import { draftResultSchema } from '../../src/domain/workspace-schema';
 import { legacyExport, reviewed, empty } from './storage-support';
 import { sender, sharedSetup, token } from './shared-support';
-import { MigrationError } from '../../src/domain/storage/errors';
 
 const decisions: Decisions = {
   acknowledgeIssues: false,
   preferences: {},
   historical: {},
 };
-const allowSync = () => Promise.resolve();
 const sample = () => ({
   format: 'bulk-url-opener' as const,
   version: 2 as const,
@@ -136,7 +137,7 @@ describe('portable transfer and reviewed replacement', () => {
       );
     expect(await storage.requireActiveData()).toEqual(before);
     await expect(
-      workspace.preview(' '.repeat(8 * 1024 * 1024 + 1), 'file'),
+      workspace.preview(' '.repeat(24 * 1024 * 1024 + 1), 'file'),
     ).rejects.toThrow('IMPORT_TOO_LARGE');
   });
   it('keeps a preview immutable, preserves working input and never opens restored startup lists', async () => {
@@ -204,7 +205,11 @@ describe('portable transfer and reviewed replacement', () => {
         decisions,
       }),
     ).rejects.toThrow('REVIEW_REQUIRED');
-    expect(port.local['buo:v2:transfer:' + review.id]).toMatchObject({ raw });
+    const entry = v.parse(
+      transferRecordSchema,
+      port.local['buo:v2:transfer:' + review.id],
+    );
+    expect(await unpackJson(entry.raw)).toEqual(raw);
   });
   it.each(['before', 'after', 'drop'] as const)(
     'recovers replacement publication failure without losing the old library: %s',
@@ -373,71 +378,7 @@ describe('working drafts', () => {
   );
 });
 
-describe('optional snapshots', () => {
-  it('never prunes older snapshots when the replacement copy fails verification', async () => {
-    const context = await setup();
-    for (let id = 1; id <= 5; id++)
-      await changed(context, id, { nightMode: id % 2 === 1 });
-    const before = await context.workspace.snapshots();
-    const head = (await context.storage.requireActiveData()).head;
-    context.port.failAt = context.port.writes.length + 1;
-    context.port.failure = 'corrupt';
-    await expect(changed(context, 6)).rejects.toThrow(
-      'WRITE_VERIFICATION_FAILED',
-    );
-    expect((await context.workspace.snapshots()).records).toEqual(
-      before.records,
-    );
-    expect(context.port.removed).toEqual([]);
-    expect((await context.storage.requireActiveData()).head).toEqual(head);
-  });
-  it('bounds new retention, supports review/restore and never purges original sources or canonical history', async () => {
-    const context = await setup();
-    for (let id = 1; id <= 8; id++)
-      await changed(context, id, { nightMode: id % 2 === 1 });
-    const records = await context.workspace.snapshots();
-    expect(records.records).toHaveLength(5);
-    const snapshot = records.records[0]!;
-    const preview = await context.workspace.previewSnapshot(snapshot.id, false);
-    expect(preview.portable!.settings.nightMode).toBe(true);
-    const head = (await context.storage.requireActiveData()).head;
-    const before = Object.keys(context.port.local).filter(
-      (key) => !key.startsWith('buo:v2:snapshot:'),
-    );
-    await context.workspace.purgeSnapshots();
-    expect((await context.workspace.snapshots()).records).toEqual([]);
-    expect(Object.keys(context.port.local)).toEqual(before);
-    expect((await context.storage.requireActiveData()).head).toEqual(head);
-  });
-  it('disabling automatic snapshots retains existing copies and still permits an explicit capture', async () => {
-    const context = await setup();
-    await context.storage.mutate({
-      id: token(1),
-      expectedHead: (await context.storage.requireActiveData()).head,
-      command: { kind: 'settings.update', patch: { disableSnapshots: true } },
-    });
-    const count = (await context.workspace.snapshots()).records.length;
-    await changed(context, 2);
-    expect((await context.workspace.snapshots()).records).toHaveLength(count);
-    await context.workspace.captureSnapshot();
-    expect((await context.workspace.snapshots()).records).toHaveLength(
-      count + 1,
-    );
-  });
-  it('retains damaged snapshots and extra verified copies when pruning fails', async () => {
-    const context = await setup();
-    context.port.removeFailure = true;
-    context.port.local['buo:v2:snapshot:' + token(999)] = { damaged: true };
-    for (let id = 1; id <= 6; id++)
-      await changed(context, id, { nightMode: id % 2 === 1 });
-    expect((await context.workspace.snapshots()).damaged).toBe(1);
-    expect((await context.workspace.snapshots()).records).toHaveLength(6);
-    context.port.removeFailure = false;
-    await context.workspace.purgeSnapshots();
-    expect(context.port.local['buo:v2:snapshot:' + token(999)]).toEqual({
-      damaged: true,
-    });
-  });
+describe('read-only legacy archives', () => {
   it('makes original legacy archive payloads individually reviewable without activating them', async () => {
     const { storage } = await sharedSetup(legacyExport('zero-id-export'));
     const raw = exportLegacy((await storage.requireActiveData()).data);
@@ -451,113 +392,46 @@ describe('optional snapshots', () => {
     const workspace = new WorkspaceService(migrated);
     const archive = (await workspace.archives())[0]!;
     expect(
-      (await workspace.previewSnapshot(archive.id, true)).legacy!.lists.length,
+      (await workspace.previewArchive(archive.id)).legacy!.lists.length,
     ).toBeGreaterThan(0);
     expect((await workspace.read()).data.lists).toEqual([]);
   });
 });
 
-describe('manual browser-account sync', () => {
-  it('checks Firefox transmission consent before any sync write', async () => {
+describe('retired sync and snapshot features', () => {
+  it('reviews an existing sync cache locally without changing or clearing account storage', async () => {
     const context = await setup();
-    const review = await context.workspace.previewUpload();
-    context.browser.allowTransmission = (purpose) => {
-      expect(purpose).toBe('sync');
-      return Promise.reject(new MigrationError('SYNC_CONSENT_REQUIRED'));
-    };
-    await expect(
-      context.services.dispatch(
-        { type: 'buo:service/sync.upload', id: review.id, acknowledge: true },
-        sender('data.html'),
-      ),
-    ).rejects.toThrow('SYNC_CONSENT_REQUIRED');
-    expect(context.port.syncWrites).toBe(0);
-  });
-  it('rechecks a revoked grant after serialized backup work and allows a later reviewed retry', async () => {
-    const context = await setup();
-    const review = await context.workspace.previewUpload();
-    const before = await context.storage.requireActiveData();
-    let checks = 0;
-    context.browser.allowTransmission = (purpose) => {
-      expect(purpose).toBe('sync');
-      return ++checks === 1
-        ? Promise.resolve()
-        : Promise.reject(new MigrationError('SYNC_CONSENT_REQUIRED'));
-    };
-    const request = {
-      type: 'buo:service/sync.upload',
-      id: review.id,
-      acknowledge: true,
-    };
-    await expect(
-      context.services.dispatch(request, sender('data.html')),
-    ).rejects.toThrow('SYNC_CONSENT_REQUIRED');
-    expect(checks).toBe(2);
-    expect(context.port.syncWrites).toBe(0);
-    expect(await context.storage.requireActiveData()).toEqual(before);
-    context.browser.allowTransmission = () => Promise.resolve();
-    await expect(
-      context.services.dispatch(request, sender('data.html')),
-    ).resolves.toBe(true);
-    expect(context.port.syncWrites).toBe(1);
-    expect(await context.storage.requireActiveData()).toEqual(before);
-  });
-  it('preserves the legacy key, verifies the new copy and restores only the reviewed download', async () => {
-    const context = await setup();
+    const data = sample();
     context.port.sync = {
-      user_settings: 'retained legacy source',
+      'bulk-url-opener-v2': {
+        schemaVersion: 1,
+        digest: await digest(data),
+        data,
+      },
       unrelated: { safe: true },
     };
     const before = structuredClone(context.port.sync);
-    const upload = await context.workspace.previewUpload();
-    await context.workspace.upload(upload.id, allowSync);
-    expect(context.port.sync).toMatchObject(before);
-    expect(
-      context.port.local['buo:v2:sync-backup:' + (await digest(before))],
-    ).toEqual(before);
-    const download = await context.workspace.previewDownload(false);
-    context.port.sync = { changed: true };
+    const review = await context.workspace.recoverSync(false);
     await context.workspace.apply({
-      id: download.id,
+      id: review.id,
       operation: token(1),
       acknowledgeReplacement: true,
       decisions,
     });
-    expect((await context.workspace.read()).data.lists).toEqual([]);
-  });
-  it('rejects changed sync/local state after preview and never silently overwrites it', async () => {
-    const context = await setup();
-    const upload = await context.workspace.previewUpload();
-    context.port.sync = { fromOtherDevice: true };
-    await expect(
-      context.workspace.upload(upload.id, allowSync),
-    ).rejects.toThrow('SYNC_CHANGED');
-    expect(context.port.syncWrites).toBe(0);
-    const next = await context.workspace.previewUpload();
-    await changed(context, 1);
-    await expect(context.workspace.upload(next.id, allowSync)).rejects.toThrow(
-      'REVISION_CONFLICT',
+    expect(toPortable((await context.workspace.read()).data).lists).toEqual(
+      data.lists,
     );
+    expect(context.port.sync).toEqual(before);
+    expect(context.port.syncWrites).toBe(0);
+    expect(
+      Object.keys(context.port.local).some((key) =>
+        key.startsWith('buo:v2:snapshot:'),
+      ),
+    ).toBe(false);
   });
-  it.each(['before', 'after', 'drop', 'corrupt'] as const)(
-    'reports failed sync writes and permits idempotent retry after lost acknowledgement: %s',
-    async (failure) => {
-      const context = await setup();
-      const upload = await context.workspace.previewUpload();
-      context.port.syncFailure = failure;
-      await expect(
-        context.workspace.upload(upload.id, allowSync),
-      ).rejects.toThrow(/SYNC_WRITE_FAILED|SYNC_VERIFICATION_FAILED/);
-      context.port.syncFailure = null;
-      if (failure === 'after') {
-        await context.workspace.upload(upload.id, allowSync);
-        expect(context.port.syncWrites).toBe(1);
-      }
-      expect((await context.workspace.read()).data.lists).toEqual([]);
-    },
-  );
-  it('detects corrupt downloads, enforces per-item quota and keeps larger libraries exportable', async () => {
+  it('rejects a corrupt sync cache without changing the local library', async () => {
     const context = await setup();
+    const before = await context.storage.requireActiveData();
     context.port.sync = {
       'bulk-url-opener-v2': {
         schemaVersion: 1,
@@ -565,25 +439,30 @@ describe('manual browser-account sync', () => {
         data: sample(),
       },
     };
-    await expect(context.workspace.previewDownload(false)).rejects.toThrow(
+    await expect(context.workspace.recoverSync(false)).rejects.toThrow(
       'SYNC_INVALID',
     );
-    const large = sample();
-    large.lists[0]!.lines = ['https://example.test/' + 'x'.repeat(10_000)];
-    const preview = await context.workspace.preview(
-      JSON.stringify(large),
-      'paste',
-    );
-    await context.workspace.apply({
-      id: preview.id,
-      operation: token(1),
-      acknowledgeReplacement: true,
-      decisions,
-    });
-    await expect(context.workspace.previewUpload()).rejects.toThrow(
-      'SYNC_TOO_LARGE',
-    );
-    expect(await context.workspace.export(false)).toContain('x'.repeat(10_000));
+    expect(await context.storage.requireActiveData()).toEqual(before);
+    expect(context.port.syncWrites).toBe(0);
+  });
+  it('rejects retired upload and snapshot endpoints before making any writes', async () => {
+    const context = await setup();
+    const before = structuredClone(context.port.local);
+    for (const type of [
+      'sync.preview-upload',
+      'sync.upload',
+      'snapshots.capture',
+      'snapshots.purge',
+    ]) {
+      await expect(
+        context.services.dispatch(
+          { type: 'buo:service/' + type },
+          sender('data.html'),
+        ),
+      ).rejects.toThrow();
+    }
+    expect(context.port.local).toEqual(before);
+    expect(context.port.syncWrites).toBe(0);
   });
   it('authorizes transfer, draft and diagnostics endpoints by page and blocks private senders before writes', async () => {
     const { services, port } = await setup();
@@ -599,7 +478,7 @@ describe('manual browser-account sync', () => {
     ).rejects.toThrow('UNAUTHORIZED_PAGE');
     await expect(
       services.dispatch(
-        { type: 'buo:service/sync.preview-upload' },
+        { type: 'buo:service/data.recover-sync', legacy: false },
         { ...sender('data.html'), tab: { incognito: true } },
       ),
     ).rejects.toThrow('PRIVATE_WINDOW_UNSUPPORTED');

@@ -777,7 +777,7 @@ test(
     assert.equal(opened.url, new URL(marker).href);
     await page('data.html');
     const blocked = await native(
-      'return await api.runtime.sendMessage({type: "buo:service/sync.preview-upload"});',
+      'return await api.runtime.sendMessage({type: "buo:service/data.recover-sync", legacy: false});',
     );
     assert.equal(blocked.error, 'PRIVATE_SYNC_UNAVAILABLE');
     await stopBackground();
@@ -1105,7 +1105,7 @@ test(
 );
 
 test(
-  'reviewed manual sync uses the real local API cache and preserves legacy keys',
+  'previous browser-sync copies can be reviewed locally without uploads or clearing account storage',
   { timeout: 45_000 },
   async () => {
     await page('data.html');
@@ -1116,86 +1116,20 @@ test(
     const legacy = JSON.parse(
       await rpc({ type: 'buo:service/data.export', legacy: true }),
     );
+    // Seed only a disposable old account cache; application code has no sync writer.
     await native(
-      'await api.storage.sync.set({user_settings: arguments[0]}); return true;',
-      JSON.stringify(legacy),
+      `const data = arguments[0];
+      const stable = value => Array.isArray(value) ? '[' + value.map(stable).join(',') + ']' : value !== null && typeof value === 'object' ? '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ':' + stable(value[key])).join(',') + '}' : JSON.stringify(value);
+      const hash = Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(stable(data)))), byte => byte.toString(16).padStart(2, '0')).join('');
+      await api.storage.sync.set({'bulk-url-opener-v2': {schemaVersion: 1, digest: hash, data}, user_settings: JSON.stringify(arguments[1]), unrelated: 'keep'}); return true;`,
+      portable,
+      legacy,
     );
-    await clickText('Review upload');
-    await driver.wait(
-      until.elementLocated(
-        By.xpath('//h3[normalize-space(.)="Review sync upload"]'),
-      ),
-      15_000,
-    );
-    await driver
-      .findElement(By.css('.transfer-review input[type=checkbox]'))
-      .click();
-    await driver.wait(
-      until.elementIsEnabled(
-        await driver.findElement(
-          By.xpath('//button[normalize-space(.)="Upload reviewed copy"]'),
-        ),
-      ),
-      10_000,
-    );
-    if (target === 'firefox') {
-      await native(
-        'return await api.permissions.remove({data_collection: ["technicalAndInteraction"]});',
-      );
-      const review = await rpc({ type: 'buo:service/sync.preview-upload' });
-      const stores = await native(
-        'return {local: await api.storage.local.get(null), sync: await api.storage.sync.get(null)};',
-      );
-      const refusal = await native(
-        'return await api.runtime.sendMessage(arguments[0]);',
-        {
-          type: 'buo:service/sync.upload',
-          id: review.id,
-          acknowledge: true,
-        },
-      );
-      assert.deepEqual(refusal, { ok: false, error: 'SYNC_CONSENT_REQUIRED' });
-      assert.deepEqual(
-        await native(
-          'return {local: await api.storage.local.get(null), sync: await api.storage.sync.get(null)};',
-        ),
-        stores,
-      );
-      await driver.setContext(firefox.Context.CHROME);
-      try {
-        const granted = await driver.executeAsyncScript(
-          `const done = arguments[arguments.length - 1]; const {ExtensionPermissions} = ChromeUtils.importESModule('resource://gre/modules/ExtensionPermissions.sys.mjs'); const {ExtensionParent} = ChromeUtils.importESModule('resource://gre/modules/ExtensionParent.sys.mjs'); const extension = ExtensionParent.GlobalManager.getExtension(arguments[0]); ExtensionPermissions.add(arguments[0], {permissions: [], origins: [], data_collection: ['technicalAndInteraction']}, extension).then(() => done({ok: true}), error => done({error: String(error)}));`,
-          addonId,
-        );
-        assert(granted.ok, granted.error);
-      } finally {
-        await driver.setContext(firefox.Context.CONTENT);
-      }
-      await driver.wait(
-        async () =>
-          (
-            await native('return await api.permissions.getAll();')
-          ).data_collection.includes('technicalAndInteraction'),
-        15_000,
-        'The disposable harness grant must reach the running Firefox extension.',
-      );
-      report.assertions.push(
-        'Firefox settings-data consent refusal preserves both stores; optional grant set by disposable test harness, native consent prompt remains manual',
-      );
-    }
-    await clickText('Upload reviewed copy');
-    await driver.wait(async () => {
-      const state = await driver.executeScript(
-        'return {alerts: Array.from(document.querySelectorAll("[role=alert]")).map(element => element.textContent), status: Array.from(document.querySelectorAll("[role=status]")).map(element => element.textContent)};',
-      );
-      assert.deepEqual(state.alerts, [], JSON.stringify(state));
-      return state.status.some((text) => text.includes('verified locally'));
-    }, 20_000);
-    const remote = await native('return await api.storage.sync.get(null);');
-    assert.equal(remote.user_settings, JSON.stringify(legacy));
-    assert.deepEqual(remote['bulk-url-opener-v2'].data, portable);
+    const cache = await native('return await api.storage.sync.get(null);');
+    await clickText('Inspect previous sync copy');
+    await driver.wait(until.elementLocated(By.css('.transfer-review')), 15_000);
     const preview = await rpc({
-      type: 'buo:service/sync.download',
+      type: 'buo:service/data.recover-sync',
       legacy: false,
     });
     assert.deepEqual(preview.portable, portable);
@@ -1203,15 +1137,33 @@ test(
       (await rpc({ type: 'buo:service/library.read' })).head,
       before.head,
     );
-    report.assertions.push(
-      'reviewed real storage.sync cache upload/download and retained legacy key; no remote delivery claim',
+    await driver
+      .findElement(By.css('.transfer-review input[type=checkbox]'))
+      .click();
+    await clickText('Replace lists and settings');
+    await driver.wait(
+      async () =>
+        (await rpc({ type: 'buo:service/library.read' })).head.revision >
+        before.head.revision,
+      20_000,
     );
-    report.syncScope = 'local API cache only; no browser accounts signed in';
+    assert.deepEqual(
+      await native('return await api.storage.sync.get(null);'),
+      cache,
+    );
+    const text = await driver.findElement(By.css('body')).getText();
+    assert(!text.includes('Upload reviewed copy'));
+    assert(!text.includes('Capture snapshot'));
+    report.assertions.push(
+      'read-only recovery of an old browser-sync cache preserves all account keys; no upload feature or optional settings consent',
+    );
+    report.syncScope =
+      'read-only legacy cache recovery; browser sync uploads removed';
   },
 );
 
 test(
-  'a 5000-entry list saves and exports exactly; an oversized sync copy preserves local data',
+  'a 5000-entry list saves and exports exactly',
   { timeout: 120_000 },
   async () => {
     await page('new-list.html');
@@ -1241,19 +1193,7 @@ test(
         .lines,
       lines,
     );
-    const before = await rpc({ type: 'buo:service/library.read' });
-    const response = await native(
-      'return await api.runtime.sendMessage({type: "buo:service/sync.preview-upload"});',
-    );
-    assert.equal(response.ok, false);
-    assert.equal(response.error, 'SYNC_TOO_LARGE');
-    assert.deepEqual(
-      (await rpc({ type: 'buo:service/library.read' })).head,
-      before.head,
-    );
-    report.assertions.push(
-      '5000 exact saved/exported entries and oversized-sync rejection',
-    );
+    report.assertions.push('5000 exact saved/exported entries');
   },
 );
 
@@ -1266,21 +1206,22 @@ test(
     const filled = await native(
       'const bytes = await api.storage.local.getBytesInUse(null); const limit = api.storage.local.QUOTA_BYTES; if (!Number.isSafeInteger(limit)) throw new Error("Missing quota constant"); const length = limit - bytes - 65536; if (length < 1) throw new Error("Profile is already at quota"); await api.storage.local.set({"buo-test:quota": "q".repeat(length)}); return {bytes, limit};',
     );
+    const request = {
+      type: 'buo:service/library.mutate',
+      input: {
+        id: id(),
+        expectedHead: before.head,
+        command: {
+          kind: 'list.create',
+          name: 'Quota retry',
+          lines: [destination + '/quota?' + 'q'.repeat(128 * 1024)],
+        },
+      },
+    };
     try {
       const response = await native(
         'return await api.runtime.sendMessage(arguments[0]);',
-        {
-          type: 'buo:service/library.mutate',
-          input: {
-            id: id(),
-            expectedHead: before.head,
-            command: {
-              kind: 'list.create',
-              name: 'Quota must not replace the library',
-              lines: [destination + '/quota?' + 'q'.repeat(128 * 1024)],
-            },
-          },
-        },
+        request,
       );
       assert.equal(response.ok, false);
       assert.equal(response.error, 'STORAGE_WRITE_FAILED');
@@ -1301,71 +1242,86 @@ test(
         'await api.storage.local.remove("buo-test:quota"); return true;',
       );
     }
+    const recovered = await rpc(request);
+    assert.deepEqual(
+      recovered.data.lists.at(-1).lines,
+      request.input.command.lines,
+    );
+    report.assertions.push(
+      'same-request retry completes a quota-interrupted component save after space is available',
+    );
   },
 );
 
 test(
-  'repeated large-library saves measure retained-history growth without deleting recovery data',
-  { skip: target !== 'chrome', timeout: 180_000 },
+  '100 settings saves keep a large library exact and storage growth bounded',
+  { timeout: 180_000 },
   async () => {
     await page('options.html');
+    const original = await rpc({ type: 'buo:service/library.read' });
     const measurements = [];
-    let exhausted = false;
-    for (let index = 0; index < 32; index++) {
+    const start = performance.now();
+    for (let index = 0; index < 100; index++) {
       const before = await rpc({ type: 'buo:service/library.read' });
-      const bytes = await native(
-        'return await api.storage.local.getBytesInUse(null);',
-      );
-      const response = await native(
-        'return await api.runtime.sendMessage(arguments[0]);',
-        {
-          type: 'buo:service/library.mutate',
-          input: {
-            id: id(),
-            expectedHead: before.head,
-            command: {
-              kind: 'settings.update',
-              patch: { nightMode: !before.data.settings.nightMode },
-            },
+      const result = await rpc({
+        type: 'buo:service/library.mutate',
+        input: {
+          id: id(),
+          expectedHead: before.head,
+          command: {
+            kind: 'settings.update',
+            patch: { nightMode: !before.data.settings.nightMode },
           },
         },
-      );
-      measurements.push({
-        save: index + 1,
-        bytesBefore: bytes,
-        saved: response.ok,
       });
-      if (!response.ok) {
-        assert.equal(response.error, 'STORAGE_WRITE_FAILED');
-        assert.deepEqual(
-          await rpc({ type: 'buo:service/library.read' }),
-          before,
-        );
-        const recovery = await rpc({
-          type: 'buo:migration/export',
-          document: {},
+      assert.equal(result.head.revision, before.head.revision + 1);
+      if ([0, 19, 49, 99].includes(index))
+        measurements.push({
+          save: index + 1,
+          bytes: await native(
+            'return await api.storage.local.getBytesInUse(null);',
+          ),
         });
-        assert.equal(recovery.format, 'bulk-url-opener-recovery');
-        assert(Object.hasOwn(recovery.sources.storageLocal, 'buo:v2:head'));
-        exhausted = true;
-        break;
-      }
-      assert.equal(
-        (await rpc({ type: 'buo:service/library.read' })).head.revision,
-        before.head.revision + 1,
-      );
     }
+    const saved = await rpc({ type: 'buo:service/library.read' });
+    assert.deepEqual(saved.data, original.data);
+    assert(
+      measurements.at(-1).bytes - measurements[1].bytes < 100_000,
+      JSON.stringify(measurements),
+    );
+    const records = await native('return await api.storage.local.get(null);');
+    assert(
+      Object.values(records).filter(
+        (value) => value?.schemaVersion === 4 && value?.kind === 'checkpoint',
+      ).length <= 6,
+    );
+    assert(
+      !Object.keys(records).some((key) => key.startsWith('buo:v2:snapshot:')),
+    );
+    await page('data.html');
+    const archive = await rpc({
+      type: 'buo:migration/export-archive',
+      document: {},
+    });
+    assert.equal(archive.format, 'bulk-url-opener-packed-json');
+    const preview = await rpc({
+      type: 'buo:service/data.preview',
+      text: JSON.stringify(archive),
+      source: 'file',
+    });
+    assert.deepEqual(
+      preview.portable.lists,
+      saved.data.lists.map(({ id, name, lines }) => ({ id, name, lines })),
+    );
     report.retention = {
+      saves: 100,
       measurements,
-      exhausted,
-      bytesAfter: await native(
-        'return await api.storage.local.getBytesInUse(null);',
-      ),
+      milliseconds: Math.round(performance.now() - start),
       scope:
-        'Synthetic 5000-entry library; bounded save sequence in Chrome only, not a retention or unlimited-capacity guarantee.',
+        'Synthetic 5000-entry library; finite checkpoint retention and exact compressed recovery import verified. Active data, protected originals and unresolved work still need storage space.',
     };
     report.assertions.push(
-      'retained-history volume measured; any quota rejection preserves the last acknowledged library and read-only recovery export',
+      '100 large-library settings saves plateau after warmup, keep at most five internal restore points, create no automatic snapshots and round-trip compressed recovery',
     );
   },
 );

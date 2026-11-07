@@ -17,7 +17,9 @@ Browser-only cleanup and source/package reproduction are recorded in
 [Phase 6](docs/PHASE_6_CLEANUP.md) and [the build guide](docs/BUILD_AND_PACKAGE.md).
 Release preparation and outstanding blockers are recorded in
 [Phase 7](docs/PHASE_7_RELEASE.md), with [upgrade verification](docs/UPGRADE_VERIFICATION.md)
-and [store disclosure drafts](docs/STORE_SUBMISSION.md). Development same-ID
+and [store disclosure drafts](docs/STORE_SUBMISSION.md). The user-approved
+[storage simplification](docs/STORAGE_SIMPLIFICATION.md) supersedes the earlier
+unbounded-history, sync and snapshot contracts. Development same-ID
 tests are not signed-store evidence. Keep preview status until the release gates
 are actually satisfied and a specific release is authorized.
 
@@ -53,7 +55,7 @@ are actually satisfied and a specific release is authorized.
   extension metadata; preserve it for update compatibility.
 - Review commit metadata too. Use the repository's GitHub noreply email for
   commits created here instead of a personal contact address.
-- Browser runtime tests, real cross-device sync and genuine signed-upgrade
+- Browser runtime tests and genuine signed-upgrade
   tests are separate from mocked tests and build validation.
 - Proceed within the phase authorized in the current conversation. Publishing,
   merging to the default branch and store releases are separate actions.
@@ -68,12 +70,18 @@ source, or the exported source manifest. Keep notices for every bundled runtime
 helper current, and verify source/archive reproduction before phase publication.
 New runtime writes belong to the background storage coordinator and its shared
 Web Lock. Keep legacy document/local/sync sources read-only. Preserve immutable
-backups/stages/history, verify full content and expected revisions, and publish
+original backups/stages, verify full content and expected revisions, and publish
 the active head last. Never initialize defaults over unreadable/future state or
 erase recovery data to fix quota. A readiness check outside a mutation is not a
 transaction. List/settings/opening/menu services must use the migration gate.
-Normal mutation records use schema 2 while retaining readable schema-1 migration
-history. Keep assigned list IDs through edits, deduplicate request IDs and reject
+Normal mutations use schema-4 independent checkpoints and content-addressed
+lists/settings/metadata; schemas 1/2/3 remain readable for migration/recovery.
+Retain at most five preceding checkpoints under the 4 MiB incremental history
+target, always keeping the preceding verified save. Verify the candidate before
+publishing and retain a durable deletion manifest before removing obsolete new
+records. Earlier preview history requires a matching downloaded recovery archive
+and explicit user confirmation before eligible removal. Never delete original
+migration sources, damaged records, unresolved input or jobs during maintenance. Keep assigned list IDs through edits, deduplicate request IDs and reject
 stale revisions. Job plans/results are immutable; publish progress heads last.
 Establish alarms before publishing a job; its signal and idle cleanup are ordered
 under the writer lock. Keep tab effects and sleeping outside that lock, and use
@@ -87,7 +95,7 @@ Chromium split-mode incognito IndexedDB. Chromium shares storage.session across
 split contexts; do not put private contents there. Its private background must
 never execute regular startup/jobs, nor may the regular background open the
 private database. Never route private drafts,
-list edits, snapshots, imports or jobs to local/sync storage. Ended-session
+list edits, recovery records, imports or jobs to local/sync storage. Ended-session
 callbacks must fail, and final-window cleanup must share the private writer lock
 with publication and alarm signalling. Global menus and startup stay regular.
 Mozilla validation has one narrowly source-mapped, version-pinned Preact vendor
@@ -99,12 +107,11 @@ popup text into a save that only runs after its document closes. Keep stale
 editor/settings input visible and reuse an uncertain request's original ID.
 Replacement imports use a retained, immutable preview and its expected head,
 never a fresh sync fetch at acceptance. Only the Data page can accept transfer.
-Manual sync writes only the new `bulk-url-opener-v2` key after explicit review,
-consent, local backup and a visible-change check. Its original legacy keys stay
-read-only; never clear the sync area. Optional snapshot cleanup can remove only
-verified `buo:v2:snapshot:` records after a new copy is verified. Mandatory
-history, original legacy snapshots and damaged records remain intact.
-Firefox sync additionally needs optional `technicalAndInteraction` consent for
-preferences: request it in the upload gesture and recheck it in the background.
-Do not broaden ordinary opening consent or treat a privileged test grant as
-evidence for a native user prompt.
+Browser-account sync uploads and snapshot capture/purge are retired. Keep old
+sync stores read-only and retain local recovery of their existing copies. Never
+clear account storage or request optional technical/settings-data consent.
+Archives use bounded native gzip JSON, checksums and the shared verifier; imports
+allow 64 MiB decoded / 16 MiB compressed with a smaller message transport limit.
+Protect unresolved reviews. Consumed schema-2 transfer bodies can be collected
+only after their owning new-format checkpoint leaves retention. Keep existing
+preview archives until verified external archival; checksums are not encryption.

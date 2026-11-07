@@ -30,7 +30,7 @@ lists for repeated opening.
 
 **Description:** Enter one destination per line, open the batch, or load a saved
 list. Capture open-tab URLs, choose a delay/order and manage lists on separate
-pages. Settings, manual JSON transfer, optional browser-account sync and recovery
+pages. Settings, manual JSON transfer and recovery
 stay outside the simple 540px-preferred-width popup. The context menu is
 `Bulk URL Opener > Open Lists > [saved lists]`. Browser restrictions apply to
 file, internal and other protected destinations. Private access requires the
@@ -38,22 +38,24 @@ browser's grant and uses a separate temporary workspace.
 
 **Update notes:** Browser-only 2.x rebuild; Electron is retired. Existing lists
 and preferences migrate only after a backed-up review. Original stores and
-recovery history remain available. Failed/unconfirmed tab opening needs review
-instead of automatic replay. Optional Firefox settings-data consent is needed
-for manual account-sync upload; it is not telemetry. This remains a preview
-until the release checklist is satisfied.
+original migration backups remain available. Failed/unconfirmed tab opening
+needs review instead of automatic replay. Browser-account sync uploads and
+snapshot capture have been removed; existing copies remain locally recoverable.
+New saves share unchanged data and use bounded recovery checkpoints. Earlier
+preview-history cleanup requires a verified downloaded archive and explicit
+confirmation. This remains a preview until the release checklist is satisfied.
 
 Replace old desktop screenshots/instructions and inaccurate permission wording.
 `tabs` is used to read tab URLs, not to read browsing history or authorize tab
 creation. Store-managed updates replace the old remote version-check endpoint.
 No claim of mobile support, universal OS support, unlimited storage, guaranteed
-cross-device delivery or exactly-once recovery belongs in the listing.
+cross-device sync or exactly-once recovery belongs in the listing.
 
 ## Permission justifications
 
 | Manifest permission | Implemented purpose                                                                                                                                                                 |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `storage`           | Save lists/preferences/drafts, verified migration/recovery records and durable opening jobs; explicit reviewed browser-account sync.                                                |
+| `storage`           | Save lists/preferences/drafts, verified migration/recovery records and durable opening jobs; read-only recovery of previous account caches.                                         |
 | `tabs`              | Read the URLs of open tabs for user-requested capture within the current regular/private scope and recover the extension's opaque held-tab references. No history API is requested. |
 | `alarms`            | Recover delayed/interrupted opening work when background execution is suspended. Fractional delays also use active execution.                                                       |
 | `contextMenus`      | Provide only the basic saved-list opening hierarchy.                                                                                                                                |
@@ -68,27 +70,25 @@ permission is requested. Keep final generated manifests with reviewer evidence.
 
 The [privacy policy](../privacy-policy.md) must agree with the package, listing
 and dashboard. Do not copy the old blanket “collects no data” statement without
-explaining navigation, search and optional browser-account sync.
+explaining navigation, search and local recovery of old account caches.
 
-| Data / path                                                        | Handling to disclose                                                                                                                                               |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Saved/captured URLs and search input                               | Stored locally; opening transmits destinations to chosen sites and queries to Google, DuckDuckGo or Bing. A startup list can navigate automatically if configured. |
-| List names and all preferences                                     | Local library; included with URLs/searches only in explicitly reviewed manual sync uploads. The browser provider manages remote delivery and its account service.  |
-| Working text, jobs, staged imports, conflicts and recovery history | Local recovery storage with no automatic expiry; full recovery downloads may contain all of it. No developer collection endpoint.                                  |
-| Private workspace                                                  | Temporary Firefox session storage or isolated Chromium incognito IndexedDB. Explicit downloads/copy can outlast the session.                                       |
-| Optional snapshots                                                 | Five normally retained; verified optional copies can be purged. Original legacy and mandatory history remain.                                                      |
-| Diagnostics                                                        | Prepared for review before copying/downloading; omit saved names/URLs/drafts/jobs/recovery bodies and saved-list references. Nothing automatically sent.           |
+| Data / path                                                        | Handling to disclose                                                                                                                                                                                 |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Saved/captured URLs and search input                               | Stored locally; opening transmits destinations to chosen sites and queries to Google, DuckDuckGo or Bing. A startup list can navigate automatically if configured.                                   |
+| List names and all preferences                                     | Local library; included in user-requested JSON exports. No browser-account uploads. Existing account caches remain read-only.                                                                        |
+| Working text, jobs, staged imports, conflicts and recovery history | Local storage; protected originals/unresolved work remain. Ordinary checkpoints have bounded retention; consumed new-format imports can be collected. Full recovery downloads may contain all of it. |
+| Private workspace                                                  | Temporary Firefox session storage or isolated Chromium incognito IndexedDB. Explicit downloads/copy can outlast the session.                                                                         |
+| Internal save checkpoints                                          | Up to five preceding verified saves under a 4 MiB incremental target; the preceding save is always kept. Snapshot capture is removed; old copies remain recoverable.                                 |
+| Diagnostics                                                        | Prepared for review before copying/downloading; omit saved names/URLs/drafts/jobs/recovery bodies and saved-list references. Nothing automatically sent.                                             |
 
-Firefox declares required `browsingActivity` and `searchTerms` for opening/search
-and optional `technicalAndInteraction` for settings transmitted by manual sync.
-The last category must be optional under Mozilla's current taxonomy. Request it
-from the upload gesture and recheck all necessary grants in the background;
-refusal cannot change local or remote data. No `has_previous_consent` claim is
-made. The native install/update/refusal prompts still require signed-build tests.
+Firefox declares required `browsingActivity` and `searchTerms` for opening/search.
+Optional `technicalAndInteraction` is removed with sync uploads. No
+`has_previous_consent` claim is made. Native install/update/refusal prompts still
+require signed-build tests.
 
 For Chrome/Edge, disclose browsing destinations and any applicable user-provided
 content/preferences in the current dashboard taxonomy. State that use is limited
-to the visible extension function, optional provider sync and user-requested
+to the visible extension function, local recovery and user-requested
 exports. There is no sale, advertising, developer profiling or developer access
 to stored contents. A lack of a developer server does not exempt handled browser
 data from privacy disclosures. The maintainer must review the actual selections

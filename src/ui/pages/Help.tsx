@@ -81,20 +81,21 @@ export function Help() {
         <details>
           <summary>How do I transfer lists to another browser?</summary>
           <p>
-            Use a JSON export and inspect it before import. Manual
-            browser-account sync uses the browser's own account, has an 8 KB
-            item limit, and does not cross between Firefox and Chrome accounts.
-            An API success does not establish remote delivery.
+            Use a JSON export and inspect it before import. Browser-account sync
+            has been removed. Existing sync copies can still be inspected and
+            recovered locally on the Data page.
           </p>
         </details>
         <details>
           <summary>Where is my data stored?</summary>
           <p>
             Lists, drafts, jobs and recovery records are held in local extension
-            storage. Manual sync uploads only reviewed lists and settings.
-            Opening a URL contacts that destination; searches go to the selected
-            provider. No analytics or developer collection service is used.
-            Recovery files may contain private content; keep them private.
+            storage. Saves reuse unchanged list records and retain up to five
+            internal recovery checkpoints within a size budget. Automatic
+            snapshots have been removed. Opening a URL contacts that
+            destination; searches go to the selected provider. No analytics or
+            developer collection service is used. Recovery files may contain
+            private content; keep them private.
           </p>
         </details>
         <details>
@@ -102,9 +103,10 @@ export function Help() {
           <p>
             Allow the extension in private windows using your browser's
             extension settings. A private workspace starts with a copy of
-            regular saved lists and preferences. Its drafts, edits, snapshots
-            and opening jobs stay in session storage and clear when the last
-            private window closes. Startup and sync use regular windows.
+            regular saved lists and preferences. Its drafts, edits, recovery
+            records and opening jobs stay in temporary private storage and clear
+            when the last private window closes. Startup and recovery of old
+            sync copies use regular windows.
           </p>
         </details>
         <details>

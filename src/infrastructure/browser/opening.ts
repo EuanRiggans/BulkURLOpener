@@ -39,13 +39,11 @@ export async function browserSessionId(): Promise<string> {
   });
 }
 
-export async function requireTransmissionConsent(
-  purpose: 'opening' | 'sync' = 'opening',
-): Promise<void> {
+export async function requireTransmissionConsent(): Promise<void> {
   if (import.meta.env.FIREFOX)
     requireCondition(
-      hasTransmissionConsent(await browser.permissions.getAll(), purpose),
-      purpose === 'sync' ? 'SYNC_CONSENT_REQUIRED' : 'DATA_CONSENT_REQUIRED',
+      hasTransmissionConsent(await browser.permissions.getAll()),
+      'DATA_CONSENT_REQUIRED',
     );
 }
 export async function prepareOpeningRecovery(

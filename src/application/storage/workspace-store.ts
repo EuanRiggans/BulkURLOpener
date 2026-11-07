@@ -5,7 +5,6 @@ import {
   backupSchema,
   storagePrefix,
   type CanonicalData,
-  type Head,
 } from '../../domain/storage/schema';
 import {
   draftHeadSchema,
@@ -16,14 +15,12 @@ import {
   type DraftSave,
   type TransferRecord,
 } from '../../domain/workspace-schema';
-import { toPortable } from '../../domain/portable';
 import { sameContent } from '../../domain/storage/migrate';
 
 export interface WorkspaceIO {
   read(): Promise<Record<string, unknown>>;
   append(key: string, value: unknown): Promise<void>;
   write(key: string, value: unknown): Promise<void>;
-  removeSnapshots(keys: string[]): Promise<void>;
 }
 function parsed<T>(schema: v.GenericSchema<T>, raw: unknown): T {
   const result = v.safeParse(schema, raw);
@@ -185,41 +182,6 @@ export class WorkspaceStore {
     );
     return record;
   }
-  async capture(head: Head, data: CanonicalData, now: string) {
-    const portable = toPortable(data);
-    const id = await digest({ head, data: portable });
-    const existing = (await this.io.read())[snapshotPrefix + id];
-    if (existing !== undefined) {
-      const record = await this.snapshot(id);
-      requireCondition(
-        sameContent(record.data, portable),
-        'WORKSPACE_INTEGRITY_FAILED',
-      );
-    } else
-      await this.io.append(snapshotPrefix + id, {
-        schemaVersion: 1,
-        head,
-        data: portable,
-        createdAt: now,
-      });
-    const extra = (await this.snapshots()).records
-      .slice(5)
-      .map((record) => snapshotPrefix + record.id);
-    if (extra.length) {
-      try {
-        await this.io.removeSnapshots(extra);
-      } catch {
-        /* Retain extra snapshots when cleanup is unavailable. */
-      }
-    }
-    return id;
-  }
-  async purgeSnapshots() {
-    const records = (await this.snapshots()).records;
-    await this.io.removeSnapshots(
-      records.map((record) => snapshotPrefix + record.id),
-    );
-  }
   async archives() {
     const result = new Map<
       string,
@@ -267,6 +229,10 @@ export class WorkspaceStore {
           backup.sources.storageSync.user_settings,
           'Original legacy browser sync copy',
         );
+    }
+    for (const snapshot of (await this.snapshots()).records) {
+      const previous = await this.snapshot(snapshot.id);
+      await add(previous.data, 'Saved recovery copy from an earlier preview');
     }
     return [...result.values()];
   }

@@ -331,7 +331,7 @@ describe('session-only private workspace', () => {
     const context = await setup();
     await expect(
       context.services.dispatch(
-        { type: 'buo:service/sync.preview-upload' },
+        { type: 'buo:service/data.recover-sync', legacy: false },
         privateSender('data.html'),
       ),
     ).rejects.toThrow('PRIVATE_SYNC_UNAVAILABLE');

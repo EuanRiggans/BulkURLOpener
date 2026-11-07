@@ -6,6 +6,7 @@ import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
+import { randomBytes } from 'node:crypto';
 import { Builder, By, until } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome.js';
 import firefox from 'selenium-webdriver/firefox.js';
@@ -355,6 +356,132 @@ test(
       'Migration and reload must not replay legacy pending tabs.',
     );
     report.noLegacyReplay = true;
+    report.passed = true;
+  },
+);
+
+test(
+  'old preview history is preserved until a matching archive authorizes independent-checkpoint cleanup',
+  { timeout: 180_000 },
+  async () => {
+    report.passed = false;
+    await navigate(root + 'data.html');
+    const originals = await captured();
+    const oldHeads = await native(`
+      const stable = value => Array.isArray(value) ? '[' + value.map(stable).join(',') + ']' : value !== null && typeof value === 'object' ? '{' + Object.keys(value).sort().map(key => JSON.stringify(key) + ':' + stable(value[key])).join(',') + '}' : JSON.stringify(value);
+      const hash = async value => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(stable(value)))), byte => byte.toString(16).padStart(2, '0')).join('');
+      const store = await api.storage.local.get(null);
+      let head = store['buo:v2:head'];
+      const origin = store['buo:v2:state:' + head.stateDigest];
+      if (origin.schemaVersion !== 1) throw new Error('This fixture must start from the verified migration root');
+      const data = structuredClone(origin.data), records = {}, heads = [];
+      for (let index = 0; index < 8; index++) {
+        const command = {kind: 'settings.update', patch: {nightMode: data.settings.nightMode}};
+        const operationId = await hash({fixture: 'old-preview', index});
+        const state = {schemaVersion: 2, revision: head.revision + 1, kind: 'mutation', previous: head, backupDigest: origin.backupDigest, stageDigest: origin.stageDigest, restoreTarget: null, data, operation: {id: operationId, command, requestDigest: await hash({expectedHead: head, command})}};
+        const stateDigest = await hash(state);
+        records['buo:v2:state:' + stateDigest] = state;
+        head = {schemaVersion: 1, revision: state.revision, stateDigest};
+        heads.push(head);
+      }
+      await api.storage.local.set(records);
+      await api.storage.local.set({'buo:v2:head': head});
+      return heads;
+    `);
+    const before = await rpc({ type: 'buo:service/library.read' });
+    const document = originals.localStorage;
+    const staleArchive = await rpc({
+      type: 'buo:migration/export-archive',
+      document,
+    });
+    await navigate(root + 'options.html');
+    await rpc({
+      type: 'buo:service/library.mutate',
+      input: {
+        id: randomBytes(32).toString('hex'),
+        expectedHead: before.head,
+        command: {
+          kind: 'settings.update',
+          patch: { nightMode: before.data.settings.nightMode },
+        },
+      },
+    });
+    const adopted = await captured();
+    for (const head of oldHeads)
+      assert(
+        Object.hasOwn(adopted.storageLocal, 'buo:v2:state:' + head.stateDigest),
+      );
+    await navigate(root + 'data.html');
+    const stale = await native(
+      'return await api.runtime.sendMessage(arguments[0]);',
+      {
+        type: 'buo:migration/compact',
+        document,
+        archive: staleArchive,
+        acknowledge: true,
+      },
+    );
+    assert.deepEqual(stale, { ok: false, error: 'ARCHIVE_SOURCES_CHANGED' });
+    const archive = await rpc({
+      type: 'buo:migration/export-archive',
+      document,
+    });
+    await rpc({
+      type: 'buo:migration/compact',
+      document,
+      archive,
+      acknowledge: true,
+    });
+    await navigate(root + 'options.html');
+    for (let index = 0; index < 8; index++) {
+      const active = await rpc({ type: 'buo:service/library.read' });
+      await rpc({
+        type: 'buo:service/library.mutate',
+        input: {
+          id: randomBytes(32).toString('hex'),
+          expectedHead: active.head,
+          command: {
+            kind: 'settings.update',
+            patch: { nightMode: before.data.settings.nightMode },
+          },
+        },
+      });
+    }
+    assert.deepEqual(
+      (await rpc({ type: 'buo:service/library.read' })).data,
+      before.data,
+    );
+    const after = await captured();
+    for (const head of oldHeads)
+      assert(
+        !Object.hasOwn(after.storageLocal, 'buo:v2:state:' + head.stateDigest),
+      );
+    for (const [key, value] of Object.entries(originals.storageLocal))
+      if (key !== 'buo:v2:head')
+        assert.deepEqual(after.storageLocal[key], value);
+    assert.deepEqual(after.localStorage, originals.localStorage);
+    assert.deepEqual(after.storageSync, originals.storageSync);
+    await navigate(root + 'data.html');
+    assert.equal(
+      (await rpc({ type: 'buo:migration/storage-info' })).cleanupPending,
+      false,
+    );
+    const recovered = await rpc({
+      type: 'buo:service/data.preview',
+      text: JSON.stringify(archive),
+      source: 'file',
+    });
+    assert.deepEqual(
+      recovered.portable.lists,
+      before.data.lists.map(({ id, name, lines }) => ({ id, name, lines })),
+    );
+    report.previewArchival = {
+      passed: true,
+      oldStates: oldHeads.length,
+      staleFileRejected: true,
+      originalsPreserved: true,
+      compressedArchiveReview: true,
+    };
     report.passed = true;
   },
 );

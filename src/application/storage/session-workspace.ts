@@ -241,7 +241,13 @@ export class SessionWorkspace {
       removeLocal: async (keys) => {
         await this.assertSession(metadata.id);
         requireCondition(
-          keys.every((key) => key.startsWith(storagePrefix + 'snapshot:')),
+          keys.every(
+            (key) =>
+              /^buo:v2:(snapshot|state|gc|transfer):[a-f0-9]{64}$/.test(key) ||
+              /^buo:v2:content:(list|settings|metadata):[a-f0-9]{64}$/.test(
+                key,
+              ),
+          ),
           'INVALID_STORAGE_KEY',
         );
         await this.port.remove(keys.map((key) => privatePrefix + key));

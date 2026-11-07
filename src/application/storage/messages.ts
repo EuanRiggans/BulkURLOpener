@@ -24,6 +24,7 @@ export function createMigrationListener(
           'buo:migration/prepare',
           'buo:migration/commit',
           'buo:migration/rollback',
+          'buo:migration/compact',
         ].includes(request.type)
       )
         throw new MigrationError('PRIVATE_MIGRATION_UNAVAILABLE');
@@ -48,6 +49,26 @@ export function createMigrationListener(
         case 'buo:migration/export':
           value = await storage.exportRecovery(
             privateMode ? {} : request.document,
+          );
+          break;
+        case 'buo:migration/export-archive':
+          value = await storage.exportArchive(
+            privateMode ? {} : request.document,
+          );
+          break;
+        case 'buo:migration/storage-info':
+          value = await storage.storageInfo();
+          break;
+        case 'buo:migration/recovery-copies':
+          value = await storage.recoveryCopies();
+          break;
+        case 'buo:migration/export-copy':
+          value = await storage.exportCopy(request.digest);
+          break;
+        case 'buo:migration/compact':
+          value = await storage.compactArchive(
+            request.document,
+            request.archive,
           );
           break;
         case 'buo:migration/backup':

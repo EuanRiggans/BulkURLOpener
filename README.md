@@ -52,7 +52,7 @@ src/entrypoints/              Background and nine bundled extension pages
 src/infrastructure/browser/  Browser API adapters
 src/application/storage/     Serialized migration/recovery coordinator and protocol
 src/application/opening/     Shared planning, execution and startup services
-src/application/workspace.ts Drafts, reviewed transfer/sync and snapshots
+src/application/workspace.ts Drafts, reviewed transfers and old-archive recovery
 src/domain/storage/          Typed schemas and pure legacy reconciliation
 src/domain/opening/          URL policy and typed job model
 src/shared/                  Pure internal navigation helpers
@@ -83,21 +83,23 @@ In Settings or Data & recovery, **Data protection and recovery** captures exact 
 
 The popup saves working text promptly to a separate verified record; conflicts and new-list handoffs are retained as immutable copies. Initial loading never auto-opens a list. Auto-load and auto-open remain separate preferences, with a temporary popup override. List saves and settings autosave use revision checks; stale edits stay visible for review. Select **Save settings** to save immediately.
 
-Data & recovery supports portable 2.x and legacy 1.x JSON exports, paste/file import, reviewed replacement, five optional snapshots and inspection of retained legacy archives. Recovery-file imports restore lists/settings while keeping current drafts/jobs; other imported records remain in the retained original. Raw recovery downloads include all retained records and may be much larger than a normal export.
+Data & recovery supports portable 2.x and legacy 1.x JSON exports, paste/file import, reviewed replacement and inspection of retained legacy archives. Recovery imports restore lists/settings while keeping current drafts/jobs; other imported records remain in the retained original while its recovery checkpoint is kept. Original migration backups and unresolved imports are protected.
 
-Manual browser-account sync uploads only explicitly reviewed lists/settings to a new key, preserving the legacy sync key and a local copy of previous sync contents. A conservative 8 KB item limit applies; larger libraries use JSON transfer. Read-back verifies the local sync area, not remote delivery. Chrome-family and Firefox accounts do not share a sync service.
+Browser-account sync and automatic/manual snapshots have been removed. Existing sync copies and old snapshot archives remain available for read-only inspection and local recovery. Nothing is uploaded or cleared in account storage; JSON export/import transfers lists between installations. Firefox retains required browsing/search consent for opening and no longer requests optional settings-data consent.
 
-Firefox asks for optional settings-data consent when uploading a reviewed sync copy, in addition to its required browsing/search categories. Refusal leaves the review and both stores intact; ordinary opening remains available. The settings-data grant is used for manual sync, not analytics.
+Lists, settings and draft metadata use separate checksummed records. Unchanged lists are reused across saves. Independent checkpoints keep the current save and up to five preceding verified saves, with a 4 MiB target for additional history; the preceding save is always protected even if larger. Cleanup failures keep extra records and retry later. Protected originals, unresolved work and the active library still need storage space; there is no unlimited-capacity claim.
+
+Earlier preview history is not silently deleted. Download a **full recovery archive**, select that downloaded file under **Archive earlier preview history**, and explicitly confirm. Only a matching, verified archive authorizes deletion of eligible, unneeded preview records. Migration backups, damaged records, unresolved inputs and jobs remain protected. Archives are compressed JSON with checksums, not encryption: keep them private. Imports support up to 64 MiB decoded JSON / 16 MiB compressed; keep a separate lists/settings export too. See [the current storage contract](docs/STORAGE_SIMPLIFICATION.md).
 
 Saved-list startup preferences use the same opening policy. Jobs retain a settings snapshot and durable acknowledgements; interrupted/unconfirmed tab creation needs review instead of blind replay. Pending work from a new browser session needs an explicit target window. Settings links to staged-change and opening-job recovery.
 
-Jobs retain URLs/search input locally and navigate to user-chosen destinations/providers. Firefox declares and checks corresponding consent before opening or uploading sync data.
+Jobs retain URLs/search input locally and navigate to user-chosen destinations/providers. Firefox declares and checks corresponding consent before opening destinations.
 
-Private access requires the browser's extension grant. A private workspace starts with regular saved lists/preferences; its drafts, edits, snapshots and jobs use temporary private storage (Firefox session storage; Chromium's isolated incognito IndexedDB). Closing the last private window clears that workspace; browser restart/extension reload can clear it too. Capture stays within the matching privacy scope. Sync and startup remain regular, and the global menu always lists regular saved lists. Explicit file/clipboard exports can outlast a private session. See the [privacy policy](privacy-policy.md) and [Phase 5 hardening record](docs/PHASE_5_HARDENING.md).
+Private access requires the browser's extension grant. A private workspace starts with regular saved lists/preferences; its drafts, edits, recovery checkpoints and jobs use temporary private storage (Firefox session storage; Chromium's isolated incognito IndexedDB). Closing the last private window clears that workspace; browser restart/extension reload can clear it too. Capture stays within the matching privacy scope. Recovery of old sync copies and startup remain regular, and the global menu always lists regular saved lists. Explicit file/clipboard exports can outlast a private session. See the [privacy policy](privacy-policy.md) and [Phase 5 hardening record](docs/PHASE_5_HARDENING.md).
 
 Download a recovery file first, then choose **Inspect and back up data**. Conflicting preferences and ambiguous historical comma records require explicit choices. Storage errors block activation rather than deleting data to make room. Recovery downloads contain private data; keep them private. See [the Phase 2 contract and limits](docs/PHASE_2_DATA.md).
 
-Mandatory recovery/history and reviewed imports have no automatic expiry. Repeated saves can fill browser storage even with optional snapshots disabled. This candidate retains records and fails visibly; the long-term capacity design remains a release gate. See [Phase 7](docs/PHASE_7_RELEASE.md) and the [upgrade comparison protocol](docs/UPGRADE_VERIFICATION.md).
+Signed upgrades and the remaining native browser/platform checks remain release gates. See [Phase 7](docs/PHASE_7_RELEASE.md) and the [upgrade comparison protocol](docs/UPGRADE_VERIFICATION.md).
 
 This is a public repository. Never commit personal exports, browser profiles, private URLs/list names or unsanitized diagnostics. All committed migration fixtures are synthetic. The Firefox add-on ID is public extension metadata.
 
@@ -113,11 +115,12 @@ This is a public repository. Never commit personal exports, browser profiles, pr
 - [Remaining manual release checks](docs/PHASE_5_MANUAL_CHECKS.md)
 - [Phase 6 cleanup and package evidence](docs/PHASE_6_CLEANUP.md)
 - [Phase 7 release preparation and remaining gates](docs/PHASE_7_RELEASE.md)
+- [Storage simplification, retention and archive safety](docs/STORAGE_SIMPLIFICATION.md)
 - [Upgrade preservation and comparison protocol](docs/UPGRADE_VERIFICATION.md)
 - [Store identity and disclosure draft](docs/STORE_SUBMISSION.md)
 - [Historical storage fixtures](test/fixtures/legacy/README.md)
 
-Completed phases are committed, pushed to `redevelopment` and verified against GitHub. Linux automation exercises Chrome stable, Firefox stable and Firefox ESR with synthetic data. It does not establish screen-reader listening, other operating systems, remote account-sync delivery or genuine signed upgrades; those remain separate release gates.
+Completed phases are committed, pushed to `redevelopment` and verified against GitHub. Linux automation exercises Chrome stable, Firefox stable and Firefox ESR with synthetic data. It does not establish screen-reader listening, other operating systems or genuine signed upgrades; those remain separate release gates.
 
 ## Existing store listings
 

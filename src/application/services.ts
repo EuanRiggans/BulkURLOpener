@@ -16,7 +16,7 @@ import { WorkspaceService } from './workspace';
 
 export interface ServicePlatform {
   targetWindow(id: number | null): Promise<number>;
-  allowTransmission(purpose?: 'opening' | 'sync'): Promise<void>;
+  allowTransmission(): Promise<void>;
   capture(
     scope: 'currentWindow' | 'allOpenedTabs',
     windowId: number,
@@ -56,7 +56,7 @@ export class SharedServices {
       Boolean(sender.tab?.incognito) === this.privateMode,
       'PRIVATE_WINDOW_UNSUPPORTED',
     );
-    if (this.privateMode && request.type.startsWith('buo:service/sync.'))
+    if (this.privateMode && request.type === 'buo:service/data.recover-sync')
       throw new MigrationError('PRIVATE_SYNC_UNAVAILABLE');
     // Action popups do not always have sender.tab. Resolve their browser
     // window before exposing editable data or accepting working-draft writes.
@@ -103,25 +103,12 @@ export class SharedServices {
         await this.menus.refresh();
         return result;
       }
-      case 'buo:service/snapshots.list':
-        return this.workspace.snapshots();
-      case 'buo:service/snapshots.capture':
-        return this.workspace.captureSnapshot();
-      case 'buo:service/snapshots.purge':
-        return this.workspace.purgeSnapshots();
-      case 'buo:service/snapshots.preview':
-        return this.workspace.previewSnapshot(request.id, request.legacy);
       case 'buo:service/archives.list':
         return this.workspace.archives();
-      case 'buo:service/sync.download':
-        return this.workspace.previewDownload(request.legacy);
-      case 'buo:service/sync.preview-upload':
-        return this.workspace.previewUpload();
-      case 'buo:service/sync.upload':
-        await this.platform.allowTransmission('sync');
-        return this.workspace.upload(request.id, () =>
-          this.platform.allowTransmission('sync'),
-        );
+      case 'buo:service/archives.preview':
+        return this.workspace.previewArchive(request.id);
+      case 'buo:service/data.recover-sync':
+        return this.workspace.recoverSync(request.legacy);
       case 'buo:service/diagnostics':
         return this.workspace.diagnostics();
       case 'buo:service/main.open': {
@@ -166,6 +153,7 @@ export class SharedServices {
           (change) => change.stateDigest === request.stateDigest,
         );
         requireCondition(pending, 'PENDING_CHANGE_NOT_FOUND');
+        requireCondition(pending.input, 'PARTIAL_SAVE_REQUIRES_ORIGINAL_INPUT');
         const result = await this.storage.mutate(pending.input);
         await this.menus.refresh();
         return result;

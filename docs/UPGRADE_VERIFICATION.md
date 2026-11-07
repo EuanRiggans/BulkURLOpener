@@ -76,14 +76,17 @@ user, OS coverage or a genuine signed-candidate upgrade. Those are separate gate
    update route. Temporary/unpacked replacement is useful development evidence
    only. Record the version transition and the actual browser prompts, including
    new `alarms`/`contextMenus` API grants where applicable and Firefox data
-   consent. Refuse optional settings-data consent once: ordinary opening must
-   remain available, sync upload must fail without changing either store.
+   consent. Optional settings-data consent and sync uploads have been removed;
+   existing account caches must remain unchanged and locally recoverable.
 5. In the candidate's Data & recovery page, download a recovery file before any
    migration. Compare the original areas privately; report missing data rather
    than clicking through a fresh empty initialization. Then choose **Inspect
    and back up data**, review conflicts/ambiguous historical records and migrate.
    Download a full recovery file immediately after migration. Do not edit lists,
-   settings, drafts or run jobs between the baseline and this comparison.
+   settings, drafts or run jobs between the baseline and this comparison. Do not
+   compact preview history until this comparison is complete. The comparator
+   accepts both older plain and new compressed full-recovery files; intentional
+   saves/archival change records and are outside a frozen upgrade comparison.
 6. On a trusted development machine run:
 
    ```sh

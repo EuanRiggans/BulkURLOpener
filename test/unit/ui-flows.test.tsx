@@ -283,34 +283,17 @@ describe('simple popup flows', () => {
 });
 
 describe('separate editor and settings forms', () => {
-  it('retains the reviewed Firefox upload after consent refusal and uploads only after a later grant', async () => {
+  it('offers read-only recovery without upload, snapshot or optional-consent controls', async () => {
     vi.stubEnv('FIREFOX', 'true');
-    fake.requestPermission
-      .mockResolvedValueOnce(false)
-      .mockResolvedValueOnce(true);
     from = 'data.html';
     history.replaceState(null, '', '/data.html');
     await act(() => render(<DataPage />, app));
     await settle();
-    const before = structuredClone(context.port.sync);
-    await click('Review upload');
-    const localBeforeDecline = structuredClone(context.port.local);
-    await act(() =>
-      node<HTMLInputElement>('.transfer-review input[type="checkbox"]').click(),
-    );
-    await settle();
-    await click('Upload reviewed copy');
-    expect(context.port.sync).toEqual(before);
-    expect(context.port.local).toEqual(localBeforeDecline);
+    expect(app.textContent).toContain('Inspect previous sync copy');
+    expect(app.textContent).not.toContain('Upload reviewed copy');
+    expect(app.textContent).not.toContain('Capture snapshot');
+    expect(fake.requestPermission).not.toHaveBeenCalled();
     expect(context.port.syncWrites).toBe(0);
-    expect(app.textContent).toContain('optional settings data');
-    expect(button('Upload reviewed copy').disabled).toBe(false);
-    await click('Upload reviewed copy');
-    expect(fake.requestPermission).toHaveBeenCalledWith({
-      data_collection: ['technicalAndInteraction'],
-    });
-    expect(context.port.syncWrites).toBe(1);
-    expect(app.textContent).toContain('Sync write verified locally.');
   });
   it('prepares copyable exports and applies only an acknowledged, reviewed import from the data page', async () => {
     from = 'data.html';
@@ -386,11 +369,11 @@ describe('separate editor and settings forms', () => {
     );
     expect(button('Save list').disabled).toBe(false);
   });
-  it('renders all 17 preferences, saves fractional delays, and autosaves valid choices', async () => {
+  it('renders all 16 active preferences, saves fractional delays, and autosaves valid choices', async () => {
     from = 'options.html';
     await act(() => render(<SettingsForm />, app));
     await settle();
-    expect(app.querySelectorAll('[id^="setting-"]')).toHaveLength(17);
+    expect(app.querySelectorAll('[id^="setting-"]')).toHaveLength(16);
     await input('#setting-tabCreationDelay', '0.125');
     await act(() => {
       node<HTMLFormElement>('form').dispatchEvent(

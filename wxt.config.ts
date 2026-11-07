@@ -32,7 +32,6 @@ export default defineConfig({
               // Navigation and search now send destinations/queries to chosen sites.
               data_collection_permissions: {
                 required: ['browsingActivity', 'searchTerms'],
-                optional: ['technicalAndInteraction'],
               },
             },
           },

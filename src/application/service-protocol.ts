@@ -36,25 +36,9 @@ export const serviceRequestSchema = v.variant('type', [
     source: v.picklist(['paste', 'file']),
   }),
   v.strictObject({ type: type('data.apply'), input: transferApplySchema }),
-  v.strictObject({ type: type('snapshots.list') }),
-  v.strictObject({ type: type('snapshots.capture') }),
-  v.strictObject({
-    type: type('snapshots.purge'),
-    acknowledge: v.literal(true),
-  }),
-  v.strictObject({
-    type: type('snapshots.preview'),
-    id: hashSchema,
-    legacy: v.boolean(),
-  }),
   v.strictObject({ type: type('archives.list') }),
-  v.strictObject({ type: type('sync.download'), legacy: v.boolean() }),
-  v.strictObject({ type: type('sync.preview-upload') }),
-  v.strictObject({
-    type: type('sync.upload'),
-    id: hashSchema,
-    acknowledge: v.literal(true),
-  }),
+  v.strictObject({ type: type('archives.preview'), id: hashSchema }),
+  v.strictObject({ type: type('data.recover-sync'), legacy: v.boolean() }),
   v.strictObject({ type: type('diagnostics') }),
   v.strictObject({ type: type('main.open'), windowId }),
   v.strictObject({ type: type('library.read') }),
@@ -163,7 +147,7 @@ export function allowedRequest(page: string, request: ServiceRequest): boolean {
     return ['/new-list.html', '/popup.html'].includes(page);
   if (request.type === 'buo:service/diagnostics') return page === '/help.html';
   if (request.type === 'buo:service/main.open') return page === '/popup.html';
-  if (/^buo:service\/(data\.|snapshots\.|archives\.|sync\.)/.test(request.type))
+  if (/^buo:service\/(data\.|archives\.)/.test(request.type))
     return page === '/data.html';
   if (request.type === 'buo:service/library.mutate') {
     const kind = request.input.command.kind;

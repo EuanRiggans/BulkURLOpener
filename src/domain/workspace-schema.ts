@@ -70,7 +70,7 @@ export const snapshotListSchema = v.strictObject({
   damaged: natural,
 });
 export const transferRecordSchema = v.strictObject({
-  schemaVersion: v.literal(1),
+  schemaVersion: v.union([v.literal(1), v.literal(2)]),
   baseHead: headSchema,
   source: v.picklist([
     'paste',
@@ -106,11 +106,4 @@ export const recoveredInputSchema = v.strictObject({
 export const archiveSummarySchema = v.strictObject({
   id: hashSchema,
   label: v.string(),
-});
-export const syncUploadReviewSchema = v.strictObject({
-  id: hashSchema,
-  lists: natural,
-  bytes: natural,
-  replacesCopy: v.boolean(),
-  data: portableSchema,
 });

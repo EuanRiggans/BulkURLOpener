@@ -169,6 +169,14 @@ export const stageSchema = v.strictObject({
   data: dataSchema,
 });
 export type Stage = v.InferOutput<typeof stageSchema>;
+export const deleteListCommandSchema = v.strictObject({
+  kind: v.literal('list.delete'),
+  id: listIdSchema,
+});
+export const updateSettingsCommandSchema = v.strictObject({
+  kind: v.literal('settings.update'),
+  patch: v.partial(settingsSchema),
+});
 export const libraryCommandSchema = v.variant('kind', [
   v.strictObject({ kind: v.literal('list.create'), name: v.string(), lines }),
   v.strictObject({
@@ -177,11 +185,8 @@ export const libraryCommandSchema = v.variant('kind', [
     name: v.string(),
     lines,
   }),
-  v.strictObject({ kind: v.literal('list.delete'), id: listIdSchema }),
-  v.strictObject({
-    kind: v.literal('settings.update'),
-    patch: v.partial(settingsSchema),
-  }),
+  deleteListCommandSchema,
+  updateSettingsCommandSchema,
   v.strictObject({ kind: v.literal('draft.update'), lines: v.nullable(lines) }),
   v.strictObject({
     kind: v.literal('library.replace'),

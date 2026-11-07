@@ -99,8 +99,8 @@ for (const browser of ['chrome', 'firefox']) {
     );
     assert.deepEqual(
       manifest.browser_specific_settings.gecko.data_collection_permissions
-        .optional,
-      ['technicalAndInteraction'],
+        .optional ?? [],
+      [],
     );
   } else {
     resource(manifest.background.service_worker);

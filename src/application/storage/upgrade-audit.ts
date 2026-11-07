@@ -16,8 +16,11 @@ import {
   type Sources,
 } from '../../domain/storage/schema';
 import { MigrationError, requireCondition } from '../../domain/storage/errors';
+import { unpackJson } from '../../domain/storage/archive';
+import { checkpointSchema } from '../../domain/storage/checkpoints';
 
 async function sources(raw: unknown, allowRaw: boolean): Promise<Sources> {
+  raw = await unpackJson(raw);
   const envelope = v.safeParse(recoveryExportSchema, raw);
   if (envelope.success) {
     requireCondition(
@@ -62,7 +65,7 @@ export async function auditUpgrade(beforeRaw: unknown, afterRaw: unknown) {
     // Never choose one side of a conflict on the tester's behalf.
     const head = v.parse(headSchema, after.storageLocal[headKey]);
     const state = v.parse(
-      stateSchema,
+      v.union([stateSchema, checkpointSchema]),
       after.storageLocal['buo:v2:state:' + head.stateDigest],
     );
     const stage = v.parse(
@@ -93,7 +96,7 @@ export async function auditUpgrade(beforeRaw: unknown, afterRaw: unknown) {
       localRecordsAfter: Object.keys(after.storageLocal).length,
     },
     scope:
-      'Data comparison only; identity, signatures, permission prompts, remote sync and browser behavior require separate evidence.',
+      'Data comparison only; identity, signatures, permission prompts and browser behavior require separate evidence. Intentional saves or archive cleanup also change records.',
   };
 }
 

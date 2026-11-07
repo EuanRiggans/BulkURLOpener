@@ -11,7 +11,6 @@ export function createStorageCoordinator(
       readSync: () => browser.storage.sync.get(null),
       writeLocal: (values) => browser.storage.local.set(values),
       removeLocal: (keys) => browser.storage.local.remove(keys),
-      writeSync: (values) => browser.storage.sync.set(values),
     },
     async (work) => {
       if (!navigator.locks) throw new MigrationError('LOCK_UNAVAILABLE');

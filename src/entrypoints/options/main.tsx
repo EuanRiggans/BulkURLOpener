@@ -11,9 +11,7 @@ function Options() {
     <PageLayout title="Settings">
       <SettingsForm />
       <p>
-        <a href={pageUrl('/data.html')}>
-          Import, export, browser sync and snapshots
-        </a>
+        <a href={pageUrl('/data.html')}>Import, export and recovery</a>
       </p>
       <RecoveryPanel />
       <ServiceControls />

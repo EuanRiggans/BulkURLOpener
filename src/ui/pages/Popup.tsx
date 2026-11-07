@@ -366,7 +366,7 @@ export function Popup() {
               setSelected('');
               pendingDelete.current = null;
               setNotice(
-                'List deleted. A snapshot is available unless snapshots are disabled.',
+                'List deleted. The preceding save is available in Data & recovery.',
               );
             });
           }}

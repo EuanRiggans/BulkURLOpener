@@ -18,7 +18,7 @@ export const settingLabels: Record<keyof Settings, string> = {
   contextMenuEnabled: 'Saved lists in the context menu',
   openUrlsInReverseOrder: 'Open URLs in reverse order',
   automaticallyRemoveDuplicateUrls: 'Remove duplicate URLs when opening',
-  disableSnapshots: 'Disable automatic snapshots',
+  disableSnapshots: 'Legacy snapshot preference (no longer used)',
 };
 const valueLabels: Record<string, string> = {
   'current-tabs': 'Current tabs',
@@ -67,10 +67,18 @@ export function sourceLabel(source: string): string {
 export function recoveryError(error: unknown): string {
   const code = error instanceof Error ? error.message : '';
   const messages: Record<string, string> = {
+    RECOVERY_ARCHIVE_TOO_LARGE:
+      'This archive exceeds 64 MiB decoded JSON or 16 MiB compressed data. Keep the original and use a lists-and-settings export to transfer the active library.',
+    RECOVERY_ARCHIVE_INVALID:
+      'This compressed archive is damaged or its checksum does not match. No data has been replaced or removed.',
+    ARCHIVE_SOURCES_CHANGED:
+      'This profile changed since the archive was downloaded. Close other editors, pause jobs, then download and select a fresh full recovery archive.',
+    RECOVERY_DIGEST_MISMATCH:
+      'The recovery file source checksum does not match. Keep the original; no replacement has been accepted.',
     SOURCES_CHANGED:
       'The source data changed after inspection. Inspect it again before migrating.',
     STORAGE_WRITE_FAILED:
-      'The write did not complete. Storage may be full or the background may have stopped. Check the status and download a recovery file before retrying. Original data was not removed.',
+      'The write did not complete. Storage may be full or the background may have stopped. Check the status and download a recovery file before retrying. Keep your recovery archive and check the active status before retrying.',
     STORAGE_READ_FAILED:
       'Browser storage could not be read. Migration is blocked; no defaults will replace unreadable data.',
     WRITE_VERIFICATION_FAILED:
@@ -91,5 +99,5 @@ export function recoveryError(error: unknown): string {
   };
   return Object.hasOwn(messages, code)
     ? messages[code]!
-    : 'The operation could not be completed. Check the status before retrying. No recovery records were removed.';
+    : 'The operation could not be completed. Keep your recovery archive and check the active status before retrying.';
 }

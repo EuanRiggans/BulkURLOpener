@@ -5,6 +5,7 @@ import {
   hashSchema,
   headSchema,
 } from '../../domain/storage/schema';
+import { packedJsonSchema } from '../../domain/storage/archive';
 
 const type = <A extends string>(action: A) =>
   v.literal(('buo:migration/' + action) as `buo:migration/${A}`);
@@ -20,6 +21,16 @@ export const requestSchema = v.variant('type', [
   }),
   v.strictObject({ type: type('rollback'), expected: headSchema }),
   v.strictObject({ type: type('export'), document: documentSchema }),
+  v.strictObject({ type: type('export-archive'), document: documentSchema }),
+  v.strictObject({ type: type('storage-info') }),
+  v.strictObject({ type: type('recovery-copies') }),
+  v.strictObject({ type: type('export-copy'), digest: hashSchema }),
+  v.strictObject({
+    type: type('compact'),
+    document: documentSchema,
+    archive: packedJsonSchema,
+    acknowledge: v.literal(true),
+  }),
   v.strictObject({ type: type('backup'), digest: hashSchema }),
 ]);
 export type MigrationRequest = v.InferOutput<typeof requestSchema>;
