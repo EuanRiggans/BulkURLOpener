@@ -385,21 +385,49 @@ export async function planCheckpoint(
   return { state, head, writes };
 }
 
+export function checkpointReferenceKeys(state: Checkpoint) {
+  const keys = new Set<string>();
+  for (const list of state.lists) keys.add(contentKey('list', list.digest));
+  keys.add(contentKey('settings', state.settings));
+  keys.add(contentKey('metadata', state.metadata));
+  if (state.base) keys.add(stateKey(state.base.stateDigest));
+  if (state.operation.command.kind === 'library.replace')
+    keys.add('buo:v2:transfer:' + state.operation.command.sourceDigest);
+  return keys;
+}
+
 export async function checkpointReachability(store: Store, head: Head) {
   const reader = new CheckpointReader(store);
   const current = await reader.read(head);
   requireCondition(current.state, 'INTEGRITY_CHECK_FAILED');
   const keys = new Set(current.keys);
+  const heads = new Set([head.stateDigest]);
+  if (current.state.base) heads.add(current.state.base.stateDigest);
   for (const old of current.state.retained) {
+    heads.add(old.stateDigest);
     try {
-      for (const key of (await reader.read(old)).keys) keys.add(key);
+      const previous = await reader.read(old);
+      for (const key of previous.keys) keys.add(key);
+      if (previous.state?.base) heads.add(previous.state.base.stateDigest);
     } catch {
       keys.add(stateKey(old.stateDigest));
-      for (const key of Object.keys(store).filter((key) =>
-        key.startsWith('buo:v2:content:'),
-      ))
-        keys.add(key);
+      const parsed = v.safeParse(
+        checkpointSchema,
+        store[stateKey(old.stateDigest)],
+      );
+      if (parsed.success && (await digest(parsed.output)) === old.stateDigest) {
+        for (const key of checkpointReferenceKeys(parsed.output)) keys.add(key);
+      } else {
+        // A damaged fallback has lost its trustworthy ownership header. Pin all
+        // possible source records without treating them as acknowledged heads.
+        for (const key of Object.keys(store).filter(
+          (key) =>
+            /^buo:v2:(state|transfer):/.test(key) ||
+            key.startsWith('buo:v2:content:'),
+        ))
+          keys.add(key);
+      }
     }
   }
-  return { reader, ...current, keys };
+  return { reader, ...current, keys, heads };
 }

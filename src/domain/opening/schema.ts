@@ -53,6 +53,7 @@ export const jobPlanSchema = v.strictObject({
 });
 export type JobPlan = v.InferOutput<typeof jobPlanSchema>;
 export const planEnvelopeSchema = v.strictObject({
+  schemaVersion: v.optional(v.literal(2)),
   digest: hashSchema,
   plan: jobPlanSchema,
 });
@@ -67,6 +68,7 @@ export const runSchema = v.strictObject({
   id: hashSchema,
   revision: v.pipe(natural, v.minValue(1)),
   previousDigest: v.nullable(hashSchema),
+  completedAt: v.optional(timestampSchema),
   planDigest: hashSchema,
   status: v.picklist([
     'queued',

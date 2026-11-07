@@ -83,6 +83,9 @@ export const storageInfoSchema = v.strictObject({
   archiveableRecords: v.pipe(v.number(), v.safeInteger(), v.minValue(0)),
   archiveableBytes: v.pipe(v.number(), v.safeInteger(), v.minValue(0)),
   cleanupPending: v.boolean(),
+  completedJobs: v.number(),
+  legacyCompletedJobs: v.number(),
+  jobBytes: v.number(),
 });
 export const recoveryCopiesSchema = v.array(
   v.strictObject({ id: hashSchema, revision: v.number(), lists: v.number() }),

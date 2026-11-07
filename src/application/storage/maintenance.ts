@@ -1,3 +1,4 @@
+import { quarantines } from './quarantine';
 import * as v from 'valibot';
 import {
   archiveProofSchema,
@@ -56,6 +57,8 @@ async function disposableTransfer(raw: unknown) {
 async function protectedKeys(store: Store, head: Head) {
   const current = await checkpointReachability(store, head);
   const keys = current.keys;
+  for (const entry of await quarantines(store))
+    for (const key of entry.protectedKeys) keys.add(key);
   const plannedRoots = new Set<string>();
   for (const [key, raw] of Object.entries(store).filter(([key]) =>
     key.startsWith('buo:v2:gc:'),
@@ -185,6 +188,14 @@ export async function finishArchiveProofs(io: MaintenanceIO, head: Head) {
         key.slice('buo:v2:archive-proof:'.length)
     )
       continue;
+    let changed = false;
+    for (const record of parsed.output.records)
+      if (
+        Object.hasOwn(store, record.key) &&
+        (await digest(store[record.key])) !== record.digest
+      )
+        changed = true;
+    if (changed) continue;
     let pending = false;
     const remove = [];
     for (const record of parsed.output.records) {
@@ -286,6 +297,14 @@ export async function collectCheckpoints(io: MaintenanceIO, head: Head) {
       (await digest(parsed.output)) !== key.slice('buo:v2:gc:'.length)
     )
       continue;
+    let changed = false;
+    for (const record of parsed.output.records)
+      if (
+        Object.hasOwn(store, record.key) &&
+        (await digest(store[record.key])) !== record.digest
+      )
+        changed = true;
+    if (changed) continue;
     const removals = [];
     let remaining = false;
     for (const entry of parsed.output.records) {

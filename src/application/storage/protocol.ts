@@ -31,6 +31,15 @@ export const requestSchema = v.variant('type', [
     archive: packedJsonSchema,
     acknowledge: v.literal(true),
   }),
+  v.strictObject({
+    type: type('quarantine'),
+    document: documentSchema,
+    archive: packedJsonSchema,
+    stateDigest: hashSchema,
+    expectedHead: headSchema,
+    acknowledge: v.literal(true),
+  }),
+  v.strictObject({ type: type('pending') }),
   v.strictObject({ type: type('backup'), digest: hashSchema }),
 ]);
 export type MigrationRequest = v.InferOutput<typeof requestSchema>;

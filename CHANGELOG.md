@@ -1,5 +1,13 @@
 ## Unreleased Changes
 
+### 2.0.0 redevelopment preview — recovery hardening
+
+- Added verified-archive quarantine to unblock editing after partial saves without deleting their stored records.
+- Bounded new completed-job history and intermediate progress while protecting pending, uncertain and cancelled jobs and live/unsettled holding tabs.
+- Added request-scope rotation and scoped startup recovery to prevent expired jobs from reopening after lost acknowledgements.
+- Preserved older preview job history until explicit verified archival; hardened cleanup against changed records and damaged fallback ownership.
+- Reduced repeated storage reads while building job views. Recorded remaining active-corruption recovery and release-verification limitations.
+
 ### 2.0.0 redevelopment preview — storage simplification
 
 - Removed browser-account sync uploads and automatic/manual snapshot controls; retained read-only recovery of existing sync copies and old snapshots.

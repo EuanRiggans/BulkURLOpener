@@ -1,7 +1,7 @@
 # Bulk URL Opener Privacy Policy
 
 This policy describes the unreleased `redevelopment` preview, including the
-storage simplification after Phase 7. It does not claim the preview has replaced
+storage simplification and recovery hardening after Phase 7. It does not claim the preview has replaced
 a published store version.
 
 The extension stores saved lists, preferences, drafts and recovery records
@@ -34,7 +34,14 @@ archives remain recoverable. Earlier preview history can be removed only after
 a user downloads a full recovery archive, selects that file for read-back
 verification and explicitly authorizes compaction. Records still needed by
 retained or pending saves remain protected. This maintenance never deletes
-original migration backups, damaged records, unresolved inputs or opening jobs.
+original migration backups, damaged records or unresolved inputs. New finished
+job history has bounded retention as described below; unfinished work and tabs
+waiting to load remain protected.
+
+A user can set aside an interrupted save after selecting a matching full recovery
+archive and explicitly confirming. The inactive records remain locally protected
+by a checksummed quarantine receipt, and editing resumes from the last saved
+library. This does not restore an unreadable active library automatically.
 
 Working popup text uses a separate local record. Concurrent conflicting drafts
 and editor handoffs are retained. Imports/restores replace only lists and
@@ -45,8 +52,14 @@ checkpoints. Recovery/legacy import originals stay protected: they may contain
 backups, damaged records or unresolved work outside the active library. Original
 migration backups remain separate and protected.
 
-Opening plans, inputs, omitted-entry reports, progress and tab receipts stay in
-local extension storage for recovery. Each job retains its opening preferences.
+Opening plans, inputs, omitted-entry reports, progress and tab receipts use
+local extension storage for recovery. New progress retains its current and
+preceding verified snapshots. Finished history keeps up to ten recent results
+under a 1 MiB size target; the newest result is kept even if larger. Unfinished,
+uncertain and cancelled jobs and live/unsettled holding tabs remain protected.
+Older preview jobs require verified external archival before eligible removal.
+Opaque request-scope metadata prevents an expired retry from reopening a batch.
+Each retained job keeps its opening preferences.
 Opaque startup/session metadata uses browser session storage. Held-tab helper
 URLs contain opaque references; the browser performs destination navigation.
 

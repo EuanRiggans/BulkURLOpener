@@ -449,6 +449,82 @@ describe('independent, bounded save checkpoints', () => {
   });
 });
 
+it('keeps the ownership context when a planned cleanup record changes before deletion', async () => {
+  const c = await sharedSetup();
+  const first = await mutate(c, 1, {
+    kind: 'list.create',
+    name: 'Before',
+    lines: ['original protected text'],
+  });
+  const keys = (await new CheckpointReader(c.port.local).read(first.head!))
+    .keys;
+  const oldRoot = v.parse(
+    checkpointSchema,
+    c.port.local[stateKey(first.head!.stateDigest)],
+  );
+  await mutate(c, 2, {
+    kind: 'list.update',
+    id: 'list-' + token(1),
+    name: 'After',
+    lines: ['new text'],
+  });
+  c.port.removeFailure = true;
+  await mutate(c, 3, { kind: 'settings.update', patch: { nightMode: true } });
+  const damaged = contentKey('list', oldRoot.lists[0]!.digest);
+  c.port.local[damaged] = { damaged: 'keep' };
+  const raw = Object.fromEntries(
+    [...keys].map((key) => [key, structuredClone(c.port.local[key])]),
+  );
+  c.port.removeFailure = false;
+  await mutate(c, 4, { kind: 'settings.update', patch: { nightMode: false } });
+  for (const [key, value] of Object.entries(raw))
+    expect(c.port.local[key]).toEqual(value);
+});
+
+it('preserves a damaged fallback base without acknowledging unrelated staged changes', async () => {
+  const c = await previewHistory(3);
+  await mutate(c, 10, { kind: 'settings.update', patch: { nightMode: true } });
+  const adopted = await c.storage.requireActiveData();
+  const base = v.parse(
+    checkpointSchema,
+    c.port.local[stateKey(adopted.head.stateDigest)],
+  ).base!;
+  const archive = await c.storage.exportArchive({});
+  await c.storage.compactArchive({}, archive);
+  const current = await c.storage.requireActiveData();
+  const materialized = v.parse(
+    checkpointSchema,
+    c.port.local[stateKey(current.head.stateDigest)],
+  );
+  c.port.local[stateKey(adopted.head.stateDigest)] = null;
+  const pendingInput = {
+    id: token(20),
+    expectedHead: current.head,
+    command: {
+      kind: 'list.create' as const,
+      name: 'Unfinished',
+      lines: ['missing blob'],
+    },
+  };
+  const data = applyLibraryCommand(
+    current.data,
+    pendingInput.command,
+    pendingInput.id,
+  );
+  c.port.failKey = contentKey('list', await digest(data.lists.at(-1)!));
+  await expect(c.storage.mutate(pendingInput)).rejects.toThrow(
+    'STORAGE_WRITE_FAILED',
+  );
+  c.port.failKey = null;
+  await c.storage.mutate({
+    id: materialized.operation.id,
+    expectedHead: materialized.operation.expectedHead,
+    command: { kind: 'settings.update', patch: {} },
+  });
+  expect(c.port.local[stateKey(base.stateDigest)]).toBeDefined();
+  expect(await c.storage.pendingMutations()).toHaveLength(1);
+});
+
 describe('verified archival of earlier preview history', () => {
   it('adopts a nearly full legacy preview store and frees only externally verified history', async () => {
     const context = await previewHistory(28);

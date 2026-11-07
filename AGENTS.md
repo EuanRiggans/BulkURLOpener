@@ -18,7 +18,8 @@ Browser-only cleanup and source/package reproduction are recorded in
 Release preparation and outstanding blockers are recorded in
 [Phase 7](docs/PHASE_7_RELEASE.md), with [upgrade verification](docs/UPGRADE_VERIFICATION.md)
 and [store disclosure drafts](docs/STORE_SUBMISSION.md). The user-approved
-[storage simplification](docs/STORAGE_SIMPLIFICATION.md) supersedes the earlier
+[storage simplification](docs/STORAGE_SIMPLIFICATION.md) and
+[recovery hardening](docs/RECOVERY_HARDENING.md) supersede the earlier
 unbounded-history, sync and snapshot contracts. Development same-ID
 tests are not signed-store evidence. Keep preview status until the release gates
 are actually satisfied and a specific release is authorized.
@@ -82,7 +83,14 @@ without losing current/fallback data. Verify the candidate before
 publishing and retain a durable deletion manifest before removing obsolete new
 records. Earlier preview history requires a matching downloaded recovery archive
 and explicit user confirmation before eligible removal. Never delete original
-migration sources, damaged records, unresolved input or jobs during maintenance. Keep assigned list IDs through edits, deduplicate request IDs and reject
+migration sources, damaged records or unresolved input during maintenance. New
+completed jobs have bounded retention; pending/uncertain/cancelled jobs and live
+or unsettled load-on-focus tabs stay protected. Old preview jobs require verified
+external archival. Keep new job progress to its current and preceding snapshots;
+rotate the request scope before retiring completed identities so old retries
+cannot replay effects. Persist startup scope before enqueue. Interrupted library
+changes can be set aside only after a matching full archive and explicit review;
+quarantine pins their original records instead of deleting them. Keep assigned list IDs through edits, deduplicate request IDs and reject
 stale revisions. Job plans/results are immutable; publish progress heads last.
 Establish alarms before publishing a job; its signal and idle cleanup are ordered
 under the writer lock. Keep tab effects and sleeping outside that lock, and use

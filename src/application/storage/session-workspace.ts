@@ -1,3 +1,4 @@
+import type { HeldJobs } from '../../domain/opening/history';
 import * as v from 'valibot';
 import {
   StorageCoordinator,
@@ -39,6 +40,7 @@ export interface SessionPort {
   now(): string;
   signal(): Promise<void>;
   idle?(): Promise<void>;
+  heldJobs?(): Promise<HeldJobs | null>;
 }
 export type PrivateWorkspace = { id: string; storage: StorageCoordinator };
 
@@ -218,6 +220,15 @@ export class SessionWorkspace {
     if (Object.hasOwn(await this.port.read(), seedKey))
       await this.port.remove([seedKey]);
     const port: StoragePort = {
+      ...(this.port.heldJobs
+        ? {
+            heldJobs: async () => {
+              await this.assertSession(metadata.id);
+              const result = await this.port.heldJobs!();
+              return result ? { ...result, sessionId: metadata.id } : null;
+            },
+          }
+        : {}),
       readLocal: async () => {
         await this.assertSession(metadata.id);
         return this.logical(await this.port.read());
@@ -243,7 +254,10 @@ export class SessionWorkspace {
         requireCondition(
           keys.every(
             (key) =>
-              /^buo:v2:(snapshot|state|gc|transfer):[a-f0-9]{64}$/.test(key) ||
+              /^buo:v2:(snapshot|state|gc|transfer|job|job-plan|job-state|job-gc):[a-f0-9]{64}$/.test(
+                key,
+              ) ||
+              /^buo:v2:job-result:[a-f0-9]{64}:(0|[1-9]\d*)$/.test(key) ||
               /^buo:v2:content:(list|settings|metadata):[a-f0-9]{64}$/.test(
                 key,
               ),

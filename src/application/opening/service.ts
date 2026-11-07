@@ -21,6 +21,7 @@ import {
 } from '../../domain/opening/schema';
 
 const common = {
+  epoch: v.optional(hashSchema),
   id: hashSchema,
   windowId: v.optional(targetWindowSchema, null),
   expectedHead: v.optional(v.nullable(headSchema), null),
@@ -90,15 +91,28 @@ export class OpeningService {
     const browserSessionId = await this.session();
     return this.storage.withJobs(async (journal, active) => {
       const fingerprint = await digest(request);
+      requireCondition(
+        !(await journal.isRetiring(request.id)),
+        'OPEN_REQUEST_EXPIRED',
+      );
       const staged = await journal.stagedPlan(request.id);
       if (staged) {
+        const legacyRequest = { ...request };
+        delete legacyRequest.epoch;
         requireCondition(
-          staged.requestDigest === fingerprint,
+          staged.requestDigest === fingerprint ||
+            (request.epoch !== undefined &&
+              staged.requestDigest === (await digest(legacyRequest))),
           'OPERATION_ID_REUSED',
         );
         await journal.create(staged);
         return journal.view(request.id);
       }
+      if (request.epoch !== undefined)
+        requireCondition(
+          request.epoch === (await journal.epoch()),
+          'OPEN_REQUEST_EXPIRED',
+        );
       requireCondition(
         request.expectedHead === null ||
           sameContent(active.head, request.expectedHead),

@@ -1,6 +1,10 @@
+import { heldJobs } from '../../src/infrastructure/browser/held-jobs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 const native = vi.hoisted(() => ({
-  runtime: { lastError: undefined as { message: string } | undefined },
+  runtime: {
+    lastError: undefined as { message: string } | undefined,
+    getURL: (path: string) => 'chrome-extension://synthetic-extension' + path,
+  },
   windows: { get: vi.fn(), getLastFocused: vi.fn(), getAll: vi.fn() },
   tabs: { query: vi.fn(), get: vi.fn(), update: vi.fn() },
   permissions: { getAll: vi.fn(), request: vi.fn() },
@@ -151,4 +155,31 @@ describe('native browser API adapters', () => {
     native.alarms.create.mockReturnValueOnce(undefined);
     await expect(prepareOpeningRecovery()).resolves.toBeUndefined();
   });
+});
+
+it('identifies pending helper navigations and unsettled tabs within the matching privacy scope', async () => {
+  const job = 'a'.repeat(64);
+  native.tabs.query.mockResolvedValueOnce([
+    { id: 1, url: 'about:blank', incognito: false },
+    {
+      id: 2,
+      url: 'about:blank',
+      pendingUrl:
+        'chrome-extension://synthetic-extension/deferred.html?job=' +
+        job +
+        '&index=0',
+      incognito: false,
+    },
+    {
+      id: 3,
+      url:
+        'chrome-extension://synthetic-extension/deferred.html?job=' +
+        'b'.repeat(64) +
+        '&index=0',
+      incognito: true,
+    },
+  ]);
+  expect(await heldJobs(false)).toEqual({ jobs: [job], unsettledTabs: [1] });
+  native.tabs.query.mockRejectedValueOnce(new Error('unavailable'));
+  expect(await heldJobs(false)).toBeNull();
 });

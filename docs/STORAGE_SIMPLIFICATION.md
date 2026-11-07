@@ -8,6 +8,10 @@ and snapshot features. The popup stays simple with a 540px preferred width;
 list creation/editing stay on separate pages and context menus keep their basic
 saved-list hierarchy. This is still an unreleased preview.
 
+> The subsequent [recovery hardening](RECOVERY_HARDENING.md) adds verified
+> quarantine for interrupted saves and bounded completed-job/progress retention.
+> Its exceptions for protected work and older preview history remain explicit.
+
 ## Current storage contract
 
 - Schemas 1/2/3 remain readable. Normal saves use schema 4, retaining the existing

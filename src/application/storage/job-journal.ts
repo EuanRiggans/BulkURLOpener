@@ -1,6 +1,14 @@
+import {
+  compactJobProgress,
+  finishJobGc,
+  openingEpoch,
+  retainCompletedJobs,
+  retiringJobs,
+  type JobMaintenanceIO,
+} from './job-maintenance';
 import * as v from 'valibot';
 import { digest } from '../../domain/storage/json';
-import { requireCondition } from '../../domain/storage/errors';
+import { MigrationError, requireCondition } from '../../domain/storage/errors';
 import { storagePrefix } from '../../domain/storage/schema';
 import {
   jobHeadSchema,
@@ -16,7 +24,7 @@ import {
 } from '../../domain/opening/schema';
 import { sameContent } from '../../domain/storage/migrate';
 
-export type JournalIO = {
+export type JournalIO = JobMaintenanceIO & {
   signal(): Promise<void>;
   read(): Promise<Record<string, unknown>>;
   append(key: string, value: unknown): Promise<void>;
@@ -37,22 +45,48 @@ function parsed<T>(schema: v.GenericSchema<T>, value: unknown): T {
 // share the canonical writer lock. Plans/receipts are immutable, run snapshots
 // are small, and their mutable pointer is always published last.
 export class JobJournal {
+  terminalChanged = false;
   constructor(private readonly io: JournalIO) {}
+  async epoch() {
+    return openingEpoch(await this.io.read());
+  }
+  async isRetiring(id: string) {
+    return (await retiringJobs(await this.io.read())).has(id);
+  }
+  async maintain(archive?: { digest: string; store: Record<string, unknown> }) {
+    await finishJobGc(this.io);
+    await retainCompletedJobs(
+      this.io,
+      await this.list(),
+      (id) => this.view(id),
+      archive,
+    );
+  }
   private async planAt(id: string, store: Record<string, unknown>) {
     if (!Object.hasOwn(store, planKey(id))) return null;
     const envelope = parsed(planEnvelopeSchema, store[planKey(id)]);
     requireCondition(
       envelope.plan.id === id &&
-        (await digest(envelope.plan)) === envelope.digest,
+        (await digest(
+          envelope.schemaVersion === 2
+            ? { schemaVersion: 2, plan: envelope.plan }
+            : envelope.plan,
+        )) === envelope.digest,
       'JOB_INTEGRITY_FAILED',
     );
     return envelope;
   }
   async stagedPlan(id: string): Promise<JobPlan | null> {
-    return (await this.planAt(id, await this.io.read()))?.plan ?? null;
-  }
-  async get(id: string): Promise<{ plan: JobPlan; run: JobRun } | null> {
     const store = await this.io.read();
+    if ((await retiringJobs(store)).has(id)) return null;
+    return (await this.planAt(id, store))?.plan ?? null;
+  }
+  async get(
+    id: string,
+    snapshot?: Record<string, unknown>,
+  ): Promise<{ plan: JobPlan; run: JobRun } | null> {
+    const store = snapshot ?? (await this.io.read());
+    if ((await retiringJobs(store)).has(id)) return null;
     if (!Object.hasOwn(store, jobKey(id))) return null;
     const head = parsed(jobHeadSchema, store[jobKey(id)]);
     const envelope = await this.planAt(id, store);
@@ -99,15 +133,20 @@ export class JobJournal {
       );
     if (run.cursor)
       requireCondition(
-        await this.receipt(id, run.cursor - 1, run.planDigest),
+        await this.receipt(id, run.cursor - 1, run.planDigest, store),
         'JOB_INTEGRITY_FAILED',
       );
     return { plan: envelope.plan, run };
   }
-  async list(): Promise<{ plan: JobPlan; run: JobRun }[]> {
-    const store = await this.io.read();
-    for (const key of Object.keys(store).filter((key) =>
-      key.startsWith(storagePrefix + 'job-plan:'),
+  async list(
+    snapshot?: Record<string, unknown>,
+  ): Promise<{ plan: JobPlan; run: JobRun }[]> {
+    const store = snapshot ?? (await this.io.read());
+    const retired = await retiringJobs(store);
+    for (const key of Object.keys(store).filter(
+      (key) =>
+        key.startsWith(storagePrefix + 'job-plan:') &&
+        !retired.has(key.slice((storagePrefix + 'job-plan:').length)),
     ))
       requireCondition(
         Object.hasOwn(
@@ -118,9 +157,16 @@ export class JobJournal {
       );
     const values = [];
     for (const key of Object.keys(store)
-      .filter((key) => key.startsWith(storagePrefix + 'job:'))
+      .filter(
+        (key) =>
+          key.startsWith(storagePrefix + 'job:') &&
+          !retired.has(key.slice((storagePrefix + 'job:').length)),
+      )
       .sort()) {
-      const value = await this.get(key.slice((storagePrefix + 'job:').length));
+      const value = await this.get(
+        key.slice((storagePrefix + 'job:').length),
+        store,
+      );
       requireCondition(value, 'JOB_INTEGRITY_FAILED');
       values.push(value);
     }
@@ -132,10 +178,12 @@ export class JobJournal {
   }
   async recoverStaged(): Promise<void> {
     const store = await this.io.read();
+    const retired = await retiringJobs(store);
     for (const key of Object.keys(store).filter((key) =>
       key.startsWith(storagePrefix + 'job-plan:'),
     )) {
       const id = key.slice((storagePrefix + 'job-plan:').length);
+      if (retired.has(id)) continue;
       if (!Object.hasOwn(store, jobKey(id))) {
         const staged = await this.stagedPlan(id);
         requireCondition(staged, 'JOB_INTEGRITY_FAILED');
@@ -169,7 +217,11 @@ export class JobJournal {
   }
   async create(raw: JobPlan): Promise<{ plan: JobPlan; run: JobRun }> {
     const plan = parsed(jobPlanSchema, raw);
-    const staged = await this.stagedPlan(plan.id);
+    requireCondition(!(await this.isRetiring(plan.id)), 'OPEN_REQUEST_EXPIRED');
+    const stagedEnvelope = await this.planAt(plan.id, await this.io.read());
+    const staged = stagedEnvelope?.plan;
+    const planDigest =
+      stagedEnvelope?.digest ?? (await digest({ schemaVersion: 2, plan }));
     if (staged)
       requireCondition(sameContent(staged, plan), 'OPERATION_ID_REUSED');
     const current = await this.get(plan.id);
@@ -177,7 +229,8 @@ export class JobJournal {
     await this.io.signal();
     if (!staged)
       await this.io.append(planKey(plan.id), {
-        digest: await digest(plan),
+        schemaVersion: 2,
+        digest: planDigest,
         plan,
       });
     const run: JobRun = {
@@ -185,7 +238,7 @@ export class JobJournal {
       id: plan.id,
       revision: 1,
       previousDigest: null,
-      planDigest: await digest(plan),
+      planDigest,
       status: plan.destinations.length ? 'queued' : 'completed',
       cursor: 0,
       nextDueAt: plan.createdAt,
@@ -225,6 +278,7 @@ export class JobJournal {
     });
     const result = await this.get(plan.id);
     requireCondition(result, 'JOB_INTEGRITY_FAILED');
+    if (result.run.status === 'completed') this.terminalChanged = true;
     return result;
   }
   async change(
@@ -245,6 +299,8 @@ export class JobJournal {
       run.id === id && run.planDigest === current.run.planDigest,
       'JOB_INTEGRITY_FAILED',
     );
+    if (run.status === 'completed' && current.run.status !== 'completed')
+      run.completedAt = Date.now();
     const next = parsed(runSchema, run);
     const hash = await digest(next);
     try {
@@ -261,14 +317,27 @@ export class JobJournal {
     });
     const result = await this.get(id);
     requireCondition(result, 'JOB_INTEGRITY_FAILED');
+    if (result.run.status === 'completed') this.terminalChanged = true;
+    try {
+      await compactJobProgress(this.io, id);
+    } catch (reason) {
+      if (
+        reason instanceof MigrationError &&
+        ['PRIVATE_SESSION_ENDED', 'PRIVATE_SESSION_INVALID'].includes(
+          reason.code,
+        )
+      )
+        throw reason; /* Keep extra progress if cleanup fails after publication. */
+    }
     return result.run;
   }
   async receipt(
     id: string,
     index: number,
     planDigest: string,
+    snapshot?: Record<string, unknown>,
   ): Promise<TabReceipt | null> {
-    const store = await this.io.read();
+    const store = snapshot ?? (await this.io.read());
     const key = resultKey(id, index);
     if (!Object.hasOwn(store, key)) return null;
     const envelope = parsed(receiptEnvelopeSchema, store[key]);
@@ -297,11 +366,12 @@ export class JobJournal {
     );
   }
   async view(id: string): Promise<JobView> {
-    const job = await this.get(id);
+    const store = await this.io.read();
+    const job = await this.get(id, store);
     requireCondition(job, 'JOB_NOT_FOUND');
     const receipts = [];
     for (let index = 0; index < job.plan.destinations.length; index++) {
-      const receipt = await this.receipt(id, index, job.run.planDigest);
+      const receipt = await this.receipt(id, index, job.run.planDigest, store);
       requireCondition(
         index >= job.run.cursor || receipt,
         'JOB_INTEGRITY_FAILED',

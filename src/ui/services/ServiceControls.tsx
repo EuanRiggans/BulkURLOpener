@@ -1,11 +1,10 @@
+import { pendingChangesSchema } from '../../domain/storage/quarantine';
 import { useEffect, useState } from 'preact/hooks';
 import { observeWorkspace } from '../../infrastructure/browser/change-events';
 import * as v from 'valibot';
 import {
   dataSchema,
-  hashSchema,
   headSchema,
-  mutationInputSchema,
   statusSchema,
 } from '../../domain/storage/schema';
 import { extensionRequest } from '../../infrastructure/browser/client';
@@ -14,12 +13,7 @@ import { serviceError } from './errors';
 import { scopedKeys } from '../../shared/storage-events';
 
 const activeSchema = v.strictObject({ head: headSchema, data: dataSchema });
-const pendingSchema = v.array(
-  v.strictObject({
-    stateDigest: hashSchema,
-    input: v.nullable(mutationInputSchema),
-  }),
-);
+const pendingSchema = pendingChangesSchema;
 type Active = v.InferOutput<typeof activeSchema>;
 type Pending = v.InferOutput<typeof pendingSchema>;
 
@@ -103,6 +97,11 @@ export function ServiceControls() {
             The change was staged before the active pointer was updated. Review
             it before applying it. Existing active data and history remain
             intact.
+          </p>
+          <p>
+            <a href={pageUrl('/data.html')}>
+              Set aside an interrupted save using a verified recovery archive
+            </a>
           </p>
           {pending.map((change) => (
             <details key={change.stateDigest}>

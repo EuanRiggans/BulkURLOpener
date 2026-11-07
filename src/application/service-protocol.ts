@@ -1,3 +1,4 @@
+import { initialOpeningEpoch } from '../domain/opening/history';
 import * as v from 'valibot';
 import {
   hashSchema,
@@ -46,8 +47,10 @@ export const serviceRequestSchema = v.variant('type', [
   v.strictObject({ type: type('library.pending') }),
   v.strictObject({ type: type('library.resume'), stateDigest: hashSchema }),
   v.strictObject({ type: type('capture'), windowId }),
+  v.strictObject({ type: type('opening.epoch') }),
   v.strictObject({
     type: type('open.lines'),
+    epoch: v.optional(hashSchema, initialOpeningEpoch),
     id: hashSchema,
     lines: v.array(v.string()),
     windowId,
@@ -55,6 +58,7 @@ export const serviceRequestSchema = v.variant('type', [
   }),
   v.strictObject({
     type: type('open.list'),
+    epoch: v.optional(hashSchema, initialOpeningEpoch),
     id: hashSchema,
     listId: v.pipe(v.string(), v.regex(/^list-[a-f0-9]{64}$/)),
     windowId,
@@ -163,6 +167,8 @@ export function allowedRequest(page: string, request: ServiceRequest): boolean {
             : page === '/popup.html';
   }
   if (request.type === 'buo:service/library.read') return true;
+  if (request.type === 'buo:service/opening.epoch')
+    return page === '/popup.html';
   if (
     request.type === 'buo:service/library.pending' ||
     request.type === 'buo:service/library.resume'

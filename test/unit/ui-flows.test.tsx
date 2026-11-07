@@ -441,3 +441,53 @@ describe('separate editor and settings forms', () => {
     );
   });
 });
+
+it('keeps the verified archive tied to the latest file selection when reads finish out of order', async () => {
+  const { ArchiveFileInput } =
+    await import('../../src/ui/recovery/ArchiveFileInput');
+  const { packJson } = await import('../../src/domain/storage/archive');
+  const first = await packJson({ synthetic: 'first' }),
+    second = await packJson({ synthetic: 'second' });
+  const ready = vi.fn<(value: unknown) => void>(),
+    failed = vi.fn<(reason: unknown) => void>();
+  await act(() =>
+    render(
+      <ArchiveFileInput
+        id="race-archive"
+        disabled={false}
+        ready={ready}
+        failed={failed}
+      />,
+      app,
+    ),
+  );
+  let resolveFirst!: (value: ArrayBuffer) => void,
+    resolveSecond!: (value: ArrayBuffer) => void;
+  const firstRead = new Promise<ArrayBuffer>((resolve) => {
+    resolveFirst = resolve;
+  });
+  const secondRead = new Promise<ArrayBuffer>((resolve) => {
+    resolveSecond = resolve;
+  });
+  const picker = node<HTMLInputElement>('#race-archive');
+  for (const read of [firstRead, secondRead])
+    await act(() => {
+      Object.defineProperty(picker, 'files', {
+        configurable: true,
+        value: [{ size: 256, arrayBuffer: () => read }],
+      });
+      picker.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+  resolveSecond(await new Blob([JSON.stringify(second)]).arrayBuffer());
+  await vi.waitFor(() =>
+    expect(ready.mock.calls.filter(([value]) => value !== null)).toEqual([
+      [second],
+    ]),
+  );
+  resolveFirst(await new Blob([JSON.stringify(first)]).arrayBuffer());
+  await new Promise((resolve) => setTimeout(resolve, 25));
+  expect(ready.mock.calls.filter(([value]) => value !== null)).toEqual([
+    [second],
+  ]);
+  expect(failed).not.toHaveBeenCalled();
+});

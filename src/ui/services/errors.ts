@@ -45,6 +45,16 @@ export function serviceError(error: unknown): string {
       'This opening job could not be verified. Keep its recovery data; it will not be replayed automatically.',
     JOB_HEAD_MISSING:
       'An opening job has no verified progress pointer. Keep its recovery data instead of starting it again automatically.',
+    JOB_NOT_FOUND:
+      'That opening job is no longer available. Finished history may have expired; check current tabs before starting another batch.',
+    DEFERRED_NOT_AVAILABLE:
+      'This holding tab’s saved destination is unavailable. Keep any recovery archive and reopen the intended list from the opener.',
+    OPEN_REQUEST_EXPIRED:
+      'This older opening request has expired. Check your current tabs before choosing Open again to start a new request.',
+    OPERATION_QUARANTINED:
+      'That interrupted change was set aside. Start a new edit if you want to save it again.',
+    QUARANTINE_INTEGRITY_FAILED:
+      'An interrupted-change recovery receipt could not be verified. Keep a full recovery archive; no interrupted records will be removed.',
     PENDING_MUTATION:
       'A saved change is waiting for recovery. Review it in Settings before making another change.',
     MENU_REFRESH_FAILED:

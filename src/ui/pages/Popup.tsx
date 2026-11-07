@@ -1,3 +1,4 @@
+import { hashSchema } from '../../domain/storage/schema';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import * as v from 'valibot';
 import { observeWorkspace } from '../../infrastructure/browser/change-events';
@@ -41,6 +42,7 @@ export function Popup() {
     id: string;
     text: string;
     head: Workspace['head'];
+    epoch: string;
   } | null>(null);
   const pendingDelete = useRef<MutationInput | null>(null);
   useEffect(() => {
@@ -162,18 +164,31 @@ export function Popup() {
   async function open(text: string) {
     if (!workspace) return;
     if (!pendingOpen.current || pendingOpen.current.text !== text)
-      pendingOpen.current = { id: newRequestId(), text, head: workspace.head };
+      pendingOpen.current = {
+        id: newRequestId(),
+        text,
+        head: workspace.head,
+        epoch: await extensionRequest(
+          { type: 'buo:service/opening.epoch' },
+          hashSchema,
+        ),
+      };
     const request = pendingOpen.current;
     const result = await extensionRequest(
       {
         type: 'buo:service/open.lines',
         id: request.id,
+        epoch: request.epoch,
         lines: text.split('\n'),
         expectedHead: request.head,
         windowId: targetWindow(),
       },
       jobViewSchema,
-    );
+    ).catch((reason: unknown) => {
+      if (reason instanceof Error && reason.message === 'OPEN_REQUEST_EXPIRED')
+        pendingOpen.current = null;
+      throw reason;
+    });
     setJob(result);
     setNotice(
       result.plan.destinations.length

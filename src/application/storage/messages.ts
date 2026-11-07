@@ -71,6 +71,17 @@ export function createMigrationListener(
             request.archive,
           );
           break;
+        case 'buo:migration/pending':
+          value = await storage.pendingMutations();
+          break;
+        case 'buo:migration/quarantine':
+          value = await storage.quarantineMutation(
+            privateMode ? {} : request.document,
+            request.archive,
+            request.stateDigest,
+            request.expectedHead,
+          );
+          break;
         case 'buo:migration/backup':
           value = await storage.backup(request.digest);
           break;

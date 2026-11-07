@@ -1,3 +1,4 @@
+import { heldJobs } from './held-jobs';
 import { browser } from 'wxt/browser';
 import { SessionWorkspace } from '../../application/storage/session-workspace';
 import type { StorageCoordinator } from '../../application/storage/coordinator';
@@ -24,6 +25,7 @@ export function createPrivateWorkspace(
   return new SessionWorkspace(
     {
       ...store,
+      heldJobs: () => heldJobs(true),
       windows: async () =>
         (await browser.windows.getAll())
           .filter((window) => window.incognito && window.id !== undefined)

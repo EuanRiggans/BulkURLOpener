@@ -1,3 +1,4 @@
+import type { HeldJobs } from '../../src/domain/opening/history';
 import { readFileSync } from 'node:fs';
 import * as v from 'valibot';
 import type {
@@ -82,6 +83,7 @@ export class MemoryStorage implements StoragePort {
   removeFailure = false;
   removed: string[] = [];
   syncWrites = 0;
+  heldJobs?: () => Promise<HeldJobs | null>;
   constructor(source: Sources = empty) {
     this.local = structuredClone(source.storageLocal);
     this.sync = structuredClone(source.storageSync);

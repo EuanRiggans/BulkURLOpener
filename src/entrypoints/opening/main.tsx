@@ -1,3 +1,4 @@
+import { completedJobLimit } from '../../domain/opening/history';
 import { useEffect, useState } from 'preact/hooks';
 import { observeWorkspace } from '../../infrastructure/browser/change-events';
 import * as v from 'valibot';
@@ -90,13 +91,19 @@ function Jobs() {
   return (
     <PageLayout title="Opening jobs">
       <p>
-        Plans and progress are retained locally. Interrupted tab creation needs
-        review because a tab may have opened before its acknowledgement was
-        saved.
+        Up to {completedJobLimit} recent finished jobs are retained locally
+        under a storage budget. Unfinished work and tabs waiting to load stay
+        protected. Interrupted tab creation needs review because a tab may have
+        opened before its acknowledgement was saved.
       </p>
       {error && <p role="alert">{error}</p>}
       {!visible.length && (
-        <p role="status">No opening jobs are available here.</p>
+        <p role="status">
+          {selected
+            ? 'This job is no longer available; finished history can expire.'
+            : 'No opening jobs are available here.'}{' '}
+          {selected && <a href={pageUrl('/opening.html')}>View current jobs</a>}
+        </p>
       )}
       {visible.map((job) => (
         <section key={job.plan.id} aria-label="Opening job">

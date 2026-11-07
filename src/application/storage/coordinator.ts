@@ -1,3 +1,6 @@
+import type { HeldJobs } from '../../domain/opening/history';
+import { openingEpoch } from './job-maintenance';
+import { quarantines, quarantineReferences } from './quarantine';
 import * as v from 'valibot';
 import { MigrationError, requireCondition } from '../../domain/storage/errors';
 import { digest, jsonObjectSchema } from '../../domain/storage/json';
@@ -67,6 +70,7 @@ export interface StoragePort {
   readSync(): Promise<Record<string, unknown>>;
   writeLocal(values: Record<string, unknown>): Promise<void>;
   removeLocal?(keys: string[]): Promise<void>;
+  heldJobs?(): Promise<HeldJobs | null>;
 }
 export type Exclusive = <T>(work: () => Promise<T>) => Promise<T>;
 type Store = Record<string, unknown>;
@@ -91,8 +95,11 @@ function knownKeys(store: Store) {
     requireCondition(
       key === headKey ||
         key === storagePrefix + 'draft' ||
+        key === storagePrefix + 'job-epoch' ||
         /^buo:v2:content:(list|settings|metadata):[a-f0-9]{64}$/.test(key) ||
-        /^buo:v2:(gc|archive-proof):[a-f0-9]{64}$/.test(key) ||
+        /^buo:v2:(gc|archive-proof|quarantine|job-gc):[a-f0-9]{64}$/.test(
+          key,
+        ) ||
         /^buo:v2:(backup|stage|state|job|job-plan|job-state|draft-state|snapshot|transfer|sync-backup):[a-f0-9]{64}$/.test(
           key,
         ) ||
@@ -270,11 +277,7 @@ async function verify(store: Store): Promise<Verified> {
   return {
     status: { status: 'ready', head, data: current.data, canRollback: false },
     state: { ...current.state, data: current.data },
-    reachable: new Set(
-      [...current.keys]
-        .filter((key) => key.startsWith(storagePrefix + 'state:'))
-        .map((key) => key.slice((storagePrefix + 'state:').length)),
-    ),
+    reachable: current.heads,
   };
 }
 
@@ -469,6 +472,12 @@ export class StorageCoordinator {
       current.status.head && current.status.data && current.state,
       'MIGRATION_REQUIRED',
     );
+    const suspended = await quarantines(store);
+    requireCondition(
+      !suspended.some((entry) => entry.operationId === input.id),
+      'OPERATION_QUARANTINED',
+    );
+    const suspendedIds = new Set(suspended.map((entry) => entry.stateDigest));
     const requestDigest = await digest({
       expectedHead: input.expectedHead,
       command: input.command,
@@ -508,7 +517,7 @@ export class StorageCoordinator {
       key.startsWith(storagePrefix + 'state:'),
     )) {
       const hash = key.slice((storagePrefix + 'state:').length);
-      if (current.reachable.has(hash)) continue;
+      if (current.reachable.has(hash) || suspendedIds.has(hash)) continue;
       if (isCheckpoint(value)) {
         const staged = decoded(checkpointSchema, value);
         if (staged.revision > current.status.head.revision) {
@@ -679,73 +688,162 @@ export class StorageCoordinator {
         current.status.head && current.status.data,
         'MIGRATION_REQUIRED',
       );
-      const pending: { stateDigest: string; input: MutationInput | null }[] =
-        [];
-      for (const [key, value] of Object.entries(store).filter(([key]) =>
-        key.startsWith(storagePrefix + 'state:'),
-      )) {
-        const stateDigest = key.slice((storagePrefix + 'state:').length);
-        if (current.reachable.has(stateDigest)) continue;
-        if (isCheckpoint(value)) {
-          const state = decoded(checkpointSchema, value);
-          if (state.revision <= current.status.head.revision) continue;
+      return this.pendingLocked(store, current);
+    });
+  }
+  private async pendingLocked(store: Store, current: Verified) {
+    requireCondition(
+      current.status.head && current.status.data,
+      'MIGRATION_REQUIRED',
+    );
+    const suspendedIds = new Set(
+      (await quarantines(store)).map((entry) => entry.stateDigest),
+    );
+    const pending: { stateDigest: string; input: MutationInput | null }[] = [];
+    for (const [key, value] of Object.entries(store).filter(([key]) =>
+      key.startsWith(storagePrefix + 'state:'),
+    )) {
+      const stateDigest = key.slice((storagePrefix + 'state:').length);
+      if (current.reachable.has(stateDigest) || suspendedIds.has(stateDigest))
+        continue;
+      const recognized = v.safeParse(
+        v.union([stateSchema, checkpointSchema]),
+        value,
+      );
+      if (!recognized.success) {
+        requireCondition(
+          !(
+            value &&
+            typeof value === 'object' &&
+            'schemaVersion' in value &&
+            typeof value.schemaVersion === 'number' &&
+            value.schemaVersion > 4
+          ),
+          'UNKNOWN_STORAGE_VERSION',
+        );
+        pending.push({ stateDigest, input: null });
+        continue;
+      }
+      if (isCheckpoint(value)) {
+        const state = decoded(checkpointSchema, value);
+        if (state.revision <= current.status.head.revision) continue;
+        if (!sameContent(state.operation.expectedHead, current.status.head)) {
+          pending.push({ stateDigest, input: null });
+          continue;
+        }
+        let input: MutationInput | null = null;
+        try {
+          const candidate = await new CheckpointReader(store).read({
+            schemaVersion: 1,
+            revision: state.revision,
+            stateDigest,
+          });
+          input = {
+            id: state.operation.id,
+            expectedHead: state.operation.expectedHead,
+            command: checkpointCommand(state, candidate.data),
+          };
           requireCondition(
-            sameContent(state.operation.expectedHead, current.status.head),
-            'ORPHANED_STATE',
+            sameContent(
+              applyLibraryCommand(current.status.data, input.command, input.id),
+              candidate.data,
+            ),
+            'INTEGRITY_CHECK_FAILED',
           );
-          let input: MutationInput | null = null;
+        } catch {
+          input = null;
+          /* Partial or invalid candidates require original input or quarantine. */
+        }
+        pending.push({ stateDigest, input });
+      } else {
+        const state = decoded(stateSchema, value);
+        if (
+          current.state?.kind === 'checkpoint' &&
+          state.revision <= current.status.head.revision
+        )
+          continue;
+        let input: MutationInput | null = null;
+        if (
+          state.kind === 'mutation' &&
+          sameContent(state.previous, current.status.head)
+        ) {
           try {
-            const candidate = await new CheckpointReader(store).read({
-              schemaVersion: 1,
-              revision: state.revision,
-              stateDigest,
+            await verify({
+              ...store,
+              [headKey]: {
+                schemaVersion: 1,
+                revision: state.revision,
+                stateDigest,
+              },
             });
             input = {
               id: state.operation.id,
-              expectedHead: state.operation.expectedHead,
-              command: checkpointCommand(state, candidate.data),
-            };
-            requireCondition(
-              sameContent(
-                applyLibraryCommand(
-                  current.status.data,
-                  input.command,
-                  input.id,
-                ),
-                candidate.data,
-              ),
-              'INTEGRITY_CHECK_FAILED',
-            );
-          } catch {
-            /* Partial component writes require the original input or an archive. */
-          }
-          pending.push({ stateDigest, input });
-        } else if (current.state?.kind !== 'checkpoint') {
-          const state = decoded(stateSchema, value);
-          requireCondition(
-            state.kind === 'mutation' &&
-              sameContent(state.previous, current.status.head),
-            'ORPHANED_STATE',
-          );
-          await verify({
-            ...store,
-            [headKey]: {
-              schemaVersion: 1,
-              revision: state.revision,
-              stateDigest,
-            },
-          });
-          pending.push({
-            stateDigest,
-            input: {
-              id: state.operation.id,
               expectedHead: state.previous,
               command: state.operation.command,
-            },
-          });
+            };
+          } catch {
+            /* Keep invalid inactive history available for verified quarantine. */
+          }
         }
+        pending.push({ stateDigest, input });
       }
-      return pending;
+    }
+    return pending;
+  }
+
+  quarantineMutation(
+    document: Record<string, string>,
+    raw: unknown,
+    stateDigest: string,
+    expected: Head,
+  ) {
+    return this.run(async () => {
+      const store = await this.local();
+      const current = await verify(store);
+      requireCondition(
+        current.status.head && current.status.data,
+        'MIGRATION_REQUIRED',
+      );
+      if (
+        (await quarantines(store)).some(
+          (entry) => entry.stateDigest === stateDigest,
+        )
+      )
+        return current.status;
+      requireCondition(
+        sameContent(current.status.head, expected),
+        'REVISION_CONFLICT',
+      );
+      requireCondition(
+        (await this.pendingLocked(store, current)).some(
+          (entry) => entry.stateDigest === stateDigest,
+        ),
+        'PENDING_CHANGE_NOT_FOUND',
+      );
+      const archive = decoded(recoveryExportSchema, await unpackJson(raw));
+      requireCondition(
+        (await digest(archive.sources)) === archive.digest,
+        'RECOVERY_DIGEST_MISMATCH',
+      );
+      requireCondition(
+        (await digest(await this.capture(document, true))) === archive.digest,
+        'ARCHIVE_SOURCES_CHANGED',
+      );
+      const receipt = {
+        schemaVersion: 1 as const,
+        stateDigest,
+        recordDigest: await digest(store[stateKey(stateDigest)]),
+        archiveDigest: await digest(archive),
+        expectedHead: expected,
+        ...quarantineReferences(store, stateDigest),
+        createdAt: this.now(),
+      };
+      await this.append(
+        storagePrefix + 'quarantine:' + (await digest(receipt)),
+        receipt,
+      );
+      await quarantines(await this.local());
+      return current.status;
     });
   }
 
@@ -761,16 +859,53 @@ export class StorageCoordinator {
         current.status.head && current.status.data,
         'MIGRATION_REQUIRED',
       );
-      const journal = new JobJournal({
-        signal: this.jobSignal,
-        read: () => this.local(),
-        append: (key, value) => this.append(key, value),
-        write: (key, value) => this.write(key, value),
-      });
-      return work(journal, {
+      const journal = this.jobJournal();
+      const result = await work(journal, {
         head: current.status.head,
         data: current.status.data,
       });
+      if (
+        journal.terminalChanged ||
+        Object.keys(await this.local()).some((key) =>
+          key.startsWith(storagePrefix + 'job-gc:'),
+        )
+      ) {
+        try {
+          await journal.maintain();
+        } catch (reason) {
+          if (
+            reason instanceof MigrationError &&
+            ['PRIVATE_SESSION_ENDED', 'PRIVATE_SESSION_INVALID'].includes(
+              reason.code,
+            )
+          )
+            throw reason;
+          // Keep completed history when maintenance cannot be safely verified.
+        }
+      }
+      return result;
+    });
+  }
+
+  private jobJournal() {
+    return new JobJournal({
+      signal: this.jobSignal,
+      read: () => this.local(),
+      append: (key, value) => this.append(key, value),
+      write: (key, value) => this.write(key, value),
+      ...(this.port.removeLocal
+        ? { remove: (keys: string[]) => this.remove(keys) }
+        : {}),
+      ...(this.port.heldJobs ? { heldJobs: () => this.port.heldJobs!() } : {}),
+    });
+  }
+  openingEpoch() {
+    return this.run(async () => {
+      requireCondition(
+        (await verify(await this.local())).status.status === 'ready',
+        'MIGRATION_REQUIRED',
+      );
+      return openingEpoch(await this.local());
     });
   }
 
@@ -1058,15 +1193,35 @@ export class StorageCoordinator {
     } catch {
       /* Unverified sources can be exported, never automatically pruned. */
     }
+    let completedJobs = 0,
+      legacyCompletedJobs = 0;
+    const jobBytes = Object.entries(store)
+      .filter(([key]) => /^buo:v2:job(?:-|:)/.test(key))
+      .reduce((total, [key, raw]) => total + recordBytes(key, raw), 0);
+    try {
+      for (const job of await this.jobJournal().list())
+        if (job.run.status === 'completed') {
+          completedJobs++;
+          const raw = store[storagePrefix + 'job-plan:' + job.plan.id];
+          if (raw && typeof raw === 'object' && !('schemaVersion' in raw))
+            legacyCompletedJobs++;
+        }
+    } catch {
+      /* Preserve unreadable job records; full recovery remains available. */
+    }
     return {
       format,
       estimatedBytes,
       recoveryPoints,
       archiveableRecords,
       archiveableBytes,
+      completedJobs,
+      legacyCompletedJobs,
+      jobBytes,
       cleanupPending: Object.entries(store).some(
         ([key, raw]) =>
           key.startsWith(storagePrefix + 'gc:') ||
+          key.startsWith(storagePrefix + 'job-gc:') ||
           (key.startsWith(storagePrefix + 'archive-proof:') &&
             v.is(archiveProofSchema, raw)),
       ),
@@ -1145,6 +1300,10 @@ export class StorageCoordinator {
           true,
         );
       }
+      await this.jobJournal().maintain({
+        digest: archiveDigest,
+        store: archive.sources.storageLocal,
+      });
       return this.storageInfoLocked();
     });
   }

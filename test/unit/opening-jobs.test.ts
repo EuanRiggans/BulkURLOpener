@@ -556,7 +556,7 @@ describe('durable opening jobs', () => {
     const snapshots = Object.entries(port.local).filter(([key]) =>
       key.startsWith('buo:v2:job-state:'),
     );
-    expect(snapshots.length).toBeGreaterThan(50);
+    expect(snapshots).toHaveLength(2);
     for (const [, state] of snapshots) {
       const serialized = JSON.stringify(state);
       expect(serialized).not.toContain('https://scale.example.test/');

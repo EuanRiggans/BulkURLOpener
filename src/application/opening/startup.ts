@@ -1,3 +1,4 @@
+import { initialOpeningEpoch } from '../../domain/opening/history';
 import * as v from 'valibot';
 import type { StorageCoordinator, Exclusive } from '../storage/coordinator';
 import type { OpeningService } from './service';
@@ -8,6 +9,7 @@ import { MigrationError, requireCondition } from '../../domain/storage/errors';
 export const startupRecordSchema = v.strictObject({
   schemaVersion: v.literal(1),
   id: hashSchema,
+  epoch: v.optional(hashSchema),
   status: v.picklist(['pending', 'done']),
   windowId: targetWindowSchema,
   expectedHead: v.nullable(headSchema),
@@ -57,6 +59,15 @@ export class StartupOpening {
       if (record.status === 'done') return;
       try {
         const active = await this.storage.requireActiveData();
+        if (record.epoch === undefined) {
+          const epoch = await this.storage.openingEpoch();
+          requireCondition(
+            value === undefined || epoch === initialOpeningEpoch,
+            'OPEN_REQUEST_EXPIRED',
+          );
+          record.epoch = epoch;
+          await this.port.write(record);
+        }
         if (record.expectedHead === null) {
           record.expectedHead = active.head;
           await this.port.write(record);
@@ -76,6 +87,7 @@ export class StartupOpening {
         }
         await this.opening.enqueue({
           kind: 'startup',
+          epoch: record.epoch,
           id: record.id,
           windowId: record.windowId,
           expectedHead: record.expectedHead,

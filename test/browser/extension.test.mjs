@@ -239,6 +239,16 @@ afterEach(async (context) => {
 });
 
 async function rpc(request) {
+  if (
+    ['buo:service/open.lines', 'buo:service/open.list'].includes(
+      request.type,
+    ) &&
+    request.epoch === undefined
+  )
+    request = {
+      ...request,
+      epoch: await rpc({ type: 'buo:service/opening.epoch' }),
+    };
   const response = await driver.executeAsyncScript(function (input, done) {
     const api = globalThis.browser || globalThis.chrome;
     api.runtime
@@ -1254,6 +1264,137 @@ test(
 );
 
 test(
+  'a closed editor can be recovered through a verified archive after a real quota-interrupted save',
+  { skip: target !== 'chrome', timeout: 120_000 },
+  async () => {
+    await page('new-list.html');
+    const before = await rpc({ type: 'buo:service/library.read' });
+    await native(
+      'const used = await api.storage.local.getBytesInUse(null); await api.storage.local.set({"buo-test:recovery-quota":"q".repeat(api.storage.local.QUOTA_BYTES-used-65536)}); return true;',
+    );
+    try {
+      const response = await native(
+        'return await api.runtime.sendMessage(arguments[0]);',
+        {
+          type: 'buo:service/library.mutate',
+          input: {
+            id: id(),
+            expectedHead: before.head,
+            command: {
+              kind: 'list.create',
+              name: 'Synthetic interrupted editor',
+              lines: [destination + '/interrupted?' + 'q'.repeat(128 * 1024)],
+            },
+          },
+        },
+      );
+      assert.equal(response.ok, false);
+      assert.equal(response.error, 'STORAGE_WRITE_FAILED');
+    } finally {
+      await native(
+        'await api.storage.local.remove("buo-test:recovery-quota");return true;',
+      );
+    }
+    await page('data.html');
+    const changes = await rpc({ type: 'buo:migration/pending' });
+    assert.equal(changes.length, 1);
+    assert.equal(changes[0].input, null);
+    const archive = await rpc({
+      type: 'buo:migration/export-archive',
+      document: {},
+    });
+    const file = resolve(evidence, 'synthetic-interrupted-recovery.json');
+    await writeFile(file, JSON.stringify(archive));
+    await driver.wait(
+      until.elementLocated(By.id('interrupted-save-archive')),
+      20_000,
+    );
+    await driver.findElement(By.id('interrupted-save-archive')).sendKeys(file);
+    const section = await driver.findElement(
+      By.css('[aria-labelledby="interrupted-save-title"]'),
+    );
+    const ack = await section.findElement(By.css('input[type=checkbox]'));
+    await driver.wait(until.elementIsEnabled(ack), 20_000);
+    await ack.click();
+    await section.findElement(By.css('details > summary')).click();
+    const recover = await section.findElement(
+      By.xpath(
+        './/button[normalize-space(.)="Set aside this interrupted save"]',
+      ),
+    );
+    await driver.wait(until.elementIsEnabled(recover), 20_000);
+    await recover.click();
+    await driver.wait(
+      async () => (await rpc({ type: 'buo:migration/pending' })).length === 0,
+      20_000,
+    );
+    assert.deepEqual(await rpc({ type: 'buo:service/library.read' }), before);
+    const records = await native('return await api.storage.local.get(null);');
+    assert(
+      Object.keys(records).some((key) => key.startsWith('buo:v2:quarantine:')),
+    );
+    await settings({ nightMode: !before.data.settings.nightMode });
+    report.assertions.push(
+      'real quota-interrupted editor can be closed, archived, quarantined through the UI and followed by a new settings save',
+    );
+  },
+);
+
+test(
+  'finished job history expires without replaying old requests or dropping live holding tabs',
+  { timeout: 120_000 },
+  async () => {
+    await settings({ loadOnFocus: false });
+    await page('popup.html');
+    const active = await rpc({ type: 'buo:service/library.read' });
+    const first = {
+      type: 'buo:service/open.lines',
+      id: id(),
+      epoch: await rpc({ type: 'buo:service/opening.epoch' }),
+      expectedHead: active.head,
+      lines: [],
+    };
+    await rpc(first);
+    for (let index = 0; index < 20; index++)
+      await rpc({
+        type: 'buo:service/open.lines',
+        id: id(),
+        expectedHead: active.head,
+        lines: [],
+      });
+    await page('opening.html');
+    const jobs = await rpc({ type: 'buo:service/jobs.list' });
+    assert(
+      jobs.filter(
+        (job) =>
+          job.run.status === 'completed' &&
+          !job.plan.settings.loadOnFocus &&
+          job.run.error === null,
+      ).length <= 10,
+    );
+    await page('popup.html');
+    const old = await native(
+      'return await api.runtime.sendMessage(arguments[0]);',
+      first,
+    );
+    assert.deepEqual(old, { ok: false, error: 'OPEN_REQUEST_EXPIRED' });
+    const records = await native('return await api.storage.local.get(null);');
+    for (const job of jobs) {
+      const states = Object.values(records).filter(
+        (raw) => raw?.id === job.plan.id && 'previousDigest' in raw,
+      );
+      assert(
+        states.length <= 2,
+        'New progress history keeps at most two records per retained job.',
+      );
+    }
+    report.assertions.push(
+      'native completed-job count/progress retention and expired-request rejection; live helpers remain protected',
+    );
+  },
+);
+
+test(
   '100 settings saves keep a large library exact and storage growth bounded',
   { timeout: 180_000 },
   async () => {
@@ -1290,9 +1431,17 @@ test(
       JSON.stringify(measurements),
     );
     const records = await native('return await api.storage.local.get(null);');
+    const quarantined = new Set(
+      Object.entries(records)
+        .filter(([key]) => key.startsWith('buo:v2:quarantine:'))
+        .map(([, value]) => value.stateDigest),
+    );
     assert(
-      Object.values(records).filter(
-        (value) => value?.schemaVersion === 4 && value?.kind === 'checkpoint',
+      Object.entries(records).filter(
+        ([key, value]) =>
+          value?.schemaVersion === 4 &&
+          value?.kind === 'checkpoint' &&
+          !quarantined.has(key.slice('buo:v2:state:'.length)),
       ).length <= 2,
     );
     assert(

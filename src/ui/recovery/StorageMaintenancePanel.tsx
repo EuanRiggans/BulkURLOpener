@@ -1,10 +1,11 @@
+import {
+  completedJobLimit,
+  completedJobBytes,
+} from '../../domain/opening/history';
+import { ArchiveFileInput } from './ArchiveFileInput';
 import { useEffect, useState } from 'preact/hooks';
 import * as v from 'valibot';
-import {
-  packedJsonSchema,
-  maxArchiveBytes,
-  prepareImportText,
-} from '../../domain/storage/archive';
+import type { PackedJson } from '../../domain/storage/archive';
 import {
   recoveryCopiesSchema,
   storageInfoSchema,
@@ -25,9 +26,7 @@ export function StorageMaintenancePanel() {
   const [copies, setCopies] = useState<
     v.InferOutput<typeof recoveryCopiesSchema>
   >([]);
-  const [archive, setArchive] = useState<v.InferOutput<
-    typeof packedJsonSchema
-  > | null>(null);
+  const [archive, setArchive] = useState<PackedJson | null>(null);
   const [privateMode, setPrivate] = useState(true);
   const [acknowledge, setAcknowledge] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -79,9 +78,9 @@ export function StorageMaintenancePanel() {
       <p role="status">{busy ? 'Working…' : notice}</p>
       {info && (
         <p>
-          Estimated serialized storage:{' '}
-          {(info.estimatedBytes / 1024 / 1024).toFixed(2)} MiB. Save format:{' '}
-          {info.format}. Internal recovery points: {info.recoveryPoints}.
+          Estimated storage use:{' '}
+          {(info.estimatedBytes / 1024 / 1024).toFixed(2)} MiB. Internal
+          recovery points: {info.recoveryPoints}.
         </p>
       )}
       <p>
@@ -90,6 +89,18 @@ export function StorageMaintenancePanel() {
         migration sources, damaged records, unresolved inputs and pending jobs
         stay protected.
       </p>
+      <p>
+        Finished opening history keeps up to {completedJobLimit} recent results
+        within a {(completedJobBytes / 1024 / 1024).toFixed(0)} MiB target. The
+        newest result, unfinished jobs and tabs waiting to load stay protected.
+      </p>
+      {info && (
+        <p>
+          Opening-job storage: {(info.jobBytes / 1024 / 1024).toFixed(2)} MiB.
+          Finished jobs: {info.completedJobs}. Earlier preview jobs awaiting
+          verified archival: {info.legacyCompletedJobs}.
+        </p>
+      )}
       {info?.cleanupPending && (
         <p>
           Some archived or obsolete records are still protected or waiting for
@@ -153,37 +164,14 @@ export function StorageMaintenancePanel() {
               to remove them.
             </p>
           )}
-          <label for="verified-archive-file">
-            Select the downloaded full recovery archive
-          </label>
-          <input
+          <ArchiveFileInput
             id="verified-archive-file"
-            type="file"
-            accept=".json,application/json"
             disabled={busy}
-            onChange={(event) => {
-              const file = event.currentTarget.files?.[0];
-              setArchive(null);
+            ready={(value) => {
+              setArchive(value);
               setAcknowledge(false);
-              if (file)
-                void perform(async () => {
-                  if (file.size > maxArchiveBytes)
-                    throw new Error('RECOVERY_ARCHIVE_TOO_LARGE');
-                  const text = new TextDecoder('utf-8', { fatal: true }).decode(
-                    await file.arrayBuffer(),
-                  );
-                  setArchive(
-                    v.parse(
-                      packedJsonSchema,
-                      JSON.parse(await prepareImportText(text)),
-                    ),
-                  );
-                  setNotice(
-                    'Archive decoded and checked. Confirm to verify it against the current profile.',
-                  );
-                });
-              event.currentTarget.value = '';
             }}
+            failed={(reason) => setError(serviceError(reason))}
           />
           <label class="check-label">
             <input

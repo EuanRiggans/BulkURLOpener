@@ -189,6 +189,8 @@ export class SharedServices {
         }
         return { lines, skipped };
       }
+      case 'buo:service/opening.epoch':
+        return this.storage.openingEpoch();
       case 'buo:service/open.lines':
       case 'buo:service/open.list': {
         await this.platform.allowTransmission();
@@ -200,6 +202,7 @@ export class SharedServices {
             ? await this.opening.enqueue({
                 kind: 'lines',
                 id: request.id,
+                epoch: request.epoch,
                 lines: request.lines,
                 expectedHead: request.expectedHead,
                 windowId,
@@ -208,6 +211,7 @@ export class SharedServices {
                 kind: 'list',
                 trigger: 'saved-list',
                 id: request.id,
+                epoch: request.epoch,
                 listId: request.listId,
                 expectedHead: request.expectedHead,
                 windowId,

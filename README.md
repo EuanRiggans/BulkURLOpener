@@ -91,6 +91,8 @@ Lists, settings and draft metadata use separate checksummed records. Unchanged l
 
 Earlier preview history is not silently deleted. Download a **full recovery archive**, select that downloaded file under **Archive earlier preview history**, and explicitly confirm. Only a matching, verified archive authorizes deletion of eligible, unneeded preview records. Migration backups, damaged records, unresolved inputs and jobs remain protected. Archives are compressed JSON with checksums, not encryption: keep them private. Imports support up to 64 MiB decoded JSON / 16 MiB compressed; keep a separate lists/settings export too. See [the current storage contract](docs/STORAGE_SIMPLIFICATION.md).
 
+Interrupted saves whose original editor is unavailable can be set aside through Data & recovery after a matching full recovery archive is selected and verified. Their original records remain protected; editing resumes from the last saved library. New completed-job history keeps up to ten recent results within a 1 MiB target (the newest result is kept even if larger). Current/preceding progress records, unfinished/uncertain work and live or unsettled holding tabs stay protected. Earlier preview jobs require explicit verified archival. Old expired opening requests are rejected rather than replayed. See [recovery hardening and further findings](docs/RECOVERY_HARDENING.md).
+
 Saved-list startup preferences use the same opening policy. Jobs retain a settings snapshot and durable acknowledgements; interrupted/unconfirmed tab creation needs review instead of blind replay. Pending work from a new browser session needs an explicit target window. Settings links to staged-change and opening-job recovery.
 
 Jobs retain URLs/search input locally and navigate to user-chosen destinations/providers. Firefox declares and checks corresponding consent before opening destinations.
@@ -115,6 +117,7 @@ This is a public repository. Never commit personal exports, browser profiles, pr
 - [Remaining manual release checks](docs/PHASE_5_MANUAL_CHECKS.md)
 - [Phase 6 cleanup and package evidence](docs/PHASE_6_CLEANUP.md)
 - [Phase 7 release preparation and remaining gates](docs/PHASE_7_RELEASE.md)
+- [Recovery hardening and further code-review findings](docs/RECOVERY_HARDENING.md)
 - [Storage simplification, retention and archive safety](docs/STORAGE_SIMPLIFICATION.md)
 - [Upgrade preservation and comparison protocol](docs/UPGRADE_VERIFICATION.md)
 - [Store identity and disclosure draft](docs/STORE_SUBMISSION.md)

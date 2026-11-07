@@ -1,3 +1,4 @@
+import { InterruptedSaveRecovery } from '../recovery/InterruptedSaveRecovery';
 import { useEffect, useState } from 'preact/hooks';
 import * as v from 'valibot';
 import { extensionRequest } from '../../infrastructure/browser/client';
@@ -378,6 +379,7 @@ export function DataPage() {
           ))}
         </section>
       )}
+      <InterruptedSaveRecovery />
       <StorageMaintenancePanel />
       <RecoveryPanel />
     </PageLayout>
