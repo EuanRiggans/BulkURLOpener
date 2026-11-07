@@ -208,14 +208,8 @@ async function navigate(url) {
 async function installCandidate() {
   if (target === 'chrome') {
     await driver.get('chrome://extensions');
-  } else {
-    // Reload closes extension documents. Keep Marionette's evaluation attached
-    // to an ordinary tab instead of the document that is being unloaded.
-    await driver.get('about:blank');
-  }
-  await rm(extension, { recursive: true });
-  await cp(candidate, extension, { recursive: true });
-  if (target === 'chrome') {
+    await rm(extension, { recursive: true });
+    await cp(candidate, extension, { recursive: true });
     const result = await driver.executeAsyncScript(function (
       extensionId,
       done,
@@ -226,16 +220,11 @@ async function installCandidate() {
     }, extensionId);
     assert.equal(result.error, null);
   } else {
-    await driver.setContext(firefox.Context.CHROME);
-    try {
-      const result = await driver.executeAsyncScript(
-        `const done = arguments[arguments.length - 1]; const {AddonManager} = ChromeUtils.importESModule('resource://gre/modules/AddonManager.sys.mjs'); (async () => { const addon = await AddonManager.getAddonByID(arguments[0]); await addon.reload(); return true; })().then(() => done({ok: true}), error => done({error: String(error)}));`,
-        addonId,
-      );
-      assert(result.ok, result.error);
-    } finally {
-      await driver.setContext(firefox.Context.CONTENT);
-    }
+    // Selenium packages directories into an XPI; Firefox is not running from
+    // the seeding directory. Replace the installed package under the same ID.
+    // Keep the active document outside the add-on while it is being replaced.
+    await driver.get('about:blank');
+    assert.equal(await driver.installAddon(candidate, true), addonId);
   }
   await driver.wait(
     async () => {
