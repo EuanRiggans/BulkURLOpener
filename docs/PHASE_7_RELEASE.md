@@ -35,12 +35,37 @@ website publication, default-branch merge or release rollout occurs in this phas
 
 ## Storage capacity decision
 
+Relevant implementation: [full-state mutation publication](../src/application/storage/coordinator.ts#L408),
+[read-only upgrade audit](../src/application/storage/upgrade-audit.ts#L37),
+[upload/write-time consent](../src/application/workspace.ts#L280),
+[Firefox upload gesture](../src/infrastructure/browser/sync-consent.ts#L6) and
+[development update harness](../test/browser/upgrade.test.mjs#L208).
+
 **Confirmed by source:** each library/settings mutation retains an immutable
 full canonical state; reviewed transfer bodies, raw migration sources, conflict
 copies and job records also remain. Only optional verified snapshots have bounded
 retention. Disabling snapshots does not bound mandatory history. The real-browser
 capacity run reports measured bytes/saves in the Chrome evidence artifact; it is
 a bounded synthetic workload, not unlimited-capacity evidence.
+
+**Confirmed in hosted Chrome:** at
+[`295051f`](https://github.com/EuanRiggans/BulkURLOpener/commit/295051f6b809cc075b9d3db7f6c07151e756ff1a),
+[run 42317418970](https://github.com/EuanRiggans/BulkURLOpener/actions/runs/42317418970),
+Chrome `157.0.8103.38` on Linux started the repeated-save case at 672,551 bytes.
+After 27 settings changes with a 5,000-entry list it used 10,280,621 bytes.
+The 28th change failed with `STORAGE_WRITE_FAILED` against the browser's
+10,485,760-byte quota. The last acknowledged head/data compared equal and a full
+recovery export remained readable. This particular workload took 147.5 seconds
+including harness/API work; it is not an isolated UI-latency benchmark. The
+[Chrome evidence artifact](https://github.com/EuanRiggans/BulkURLOpener/actions/runs/42317418970/artifacts/13550738916)
+retains per-save byte measurements and both passing development-upgrade comparisons.
+
+The importer has a separate 8 MiB limit (`src/application/workspace.ts` and
+`src/ui/pages/DataPage.tsx`). A large full-history recovery download can exceed
+that limit even while its saved-lists-only export fits. Downloading a recovery
+file therefore does not establish that it can be re-imported. Capacity work must
+also cover recoverable archive sizes and restore behavior; raising the input
+limit alone would still require space for the retained import and new library.
 
 The safe decision for this candidate is to preserve existing records and fail
 visibly on quota errors. No automatic history purge, data reset, permission

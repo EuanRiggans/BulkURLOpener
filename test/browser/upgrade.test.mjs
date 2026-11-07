@@ -38,6 +38,9 @@ const fixture = {
 // This is an artificial seeding extension, never a signed/published 1.x binary.
 const fixtureName = 'Bulk URL Opener Upgrade Fixture';
 const report = {
+  format: 'bulk-url-opener-development-upgrade',
+  schemaVersion: 1,
+  passed: false,
   source: process.env.GITHUB_SHA || 'local',
   browser: target,
   scope:
@@ -146,14 +149,17 @@ before(
 after(async () => {
   try {
     if (driver) await driver.quit();
-    await mkdir(evidence, { recursive: true });
-    await writeFile(
-      join(evidence, 'upgrade-summary.json'),
-      JSON.stringify(report, null, 2),
-    );
   } finally {
-    // Only the directory created by this test. Never use a user's browser profile.
-    if (temporary) await rm(temporary, { recursive: true, force: true });
+    try {
+      await mkdir(evidence, { recursive: true });
+      await writeFile(
+        join(evidence, 'upgrade-summary.json'),
+        JSON.stringify(report, null, 2),
+      );
+    } finally {
+      // Only the directory created by this test. Never use a user's browser profile.
+      if (temporary) await rm(temporary, { recursive: true, force: true });
+    }
   }
 });
 
@@ -202,6 +208,10 @@ async function navigate(url) {
 async function installCandidate() {
   if (target === 'chrome') {
     await driver.get('chrome://extensions');
+  } else {
+    // Reload closes extension documents. Keep Marionette's evaluation attached
+    // to an ordinary tab instead of the document that is being unloaded.
+    await driver.get('about:blank');
   }
   await rm(extension, { recursive: true });
   await cp(candidate, extension, { recursive: true });
@@ -356,5 +366,6 @@ test(
       'Migration and reload must not replay legacy pending tabs.',
     );
     report.noLegacyReplay = true;
+    report.passed = true;
   },
 );

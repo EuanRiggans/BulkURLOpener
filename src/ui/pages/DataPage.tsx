@@ -221,6 +221,10 @@ export function DataPage() {
           other imported records stay in the retained original. Existing drafts
           and jobs are kept, and imported jobs are never replayed.
         </p>
+        <p class="hint">
+          Imports are limited to 8 MiB. A large full recovery file can exceed
+          this limit; keep a separate lists-and-settings export as well.
+        </p>
         <label for="import-json">Paste JSON</label>
         <textarea
           id="import-json"
